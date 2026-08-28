@@ -1,0 +1,17 @@
+MyFocusly — o que enviar para quem for usar
+============================================
+
+Opcao A — so o link (qualquer aparelho)
+  Abra: MyFocusly.url
+  Ou acesse: https://myfocusly.netlify.app/legacy/
+  Use Chrome ou Edge no PC para escolher pasta de backup.
+
+Opcao B — atalho no Windows (recomendado no PC)
+  1. Envie esta pasta inteira (zip).
+  2. A pessoa executa Criar-Atalho-Desktop.vbs
+     (ou clica duas vezes em Iniciar-MyFocusly.vbs).
+  3. Na 1a abertura: Backup > Escolher pasta de backup.
+  4. Depois abre ja sincronizado com o arquivo local.
+
+Nao envie: codigo do projeto, GitHub, nem seu arquivo
+diario-tarefas-backup.json — cada um usa a propria pasta.
