@@ -1,0 +1,3227 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#F4F4F2">
+<title>Focusly</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,500;8..60,600;8..60,700&display=swap">
+<style>
+:root{
+  --bg:#F4F4F2;
+  --surface:#FFFFFF;
+  --surface-2:#F0EEEA;
+  --ink:#333333;
+  --ink-muted:#706D68;
+  --ink-faint:#8A8680;
+  --line:#E6E4E0;
+  --accent:#7A2F60;
+  --accent-strong:#7A2F60;
+  --accent-soft:#F3E0EC;
+  --highlight:#7A2F60;
+  --highlight-soft:#F6E4EF;
+  --logo-track:rgba(122,47,96,0.4);
+  --logo-arc:#7A2F60;
+  --danger:#A8412A;
+  --danger-soft:#F3DDD5;
+  --shadow:rgba(51,51,51,0.08);
+  --now:#7A2F60;
+  --pomo:#7A2F60;
+  --pomo-track:#E8D5E1;
+  --weekend:#F4F4F2;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#12122B; --surface:#1A1A3A; --surface-2:#22224A; --ink:#FFFFFF;
+    --ink-muted:rgba(255,255,255,0.72); --ink-faint:rgba(255,255,255,0.45); --line:rgba(255,255,255,0.12);
+    --accent:#A78BFA; --accent-strong:#A78BFA; --accent-soft:rgba(167,139,250,0.14);
+    --highlight:#A78BFA; --highlight-soft:#2C2458;
+    --logo-track:rgba(255,255,255,0.45); --logo-arc:#A78BFA;
+    --danger:#E28B72; --danger-soft:#3A241E; --shadow:rgba(0,0,0,0.45);
+    --now:#A78BFA; --pomo:#A78BFA; --pomo-track:#3730A3; --weekend:#161633;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#12122B; --surface:#1A1A3A; --surface-2:#22224A; --ink:#FFFFFF;
+  --ink-muted:rgba(255,255,255,0.72); --ink-faint:rgba(255,255,255,0.45); --line:rgba(255,255,255,0.12);
+  --accent:#A78BFA; --accent-strong:#A78BFA; --accent-soft:rgba(167,139,250,0.14);
+  --highlight:#A78BFA; --highlight-soft:#2C2458;
+  --logo-track:rgba(255,255,255,0.45); --logo-arc:#A78BFA;
+  --danger:#E28B72; --danger-soft:#3A241E; --shadow:rgba(0,0,0,0.45);
+  --now:#A78BFA; --pomo:#A78BFA; --pomo-track:#3730A3; --weekend:#161633;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:var(--bg); color:var(--ink);
+  font-family:"IBM Plex Sans", system-ui, sans-serif;
+  line-height:1.5; -webkit-font-smoothing:antialiased;
+}
+#app{max-width:none;width:100%;margin:0;padding:16px 18px 72px;display:flex;flex-direction:column;gap:14px;}
+a,button,input,textarea{font-family:inherit;}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+.app-header{padding:4px 4px 8px;display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:space-between;gap:12px;}
+.app-header-text{min-width:0;flex:1 1 220px;}
+.header-actions{display:flex;gap:8px;flex-shrink:0;flex-wrap:wrap;justify-content:flex-end;}
+.theme-toggle,.mute-btn,.account-chip{
+  flex-shrink:0; background:var(--surface-2); border:1px solid var(--line); color:var(--ink-muted);
+  height:38px; border-radius:10px; cursor:pointer;
+}
+.theme-toggle,.mute-btn{width:38px;font-size:1.1rem;}
+.account-chip{display:inline-flex;align-items:center;gap:7px;padding:0 12px;font-size:0.85rem;font-weight:600;color:var(--ink);}
+.account-chip .dot{width:8px;height:8px;border-radius:50%;background:var(--ink-faint);}
+.account-chip .dot.ok{background:var(--accent);box-shadow:0 0 0 3px var(--accent-soft);}
+.theme-toggle:hover,.mute-btn:hover,.account-chip:hover{background:var(--accent-soft);}
+.eyebrow{font-size:0.7rem;text-transform:uppercase;letter-spacing:0.12em;color:var(--ink-muted);font-weight:600;margin-bottom:6px;}
+h1{font-family:"Fraunces", Georgia, serif;font-weight:600;font-size:2rem;margin:0;text-wrap:balance;}
+.app-logo{margin:0;}
+.focusly-logo{
+  display:inline-flex;align-items:baseline;font-family:"Source Serif 4", Georgia, serif;
+  font-size:1.75rem;font-weight:700;letter-spacing:-0.01em;color:var(--ink);line-height:1;
+}
+.focusly-ring{
+  width:0.6em;height:0.6em;margin:0 0.01em;position:relative;top:0.07em;flex-shrink:0;display:inline-block;
+}
+.tray-hint{margin:4px 0 0;font-size:0.72rem;color:var(--ink-muted);font-weight:500;font-family:"IBM Plex Sans",system-ui,sans-serif;}
+.subtitle{margin:0;color:var(--ink-muted);font-size:0.98rem;}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:22px;box-shadow:0 1px 2px var(--shadow);}
+.card h2{font-family:"Fraunces", Georgia, serif;font-weight:600;font-size:1.15rem;margin:0 0 14px;}
+.timer-card,.pomo-card{display:flex;flex-direction:column;gap:0;align-items:stretch;}
+.timers-row{display:block;margin-bottom:2px;}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;}
+.timer-card{padding:10px 14px;border-radius:14px;box-shadow:none;background:var(--surface);}
+.timer-bar{display:flex;align-items:center;justify-content:center;gap:14px;width:100%;min-height:44px;}
+.timer-display{
+  font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums;
+  font-size:clamp(1.35rem,3.2vw,1.85rem);font-weight:600;letter-spacing:0.05em;line-height:1;
+  color:var(--ink);text-shadow:0 0 18px color-mix(in srgb,var(--ink) 6%,transparent);
+}
+[data-theme="dark"] .timer-display{color:#f4f4f8;text-shadow:0 0 22px rgba(255,255,255,0.12);}
+.timer-controls{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+.timer-btn{
+  border:0;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;padding:0;
+  transition:transform 0.1s ease,background 0.15s ease,box-shadow 0.15s ease;
+}
+.timer-btn:active{transform:scale(0.94);}
+.timer-btn-play{
+  width:44px;height:44px;border-radius:50%;
+  background:color-mix(in srgb,var(--pomo) 24%,var(--surface-2));
+  box-shadow:0 0 0 1px color-mix(in srgb,var(--pomo) 18%,transparent);
+}
+.timer-btn-play:hover{background:color-mix(in srgb,var(--pomo) 32%,var(--surface-2));}
+.timer-btn-play.is-pause{width:40px;height:40px;border-radius:12px;background:var(--pomo);box-shadow:none;}
+.timer-btn-play.is-pause:hover{background:var(--accent-strong);}
+.ico-play{
+  display:block;width:0;height:0;margin-left:3px;
+  border-style:solid;border-width:7px 0 7px 12px;
+  border-color:transparent transparent transparent color-mix(in srgb,var(--ink) 82%,transparent);
+}
+.ico-pause{display:block;width:12px;height:14px;position:relative;}
+.ico-pause::before,.ico-pause::after{
+  content:"";position:absolute;top:0;width:4px;height:14px;background:#fff;border-radius:1px;
+}
+.ico-pause::before{left:0;}
+.ico-pause::after{right:0;}
+.timer-btn-stop{
+  width:40px;height:40px;border-radius:12px;background:var(--surface);
+  border:1px solid var(--line);
+}
+.timer-btn-stop:hover{background:var(--surface-2);}
+.ico-stop{display:block;width:10px;height:10px;border-radius:50%;background:var(--ink-muted);}
+.timer-interval-btn{
+  width:40px;height:40px;border-radius:12px;border:1px solid var(--line);background:var(--surface);
+  display:inline-flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;padding:0;
+}
+.timer-interval-btn:hover{background:var(--surface-2);}
+.timer-interval-btn .dot{width:8px;height:8px;border-radius:50%;background:var(--ink-faint);}
+.timer-interval-btn .dot.active{background:var(--pomo);box-shadow:0 0 0 3px var(--accent-soft);}
+.pomo-card-head-actions{display:flex;align-items:center;gap:6px;flex-shrink:0;}
+.account-chip .dot.active{background:var(--pomo);box-shadow:0 0 0 3px var(--accent-soft);}
+.pomo-modal .panel{max-width:min(560px,95vw);width:100%;gap:16px;}
+.pomo-modal .pomo-card{align-items:stretch;}
+.workspace{display:grid;grid-template-columns:minmax(220px,0.9fr) minmax(0,2.6fr);gap:10px;align-items:stretch;height:min(78vh,800px);}
+.workspace.log-collapsed{grid-template-columns:48px minmax(0,1fr);}
+.workspace > .tl-card,.workspace > .log-card{min-width:0;margin:0;height:100%;max-height:none;}
+.log-card{display:flex;flex-direction:column;gap:10px;min-height:0;overflow:hidden;padding:14px;}
+.log-card-head,.pomo-card-head,.dash-card-head{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-shrink:0;}
+.dash-card-head{justify-content:space-between;}
+.log-card-head h2,.pomo-card-head h2,.dash-card-head h2{margin:0;font-size:1.02rem;}
+.log-pin{flex-shrink:0;display:flex;flex-direction:column;gap:8px;}
+.log-body{overflow:auto;flex:1;display:flex;flex-direction:column;gap:12px;min-height:0;}
+.log-rail{
+  display:none;width:100%;height:100%;min-height:220px;padding:12px 0;border:0;background:transparent;
+  color:var(--ink-muted);cursor:pointer;align-items:center;justify-content:center;
+}
+.log-rail span{writing-mode:vertical-rl;transform:rotate(180deg);font-size:0.78rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;}
+.workspace.log-collapsed .log-card{padding:8px 4px;align-items:stretch;}
+.workspace.log-collapsed .log-card-head,
+.workspace.log-collapsed .log-pin,
+.workspace.log-collapsed .log-body{display:none;}
+.workspace.log-collapsed .log-rail{display:flex;}
+.dash-modal .panel{max-width:min(1100px,95vw);width:100%;max-height:92vh;padding:22px 26px;gap:16px;}
+.dash-modal-head{display:flex;align-items:center;justify-content:space-between;gap:12px;}
+.dash-modal-head h3{margin:0;}
+.dash-charts-row{display:grid;grid-template-columns:1.3fr 1fr;gap:24px;align-items:start;}
+.dash-chart-card{background:var(--surface-2);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:10px;min-width:0;}
+.dash-chart-card h4{margin:0;font-size:0.88rem;font-weight:700;}
+.dash-modal .dash-bars{height:190px;}
+.dash-modal .dash-body{align-items:center;}
+@media (max-width:760px){
+  .dash-charts-row{grid-template-columns:1fr;}
+}
+.nomen-row{display:flex;gap:8px;flex-wrap:wrap;}
+.nomen-chip{
+  display:inline-flex;align-items:center;gap:8px;padding:6px 10px 6px 6px;
+  border:1px dashed var(--line);border-radius:10px;background:transparent;color:var(--ink);
+  cursor:pointer;font-size:0.82rem;font-weight:600;
+}
+.nomen-chip.on{border-style:solid;border-color:var(--accent);background:var(--accent-soft);}
+.nomen-ico{
+  width:22px;height:22px;border-radius:6px;background:var(--surface-2);color:var(--ink-muted);
+  display:flex;align-items:center;justify-content:center;font-family:"IBM Plex Mono",monospace;font-size:0.85rem;
+}
+.quick-add-form{display:flex;gap:6px;align-items:stretch;}
+.quick-add-form .quick-add{flex:1;}
+.nomen-draft-form{
+  display:flex;flex-direction:column;gap:6px;padding:8px 10px;
+  border:1px solid var(--line);border-radius:10px;background:var(--surface-2);
+}
+.nomen-draft-line{display:flex;gap:6px;align-items:center;width:100%;min-width:0;}
+.nomen-draft-date{display:flex;align-items:center;gap:8px;font-size:0.72rem;color:var(--ink-muted);font-weight:600;}
+.nomen-draft-date input{
+  padding:4px 8px;border:1px solid var(--line);border-radius:8px;background:var(--surface);
+  font-size:0.82rem;color:var(--ink);font-family:inherit;
+}
+.nomen-draft-prefix{font-family:"IBM Plex Mono",monospace;font-weight:700;color:var(--accent-strong);flex-shrink:0;}
+.nomen-draft-input{
+  flex:1;min-width:120px;border:0;background:transparent;outline:0;
+  font-size:0.88rem;font-weight:600;color:var(--ink);padding:4px 0;
+}
+.form-review-block{display:flex;flex-direction:column;gap:8px;}
+.form-review-block .check-line{margin:0;}
+.form-time-block{display:flex;flex-direction:column;gap:10px;padding-top:12px;border-top:1px solid var(--line);}
+.form-time-block .field-caption{font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--ink-muted);}
+.t-start-timer-wrap .check-line{margin:0;padding:10px 12px;background:var(--surface-2);border:1px solid var(--line);border-radius:10px;width:100%;}
+.pomo-modal .pomo-dial{max-width:min(280px,78vw);flex:0 1 auto;width:min(100%,280px);}
+.task-marks{display:flex;flex-wrap:wrap;gap:5px;margin-top:4px;}
+.mark{
+  font-size:0.7rem;font-weight:700;padding:2px 8px;border-radius:999px;font-family:"IBM Plex Mono",monospace;
+  background:var(--surface);border:1px solid var(--line);color:var(--ink-muted);
+}
+.mark.tag{background:var(--accent-soft);border-color:transparent;color:var(--accent-strong);}
+.mark.project{background:var(--highlight-soft);border-color:transparent;color:var(--highlight);}
+.pomo-modal .pomo-card{padding:16px 18px;overflow:auto;align-items:stretch;}
+.pomo-modal .pomo-block{flex:1;min-height:0;justify-content:flex-start;}
+.pomo-dial{position:relative;width:100%;max-width:360px;aspect-ratio:1;margin:0 auto;flex:1 1 auto;display:flex;align-items:center;min-height:0;}
+.pomo-modal .pomo-dial{max-width:min(280px,78vw);flex:0 1 auto;width:min(100%,280px);}
+.pomo-dial svg{width:100%;height:100%;display:block;}
+.pomo-dial-bg{fill:color-mix(in srgb,var(--surface-2) 55%,transparent);}
+.pomo-tick{stroke:var(--pomo);stroke-width:2.4;stroke-linecap:round;filter:drop-shadow(0 0 4px color-mix(in srgb,var(--pomo) 80%,transparent));}
+.pomo-tick.elapsed{stroke:var(--pomo-track);opacity:0.45;filter:none;}
+.pomo-dial-ui{position:absolute;inset:22%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;text-align:center;pointer-events:none;}
+.pomo-dial-duration{font-size:0.78rem;font-weight:500;color:var(--ink-muted);letter-spacing:0.02em;}
+.pomo-stop{
+  width:42px;height:42px;border-radius:50%;border:0;background:var(--pomo-track);color:var(--pomo);
+  display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;
+}
+.pomo-stop span{display:block;width:14px;height:14px;border-radius:3px;background:var(--pomo);}
+.pomo-stop.play span{width:0;height:0;border-radius:0;background:transparent;border-top:8px solid transparent;border-bottom:8px solid transparent;border-left:14px solid var(--pomo);margin-left:3px;}
+.pomo-remaining{font-family:"IBM Plex Sans",sans-serif;font-size:clamp(2rem,5.5vw,2.75rem);font-weight:600;letter-spacing:-0.04em;color:var(--ink);font-variant-numeric:tabular-nums;line-height:1.05;}
+.pomo-end-time{font-size:0.82rem;color:var(--ink-muted);display:flex;align-items:center;gap:5px;font-variant-numeric:tabular-nums;}
+.pomo-nudge{display:flex;gap:18px;}
+.pomo-nudge button{background:none;border:0;color:var(--pomo);font-weight:600;font-size:0.92rem;cursor:pointer;padding:0;}
+.pomo-modal .pomo-dial-ui{inset:20%;gap:5px;}
+.pomo-modal .pomo-stop{width:40px;height:40px;}
+.pomo-modal .pomo-stop span{width:12px;height:12px;}
+.pomo-modal .pomo-stop.play span{border-top-width:7px;border-bottom-width:7px;border-left-width:12px;margin-left:2px;}
+.pomo-modal .pomo-remaining{font-size:clamp(1.85rem,8vw,2.35rem);}
+.pomo-modal .pomo-nudge{gap:12px;}
+.pomo-modal .pomo-nudge button{font-size:0.72rem;}
+.pomo-modal .pomo-main{display:flex;flex-direction:column;align-items:center;gap:14px;width:100%;}
+.pomo-modal .pomo-main .pomo-dial{margin:0;flex-shrink:0;}
+.pomo-modal .pomo-play-row{display:flex;align-items:center;justify-content:center;gap:14px;pointer-events:auto;}
+.pomo-modal .panel{background:linear-gradient(165deg,color-mix(in srgb,var(--surface) 92%,var(--pomo) 8%) 0%,var(--surface) 55%);}
+.pomo-modal .pomo-settings{display:flex;flex-direction:row;flex-wrap:wrap;gap:12px;padding-top:0;border-top:0;width:100%;justify-content:center;}
+.pomo-modal .pomo-setting input{max-width:100px;}
+.pomo-modal .pomo-setting input{width:100%;}
+.view-switch{display:inline-flex;align-items:stretch;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--surface-2);flex-shrink:0;}
+.view-switch button{
+  width:36px;height:32px;border:0;border-right:1px solid var(--line);background:transparent;color:var(--ink);
+  cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;
+}
+.view-switch button:last-child{border-right:0;}
+.view-switch button.on{background:var(--accent-soft);color:var(--accent);}
+.view-switch svg{display:block;}
+.tl-dayhead{cursor:pointer;}
+.tl-split{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(180px,1fr);gap:10px;flex:1;min-height:0;}
+.tl-split-side{overflow:auto;border:1px solid var(--line);border-radius:12px;padding:10px;min-height:0;background:var(--surface);}
+.tl-agenda{overflow:auto;flex:1;min-height:0;padding:4px 8px 8px;}
+.tl-agenda-day{margin-bottom:14px;}
+.tl-agenda-head{font-weight:700;font-size:0.88rem;padding:6px 2px 8px;border-bottom:1px solid var(--line);margin-bottom:6px;display:flex;justify-content:space-between;gap:8px;}
+.tl-agenda-item{display:flex;gap:10px;align-items:flex-start;padding:8px 6px;border-radius:8px;}
+.tl-agenda-item:hover{background:var(--surface-2);}
+.tl-agenda-time{font-variant-numeric:tabular-nums;color:var(--ink-muted);width:46px;flex-shrink:0;font-size:0.78rem;padding-top:2px;}
+.tl-agenda-title{font-weight:600;font-size:0.88rem;overflow-wrap:anywhere;}
+.tl-month{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));grid-template-rows:auto repeat(6,minmax(0,1fr));flex:1;min-height:0;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--surface);}
+.tl-month-dow{text-align:center;font-size:0.72rem;font-weight:700;padding:8px 4px;color:var(--ink-muted);background:var(--surface-2);border-bottom:1px solid var(--line);}
+.tl-month-cell{min-height:0;padding:6px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);cursor:pointer;overflow:hidden;display:flex;flex-direction:column;gap:3px;}
+.tl-month-cell:nth-child(7n){border-right:0;}
+.tl-month-cell.out{opacity:0.42;}
+.tl-month-cell.today{background:var(--accent-soft);}
+.tl-month-cell.weekend{background:var(--weekend);}
+.tl-month-num{font-size:0.78rem;font-weight:700;}
+.tl-month-chip{font-size:0.62rem;padding:2px 5px;border-radius:4px;background:var(--accent-soft);color:var(--accent-strong);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.pomo-task-pick{width:100%;flex-shrink:0;}
+.timer-row{display:flex;align-items:center;width:100%;}
+.pomo-timer-row{display:flex;align-items:center;gap:20px;flex-wrap:wrap;width:100%;}
+.pomo-card-head h2{margin:0;font-size:1.02rem;}
+.mute-btn{width:34px;height:34px;border-radius:8px;font-size:1rem;}
+.pomo-block{display:flex;flex-direction:column;gap:14px;width:100%;}
+.pomo-phase-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.pomo-badge{font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;padding:4px 11px;border-radius:999px;}
+.pomo-badge-focus{background:var(--accent-soft);color:var(--accent-strong);}
+.pomo-badge-break{background:var(--highlight-soft);color:var(--highlight);}
+.pomo-set{font-size:0.82rem;color:var(--ink-muted);font-weight:500;}
+.pomo-progress{width:100%;height:6px;background:var(--surface-2);border-radius:999px;overflow:hidden;}
+.pomo-progress-fill{height:100%;width:0;background:var(--accent);border-radius:999px;}
+.pomo-progress-fill.break{background:var(--highlight);}
+.pomo-controls{display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
+.pomo-settings{display:flex;gap:16px;flex-wrap:wrap;padding-top:10px;border-top:1px solid var(--line);width:100%;}
+.pomo-setting{display:flex;flex-direction:column;gap:4px;font-size:0.72rem;color:var(--ink-muted);font-weight:600;text-transform:uppercase;letter-spacing:0.03em;}
+.pomo-setting input{width:60px;padding:6px 8px;font-size:0.85rem;font-weight:400;text-transform:none;letter-spacing:normal;}
+.pomo-setting input:disabled{opacity:0.5;}
+.btn{font-size:0.92rem;font-weight:600;border-radius:8px;padding:10px 16px;border:1px solid transparent;cursor:pointer;}
+.btn:active{transform:translateY(1px);}
+.btn-primary{background:var(--accent-strong);color:#fff;}
+.btn-primary:hover{background:var(--accent);}
+.btn-danger{background:var(--danger);color:#fff;}
+.btn-ghost{background:transparent;color:var(--ink-muted);border-color:var(--line);}
+.btn-ghost:hover{background:var(--surface-2);color:var(--ink);}
+.btn-link{background:none;border:none;color:var(--accent-strong);padding:4px 2px;text-decoration:underline;text-underline-offset:3px;align-self:flex-start;cursor:pointer;}
+.btn-icon{background:var(--surface-2);border:1px solid var(--line);color:var(--ink);width:34px;height:34px;padding:0;border-radius:8px;font-size:1.1rem;}
+.btn-xs{padding:5px 10px;font-size:0.78rem;border-radius:6px;}
+.week-card{display:flex;flex-direction:column;gap:16px;}
+.week-head{display:flex;align-items:center;justify-content:space-between;gap:12px;}
+.week-title{text-align:center;display:flex;flex-direction:column;gap:2px;align-items:center;}
+.week-range{font-weight:600;font-size:0.98rem;}
+.chart{display:flex;align-items:flex-end;justify-content:space-between;gap:8px;padding-top:8px;}
+.bar-col{display:flex;flex-direction:column;align-items:center;gap:6px;flex:1;min-width:0;}
+.bar-value{font-family:"IBM Plex Mono", monospace;font-size:0.68rem;color:var(--ink-muted);font-variant-numeric:tabular-nums;height:14px;white-space:nowrap;}
+.bar-track{width:100%;max-width:34px;height:120px;display:flex;align-items:flex-end;justify-content:center;border-bottom:1px solid var(--line);}
+.bar-fill{width:100%;background:var(--accent);border-radius:4px 4px 2px 2px;}
+.bar-today{box-shadow:0 0 0 2px var(--surface), 0 0 0 4px var(--highlight);}
+.bar-label{font-size:0.78rem;color:var(--ink-muted);font-weight:500;}
+.bar-label-today{color:var(--highlight);font-weight:700;}
+.log-card .entry-row,.log-card .task-row,.log-card .agenda-row{padding:8px 10px;gap:8px;}
+.log-day{display:flex;flex-direction:column;gap:8px;}
+.log-day-head{font-size:0.78rem;text-transform:uppercase;letter-spacing:0.06em;color:var(--ink-muted);font-weight:600;}
+.log-section{display:flex;flex-direction:column;gap:8px;}
+.entry-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px;}
+.entry-row{display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:start;padding:10px 12px;background:var(--surface-2);border-radius:10px;}
+.entry-row.live{outline:1px solid color-mix(in srgb,var(--accent) 35%,transparent);}
+.entry-row.task-only{outline:1px dashed color-mix(in srgb,var(--line) 80%,transparent);}
+.entry-row.agenda-only{outline:1px dashed color-mix(in srgb,var(--highlight) 35%,transparent);}
+.entry-dur{font-family:"IBM Plex Mono", monospace;font-size:0.86rem;font-weight:600;color:var(--accent-strong);font-variant-numeric:tabular-nums;white-space:nowrap;padding-top:1px;}
+.entry-notes{font-size:0.92rem;overflow-wrap:anywhere;}
+.entry-notes-empty{color:var(--ink-faint);font-style:italic;}
+.entry-tags{display:flex;align-items:center;gap:6px;margin-bottom:4px;flex-wrap:wrap;}
+.entry-subject{font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.03em;color:var(--accent-strong);background:var(--accent-soft);padding:2px 9px;border-radius:999px;}
+.entry-actions{display:flex;gap:6px;}
+.empty-state{color:var(--ink-muted);font-size:0.92rem;margin:0;padding:8px 0;}
+.reviews-card{display:flex;flex-direction:column;gap:12px;}
+.review-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px;}
+.review-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 14px;background:var(--highlight-soft);border-radius:10px;}
+.review-info{display:flex;flex-direction:column;gap:2px;min-width:0;}
+.review-subject{font-weight:700;font-size:0.95rem;overflow-wrap:anywhere;}
+.review-meta{font-size:0.78rem;color:var(--ink-muted);}
+.review-actions{display:flex;gap:6px;flex-shrink:0;}
+.card-head-row{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;}
+.card-head-row h2{margin:0;}
+.agenda-card,.tasks-hint{display:flex;flex-direction:column;gap:12px;}
+.agenda-list,.task-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px;}
+.agenda-row,.task-row{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:start;padding:10px 12px;background:var(--surface-2);border-radius:10px;}
+.task-row.done .task-title{text-decoration:line-through;color:var(--ink-muted);}
+.task-check{
+  width:22px;height:22px;border-radius:6px;border:1px solid var(--line);background:var(--bg);
+  color:var(--accent-strong);font-size:0.85rem;padding:0;cursor:pointer;margin-top:1px;
+}
+.task-check.on{background:var(--accent-soft);border-color:var(--accent);}
+.task-title{font-weight:600;font-size:0.95rem;overflow-wrap:anywhere;}
+.task-note,.agenda-note{font-size:0.85rem;color:var(--ink-muted);overflow-wrap:anywhere;margin-top:2px;}
+.kind-pill{font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;padding:2px 8px;border-radius:999px;white-space:nowrap;}
+.kind-meta{background:var(--accent-soft);color:var(--accent-strong);}
+.kind-prova{background:var(--danger-soft);color:var(--danger);}
+.kind-prazo{background:var(--highlight-soft);color:var(--highlight);}
+.kind-rever{background:var(--highlight-soft);color:var(--highlight);}
+.cal-dot{font-size:0.72rem;color:var(--ink-faint);}
+.log-day-tools{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px;}
+.dash-card{display:flex;flex-direction:column;gap:10px;padding:14px;overflow:hidden;}
+.dash-block{flex:1;min-height:0;overflow:auto;display:flex;flex-direction:column;gap:10px;}
+.dash-toolbar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;}
+.dash-presets{display:flex;flex-wrap:wrap;gap:5px;}
+.dash-presets button{
+  background:var(--surface-2);border:1px solid var(--line);color:var(--ink-muted);
+  border-radius:999px;padding:5px 9px;font-size:0.72rem;font-weight:600;cursor:pointer;
+}
+.dash-presets button.on{background:var(--accent);border-color:var(--accent);color:#fff;}
+.dash-custom{display:flex;gap:8px;align-items:end;flex-wrap:wrap;}
+.dash-custom .field{margin:0;}
+.dash-custom input{padding:6px 8px;font-size:0.85rem;}
+.dash-tags{display:flex;flex-wrap:wrap;gap:6px;}
+.dash-tags button{
+  background:var(--surface-2);border:1px solid var(--line);color:var(--ink);border-radius:999px;
+  padding:4px 10px;font-size:0.75rem;font-weight:600;cursor:pointer;
+}
+.dash-tags button.on{color:#fff;border-color:transparent;}
+.dash-body{display:flex;flex-direction:column;gap:12px;align-items:center;}
+.dash-pie{
+  width:min(100%,200px);aspect-ratio:1;border-radius:50%;margin:0 auto;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:inset 0 0 0 1px var(--line);
+}
+.dash-pie-hole{
+  width:58%;height:58%;border-radius:50%;background:var(--surface);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:2px;
+  box-shadow:0 0 0 1px var(--line);
+}
+.dash-pie-total{font-family:"Fraunces",Georgia,serif;font-weight:600;font-size:1.05rem;color:var(--accent-strong);font-variant-numeric:tabular-nums;}
+.dash-pie-label{font-size:0.64rem;color:var(--ink-muted);text-transform:uppercase;letter-spacing:0.06em;font-weight:600;}
+.dash-legend{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:7px;width:100%;}
+.dash-legend li{display:grid;grid-template-columns:12px 1fr auto;gap:8px;align-items:center;font-size:0.82rem;}
+.dash-swatch{width:12px;height:12px;border-radius:50%;flex-shrink:0;}
+.dash-legend-name{overflow-wrap:anywhere;font-weight:600;}
+.dash-legend-meta{color:var(--ink-muted);font-size:0.72rem;font-variant-numeric:tabular-nums;white-space:nowrap;}
+.dash-stats{display:flex;gap:8px;}
+.dash-stat{flex:1;min-width:0;background:var(--surface-2);border-radius:10px;padding:8px 10px;display:flex;flex-direction:column;gap:2px;}
+.dash-stat-label{font-size:0.66rem;text-transform:uppercase;letter-spacing:0.05em;color:var(--ink-muted);font-weight:700;}
+.dash-stat-value{font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums;font-size:1.02rem;font-weight:600;}
+.dash-bars{display:flex;align-items:flex-end;gap:4px;height:110px;padding:4px 2px 0;}
+.dash-bar-col{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:3px;}
+.dash-bar-value{font-size:0.6rem;color:var(--ink-muted);font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;}
+.dash-bar-track{width:100%;flex:1;display:flex;align-items:flex-end;min-height:0;}
+.dash-bar-fill{width:100%;background:var(--accent);border-radius:4px 4px 0 0;min-height:0;}
+.dash-bar-label{font-size:0.64rem;color:var(--ink-muted);white-space:nowrap;}
+.dash-slice-by{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.dash-slice-label{font-size:0.72rem;color:var(--ink-muted);font-weight:600;}
+.view-toggle{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;}
+.view-toggle button{padding:5px 10px;font-size:0.76rem;font-weight:600;border:0;border-right:1px solid var(--line);background:transparent;color:var(--ink-muted);cursor:pointer;}
+.view-toggle button:last-child{border-right:0;}
+.view-toggle button.on{background:var(--accent-soft);color:var(--accent-strong);}
+.dash-breakdown{display:flex;flex-direction:column;gap:2px;width:100%;}
+.dash-breakdown-head{display:grid;grid-template-columns:1fr auto auto;gap:8px;font-size:0.66rem;text-transform:uppercase;letter-spacing:0.05em;color:var(--ink-muted);font-weight:700;padding:0 2px 4px;border-bottom:1px solid var(--line);}
+.dash-breakdown-head span:nth-child(2),.dash-breakdown-head span:nth-child(3){text-align:right;}
+.dash-breakdown-list{list-style:none;margin:0;padding:0;}
+.dash-breakdown-row{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid var(--line);font-size:0.82rem;}
+.dash-breakdown-toggle{display:flex;align-items:center;gap:6px;background:none;border:0;padding:0;color:var(--ink);font:inherit;cursor:pointer;text-align:left;min-width:0;}
+.dash-caret{font-size:0.7rem;color:var(--ink-muted);width:10px;flex-shrink:0;}
+.dash-breakdown-name{overflow-wrap:anywhere;font-weight:600;}
+.dash-breakdown-dur{font-variant-numeric:tabular-nums;white-space:nowrap;text-align:right;}
+.dash-breakdown-pct{color:var(--ink-muted);font-size:0.76rem;text-align:right;white-space:nowrap;}
+.dash-breakdown-children{list-style:none;margin:0 0 4px;padding:0 0 0 22px;display:flex;flex-direction:column;gap:3px;}
+.dash-breakdown-children li{display:flex;justify-content:space-between;gap:8px;font-size:0.76rem;color:var(--ink-muted);}
+.dash-child-name{overflow-wrap:anywhere;}
+.dash-child-dur{font-variant-numeric:tabular-nums;white-space:nowrap;}
+.dash-child-empty{font-style:italic;}
+.check-line{display:flex;align-items:center;gap:8px;font-size:0.88rem;color:var(--ink);font-weight:500;}
+.check-line input{width:auto;}
+select{font-size:0.95rem;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:9px 10px;}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:999px;font-size:0.85rem;font-weight:500;box-shadow:0 4px 16px var(--shadow);z-index:50;}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,0.4);display:none;align-items:center;justify-content:center;padding:20px;z-index:40;}
+.overlay.open{display:flex;}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:24px;width:100%;max-width:420px;max-height:88vh;overflow:auto;display:flex;flex-direction:column;gap:14px;box-shadow:0 8px 30px var(--shadow);}
+.panel h3{font-family:"Fraunces", Georgia, serif;font-weight:600;font-size:1.2rem;margin:0;}
+.field{display:flex;flex-direction:column;gap:6px;font-size:0.85rem;color:var(--ink-muted);font-weight:600;}
+.field-row{display:flex;gap:12px;}
+.field-row .field{flex:1;}
+input,textarea{font-size:0.95rem;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:9px 10px;font-weight:400;resize:vertical;}
+.field-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:4px;flex-wrap:wrap;}
+.hint{margin:0;font-size:0.82rem;color:var(--ink-muted);font-weight:400;}
+.hint-warn{color:var(--danger);font-weight:600;}
+.sync-modal{max-width:380px;text-align:center;gap:16px;padding:28px 24px 18px;}
+.sync-icon{
+  width:72px;height:72px;margin:0 auto;border-radius:18px;
+  background:linear-gradient(180deg,#E85A9A,#C73B7A);display:flex;align-items:center;justify-content:center;
+}
+.sync-modal h3{font-family:"IBM Plex Sans",sans-serif;font-size:1.35rem;font-weight:700;}
+.sync-connect{
+  display:flex;align-items:center;justify-content:center;gap:10px;width:100%;
+  background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:12px;
+  padding:12px 14px;font-weight:600;cursor:pointer;
+}
+.sync-connect:hover{background:var(--surface-2);}
+.sync-connect:disabled{opacity:0.45;cursor:not-allowed;}
+.sync-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;border-top:1px solid var(--line);font-size:0.92rem;font-weight:500;}
+.switch{position:relative;width:42px;height:24px;flex-shrink:0;}
+.switch input{opacity:0;width:0;height:0;}
+.switch span{position:absolute;inset:0;background:var(--surface-2);border-radius:999px;border:1px solid var(--line);cursor:pointer;}
+.switch span::after{content:"";position:absolute;width:18px;height:18px;left:2px;top:2px;background:#fff;border-radius:50%;transition:transform .15s;}
+.switch input:checked + span{background:var(--accent);border-color:var(--accent);}
+.switch input:checked + span::after{transform:translateX(18px);}
+.sync-foot{display:flex;align-items:center;justify-content:center;gap:8px;border-top:1px solid var(--line);padding-top:12px;color:var(--ink-muted);font-size:0.88rem;background:none;border-left:0;border-right:0;border-bottom:0;cursor:pointer;width:100%;}
+.tl-card{padding:16px 12px 12px;overflow:hidden;display:flex;flex-direction:column;}
+.tl-toolbar{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:0 8px 12px;flex-shrink:0;}
+.tl-week{display:flex;align-items:center;gap:8px;font-weight:600;}
+.tl-grid-wrap{overflow:hidden;flex:1;min-height:0;border:1px solid var(--line);border-radius:12px;position:relative;background:var(--surface);scrollbar-width:none;}
+.tl-grid-wrap::-webkit-scrollbar{display:none;}
+.tl-grid{display:grid;width:100%;height:100%;min-width:0;align-items:stretch;}
+.tl-corner,.tl-dayhead,.tl-hour,.tl-slots,.tl-allday,.tl-allday-lab,.tl-hours-col{border-right:1px solid var(--line);border-bottom:1px solid var(--line);}
+.tl-corner,.tl-dayhead{text-align:center;padding:10px 4px;font-size:0.78rem;font-weight:600;background:var(--surface);z-index:2;}
+.tl-dayhead.today{color:var(--accent-strong);}
+.tl-dayhead.weekend,.tl-allday.weekend,.tl-slots.weekend{background:var(--weekend);}
+.tl-dayhead small{display:block;font-size:0.68rem;color:var(--ink-muted);font-weight:500;}
+.tl-allday-lab{font-size:0.64rem;color:var(--ink-faint);padding:6px 4px;text-align:right;background:var(--surface);}
+.tl-hour-expand{
+  flex:0 0 auto;width:100%;border:0;border-top:1px solid var(--line);background:var(--surface);
+  color:var(--ink-muted);font-size:0.9rem;font-weight:700;padding:5px 2px;cursor:pointer;line-height:1;
+  display:flex;align-items:center;justify-content:center;text-align:center;
+}
+.tl-hour-expand:hover{color:var(--accent-strong);background:color-mix(in srgb,var(--accent) 8%,var(--surface));}
+.tl-hour-controls{display:flex;flex-direction:column;align-items:stretch;padding:0;background:var(--surface);border-bottom:1px solid var(--line);text-align:center;}
+.tl-hour-controls-top{display:flex;flex-direction:column;align-items:stretch;flex:0 0 auto;text-align:center;border-bottom:1px solid var(--line);}
+.tl-hour-controls-top .tl-hour-expand{border-top:0;}
+.tl-hour-controls-bottom{display:flex;flex-direction:column;align-items:stretch;flex:0 0 auto;text-align:center;}
+.tl-hours-col{display:flex;flex-direction:column;background:var(--surface);min-height:0;}
+.tl-hour{font-size:0.64rem;color:var(--ink-faint);padding:2px 6px 0;text-align:right;flex:1;height:auto;border-right:0;border-bottom:0;min-height:0;}
+.tl-allday{min-height:44px;padding:4px;display:flex;flex-direction:column;gap:3px;background:var(--surface);position:relative;cursor:pointer;}
+.tl-slots{position:relative;cursor:crosshair;min-height:0;height:100%;}
+.tl-slots:hover{background-color:color-mix(in srgb, var(--accent) 6%, transparent);}
+.tl-slots.weekend{background-color:var(--weekend);}
+.tl-block.done{opacity:0.42;}
+.tl-block{
+  position:absolute;left:3px;right:3px;border-radius:6px;padding:4px 6px;font-size:0.72rem;font-weight:600;
+  overflow:hidden;cursor:pointer;z-index:1;line-height:1.25;color:#fff;
+}
+.tl-block.task{background:var(--accent);}
+.tl-block.entry{background:var(--accent-strong);}
+.tl-now{position:absolute;left:0;right:0;height:2px;background:var(--now);z-index:3;pointer-events:none;}
+.tl-now::before{content:none;}
+.tl-now-start::before{content:"";position:absolute;left:-5px;top:-4px;width:10px;height:10px;border-radius:50%;background:var(--now);}
+.tl-block.agenda-prova{background:#A8412A;}
+.tl-block.agenda-prazo{background:#C97C1E;}
+.tl-block.agenda-meta{background:var(--accent);}
+.tl-block.gcal{background:#3B5BDB;}
+.tl-chip{font-size:0.68rem;padding:3px 6px;border-radius:5px;background:var(--accent-soft);color:var(--accent-strong);font-weight:600;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}
+.tl-chip.gcal{background:#3B5BDB;color:#fff;}
+details{border-top:1px solid var(--line);padding-top:10px;}
+summary{cursor:pointer;font-weight:600;font-size:0.88rem;}
+@media (max-width:1100px){
+  .workspace,.workspace.log-collapsed{grid-template-columns:1fr;height:auto;}
+  .workspace > .tl-card{height:min(70vh,640px);}
+  .log-card{height:auto;min-height:280px;}
+  .workspace.log-collapsed .log-card{min-height:0;max-height:none;}
+  .log-rail{min-height:0;padding:8px;flex-direction:row;}
+  .log-rail span{writing-mode:horizontal-tb;transform:none;}
+  .tl-split{grid-template-columns:1fr;}
+}
+@media (max-width:800px){
+  .pomo-modal .pomo-dial{max-width:260px;width:min(100%,260px);}
+}
+@media (max-width:760px){
+  .timer-bar{gap:10px;}
+  .timer-display{font-size:1.25rem;}
+}
+@media (max-width:480px){
+  .timer-display{font-size:1.15rem;}
+  .timer-btn-play{width:40px;height:40px;}
+  .timer-btn-stop,.timer-interval-btn{width:36px;height:36px;border-radius:10px;}
+  .card{padding:18px;}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none !important;animation:none !important;}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+const STORAGE_KEY = "diario-estudos-state";
+const DEFAULT_HOUR_START = 7;
+const DEFAULT_HOUR_END = 23;
+const DASH_PALETTE = ["#9C407C","#3B5BDB","#0CA678","#C97C1E","#A8412A","#5B3FA0","#1C7ED6","#2B8A3E","#E8590C","#7048E8","#0B7285","#C2255C"];
+const FS_ACCESS_SUPPORTED = typeof window !== "undefined" && typeof window.showDirectoryPicker === "function";
+const FOLDER_DB_NAME = "diario-tarefas-fs";
+const FOLDER_STORE = "handles";
+const FOLDER_KEY = "backup-folder";
+const FOLDER_BACKUP_FILENAME = "diario-tarefas-backup.json";
+
+let STATE = { entries: [], tasks: [], agenda: [], tags: [], projects: [], deleted: {}, settings: {}, updatedAt: 0 };
+let viewWeekStart = null;
+let timer = { running: false, startedAt: 0, accumulated: 0, entryId: null };
+let formBusy = false;
+let tickTimer = null;
+let formMode = null;
+let formPrefill = null;
+let confirmDeleteId = null;
+let confirmDeleteTaskId = null;
+let confirmDeleteAgendaId = null;
+let confirmDeleteTagName = null;
+let confirmDeleteProjectName = null;
+let toastMsg = null;
+let toastTimer = null;
+let muted = false;
+let theme = "light";
+let accountOpen = false;
+let logOpen = true;
+let dashModalOpen = false;
+let dashExpanded = {};
+let calView = "list";
+let selectedDayIso = "";
+let logFilter = "task";
+let nomenDraftKind = "task";
+let nomenDraftDate = "";
+let focusNomenDraft = false;
+let pomo = { active: false, phase: "focus", endsAt: 0, pausedRemaining: 0, running: false, posInSet: 1, intervalId: null, resumeTimerAfter: false };
+let pomoModalOpen = false;
+let backupFolderHandle = null;
+let migrationDirty = false;
+
+function pad2(n){ return n < 10 ? "0" + n : "" + n; }
+function uid(){ return "e" + Date.now().toString(36) + Math.random().toString(36).slice(2, 8); }
+function fmtHMS(total){
+  total = Math.max(0, Math.floor(total));
+  const h = Math.floor(total / 3600);
+  return h + ":" + pad2(Math.floor((total % 3600) / 60)) + ":" + pad2(total % 60);
+}
+function fmtDuration(seconds){
+  seconds = Math.max(0, Math.floor(seconds));
+  if (seconds < 60) return seconds ? seconds + "s" : "0min";
+  const m = Math.floor(seconds / 60);
+  if (m < 60) return m + "min";
+  const h = Math.floor(m / 60);
+  const rm = m % 60;
+  return rm ? h + "h " + rm + "min" : h + "h";
+}
+function toISODate(d){ return d.getFullYear() + "-" + pad2(d.getMonth() + 1) + "-" + pad2(d.getDate()); }
+function parseISODate(s){ const p = s.split("-").map(Number); return new Date(p[0], p[1] - 1, p[2]); }
+function mondayOf(d){
+  const date = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  const day = date.getDay();
+  date.setDate(date.getDate() + (day === 0 ? -6 : 1 - day));
+  return date;
+}
+function addDays(d, n){ const date = new Date(d.getFullYear(), d.getMonth(), d.getDate()); date.setDate(date.getDate() + n); return date; }
+function monthAbbrev(m){ return ["jan","fev","mar","abr","mai","jun","jul","ago","set","out","nov","dez"][m]; }
+function weekRangeLabel(monday){
+  const sunday = addDays(monday, 6);
+  const y = monday.getFullYear();
+  const yearSuffix = y !== new Date().getFullYear() ? " de " + y : "";
+  if (monday.getMonth() === sunday.getMonth()) return monday.getDate() + " a " + sunday.getDate() + " de " + monthAbbrev(monday.getMonth()) + "." + yearSuffix;
+  return monday.getDate() + " de " + monthAbbrev(monday.getMonth()) + ". a " + sunday.getDate() + " de " + monthAbbrev(sunday.getMonth()) + "." + yearSuffix;
+}
+function entrySeconds(e){ return e.seconds != null ? e.seconds : (e.minutes || 0) * 60; }
+function findEntry(id){
+  return (STATE.entries || []).filter(function(x){ return x.id === id; })[0] || null;
+}
+function entryDisplayLabel(e){
+  if (e.project && !e.tag && !(e.subject && e.subject !== e.project)) return "+" + e.project;
+  if (e.tag && !e.subject) return "#" + String(e.tag).replace(/^#+/, "");
+  return e.subject || e.tag || e.project || "Estudo";
+}
+function liveEntrySubject(){
+  if (timer.tags && String(timer.tags).trim()) return String(timer.tags).trim();
+  if (timer.task && String(timer.task).trim()) return String(timer.task).trim();
+  if (timer.project && String(timer.project).trim()) return String(timer.project).trim();
+  return "Estudo";
+}
+function ensureLiveEntry(taskId){
+  const existing = timer.entryId ? findEntry(timer.entryId) : null;
+  if (existing){
+    if (taskId && !existing.taskId){ existing.taskId = taskId; touch(existing); persist(); }
+    return existing;
+  }
+  const date = selectedDayIso || toISODate(new Date());
+  const tag = timer.tags ? (rememberTag("#" + String(timer.tags).replace(/^#+/, "")) || "") : "";
+  const project = timer.project ? (rememberProject("+" + String(timer.project).replace(/^\++/, "")) || "") : "";
+  const subject = timer.task || tag || project || "Estudo";
+  const entry = touch({
+    id: uid(), date: date, time: "", seconds: 0, minutes: 0,
+    subject: subject, tag: tag || "", project: project || "",
+    notes: "", source: "live", taskId: taskId || null, live: true,
+    createdAt: new Date().toISOString()
+  });
+  STATE.entries.push(entry);
+  timer.entryId = entry.id;
+  persist();
+  return entry;
+}
+function syncLiveEntrySeconds(seconds){
+  if (!timer.entryId) return;
+  const e = findEntry(timer.entryId);
+  if (!e) return;
+  e.seconds = Math.max(0, seconds || 0);
+  e.minutes = Math.round(e.seconds / 60);
+  touch(e);
+}
+function upsertEntryFromForm(entryId, data){
+  const e = findEntry(entryId);
+  if (!e) return false;
+  e.date = data.date;
+  e.time = data.time || "";
+  e.seconds = data.seconds;
+  e.minutes = Math.round((data.seconds || 0) / 60);
+  e.subject = data.subject;
+  e.tag = data.tag || "";
+  e.project = data.project || "";
+  e.notes = data.notes || "";
+  e.source = data.source || "manual";
+  if (data.taskId != null) e.taskId = data.taskId;
+  e.live = false;
+  touch(e);
+  return true;
+}
+function writeEntryRecord(data){
+  if (data.editEntryId){
+    if ((data.seconds || 0) <= 0){
+      STATE.entries = dropItem(STATE.entries, data.editEntryId);
+      return false;
+    }
+    return upsertEntryFromForm(data.editEntryId, data);
+  }
+  if ((data.seconds || 0) <= 0) return false;
+  STATE.entries.push(touch({
+    id: uid(), date: data.date, time: data.time || "", seconds: data.seconds,
+    minutes: Math.round(data.seconds / 60), subject: data.subject, tag: data.tag || "",
+    project: data.project || "", notes: data.notes || "", source: data.source || "manual",
+    taskId: data.taskId || null, live: false, createdAt: new Date().toISOString()
+  }));
+  return true;
+}
+function computeWeek(state, monday){
+  const days = [];
+  let weekTotal = 0;
+  const todayIso = toISODate(new Date());
+  for (let i = 0; i < 7; i++){
+    const d = addDays(monday, i);
+    const iso = toISODate(d);
+    const dayEntries = state.entries.filter(function(e){ return e.date === iso; }).sort(function(a, b){ return (a.createdAt || "").localeCompare(b.createdAt || ""); });
+    const seconds = dayEntries.reduce(function(s, e){ return s + entrySeconds(e); }, 0);
+    weekTotal += seconds;
+    days.push({ date: d, iso: iso, entries: dayEntries, seconds: seconds, isToday: iso === todayIso });
+  }
+  return { days: days, weekTotal: weekTotal };
+}
+function computeMonthTotal(state, year, month){
+  return state.entries.filter(function(e){
+    const d = parseISODate(e.date);
+    return d.getFullYear() === year && d.getMonth() === month;
+  }).reduce(function(s, e){ return s + entrySeconds(e); }, 0);
+}
+function computeYearTotal(state, year){
+  return state.entries.filter(function(e){
+    return parseISODate(e.date).getFullYear() === year;
+  }).reduce(function(s, e){ return s + entrySeconds(e); }, 0);
+}
+function dashPreset(){
+  return (STATE.settings && STATE.settings.dash && STATE.settings.dash.preset) || "month";
+}
+function dashPeriodBounds(){
+  const now = new Date();
+  const today = toISODate(now);
+  const preset = dashPreset();
+  const dash = STATE.settings.dash || {};
+  if (preset === "week"){
+    const m = mondayOf(now);
+    return { from: toISODate(m), to: toISODate(addDays(m, 6)), label: "Esta semana" };
+  }
+  if (preset === "year") return { from: now.getFullYear() + "-01-01", to: today, label: "Este ano" };
+  if (preset === "7") return { from: toISODate(addDays(now, -6)), to: today, label: "7 dias" };
+  if (preset === "30") return { from: toISODate(addDays(now, -29)), to: today, label: "30 dias" };
+  if (preset === "90") return { from: toISODate(addDays(now, -89)), to: today, label: "90 dias" };
+  if (preset === "custom"){
+    const from = dash.from || today;
+    const to = dash.to || today;
+    return { from: from, to: to, label: fmtHumanDate(from) + " – " + fmtHumanDate(to) };
+  }
+  const from = now.getFullYear() + "-" + pad2(now.getMonth() + 1) + "-01";
+  return { from: from, to: today, label: "Este mês" };
+}
+function normalizeTag(raw){
+  let s = String(raw || "").trim().toLowerCase();
+  s = s.replace(/^#+/, "");
+  s = s.replace(/[^a-z0-9áàâãéêíóôõúç_-]+/g, "");
+  if (!s) return "";
+  return "#" + s;
+}
+function knownTags(){
+  const map = {};
+  (STATE.tags || []).forEach(function(t){ const n = normalizeTag(t); if (n) map[n] = t.charAt(0) === "#" ? t : n; });
+  (STATE.tasks || []).forEach(function(t){ const n = normalizeTag(t.tag || t.title); if (n) map[n] = n; });
+  (STATE.entries || []).forEach(function(e){ const n = normalizeTag(e.tag || e.subject); if (n) map[n] = n; });
+  return Object.keys(map).sort(function(a, b){ return a.localeCompare(b, "pt"); });
+}
+function rememberTag(raw, silent){
+  const tag = normalizeTag(raw);
+  if (!tag) return "";
+  if (!Array.isArray(STATE.tags)) STATE.tags = [];
+  const exists = STATE.tags.some(function(t){ return normalizeTag(t) === tag; });
+  if (!exists) STATE.tags.push(tag);
+  return tag;
+}
+function slugToken(raw, prefix){
+  let s = String(raw || "").trim().toLowerCase();
+  s = s.replace(new RegExp("^\\" + prefix + "+"), "");
+  s = s.replace(/[^a-z0-9áàâãéêíóôõúç_-]+/g, "");
+  if (!s) return "";
+  return prefix + s;
+}
+function normalizeProject(raw){ return slugToken(raw, "+"); }
+function normalizeTaskName(raw){
+  let s = String(raw || "").trim();
+  s = s.replace(/^@+/, "").trim();
+  if (!s) return "";
+  return "@" + s;
+}
+function uniqueKeep(list){
+  const seen = {};
+  const out = [];
+  (list || []).forEach(function(x){
+    if (!x || seen[x]) return;
+    seen[x] = true;
+    out.push(x);
+  });
+  return out;
+}
+function parseNomen(raw){
+  let s = String(raw || "").trim();
+  const tags = [];
+  let project = "";
+  s = s.replace(/(^|\s)#([^\s#]+)/g, function(_, sp, body){
+    const t = normalizeTag(body);
+    if (t) tags.push(t);
+    return " ";
+  });
+  s = s.replace(/(^|\s)\+([^\s+]+)/g, function(_, sp, body){
+    const p = normalizeProject(body);
+    if (p) project = p;
+    return " ";
+  });
+  s = s.replace(/(^|\s)@+/g, " ").replace(/\s+/g, " ").trim();
+  let title = normalizeTaskName(s);
+  if (!title && tags[0]) title = normalizeTaskName(tags[0].replace(/^#/, ""));
+  if (!title && project) title = normalizeTaskName(project.replace(/^\+/, ""));
+  return { title: title, project: project, tag: tags[0] || "", tags: uniqueKeep(tags) };
+}
+function rememberProject(raw, silent){
+  const project = normalizeProject(raw);
+  if (!project) return "";
+  if (!Array.isArray(STATE.projects)) STATE.projects = [];
+  const exists = STATE.projects.some(function(p){ return normalizeProject(p) === project; });
+  if (!exists) STATE.projects.push(project);
+  return project;
+}
+function knownProjects(){
+  const map = {};
+  (STATE.projects || []).forEach(function(p){ const n = normalizeProject(p); if (n) map[n] = n; });
+  (STATE.tasks || []).forEach(function(t){ const n = normalizeProject(t.project); if (n) map[n] = n; });
+  (STATE.entries || []).forEach(function(e){ const n = normalizeProject(e.project); if (n) map[n] = n; });
+  return Object.keys(map).sort(function(a, b){ return a.localeCompare(b, "pt"); }).map(function(k){ return map[k]; });
+}
+function knownTasks(){
+  const map = {};
+  (STATE.tasks || []).forEach(function(t){
+    let line = taskDisplayName(t);
+    if (t.project) line += " " + normalizeProject(t.project);
+    const tag = taskTagOf(t);
+    if (tag) line += " " + tag;
+    if (line && line !== "@tarefa") map[line.toLowerCase()] = line;
+    const bare = taskDisplayName(t);
+    if (bare && bare !== "@tarefa") map[bare.toLowerCase()] = bare;
+  });
+  (STATE.entries || []).forEach(function(e){
+    if (e.taskId) return;
+    const subj = String(e.subject || "").trim();
+    if (!subj || subj === "Estudo") return;
+    if (subj.charAt(0) === "#" || subj.charAt(0) === "+") return;
+    const name = normalizeTaskName(subj);
+    if (name) map[name.toLowerCase()] = name;
+  });
+  return Object.keys(map).sort(function(a, b){ return a.localeCompare(b, "pt"); }).map(function(k){ return map[k]; });
+}
+function knownAgendaTitles(){
+  const map = {};
+  (STATE.agenda || []).forEach(function(a){
+    const title = String(a.title || "").trim();
+    if (title) map[title.toLowerCase()] = title;
+  });
+  return Object.keys(map).sort(function(a, b){ return a.localeCompare(b, "pt"); }).map(function(k){ return map[k]; });
+}
+function titleSuggestionOptions(planKind){
+  planKind = normalizePlanKind(planKind);
+  if (planKind === "project"){
+    return knownProjects().map(function(p){ return p.replace(/^\++/, ""); });
+  }
+  if (planKind === "tag"){
+    return knownTags().map(function(t){ return t.replace(/^#+/, ""); });
+  }
+  if (planKind === "prazo") return knownAgendaTitles();
+  const map = {};
+  knownTasks().concat(knownProjects()).concat(knownTags()).forEach(function(v){
+    if (v) map[String(v).toLowerCase()] = v;
+  });
+  return Object.keys(map).sort(function(a, b){ return a.localeCompare(b, "pt"); }).map(function(k){ return map[k]; });
+}
+function renderTitleSuggestionList(planKind){
+  return titleSuggestionOptions(planKind).map(function(v){
+    return '<option value="' + escapeHtml(v) + '"></option>';
+  }).join("");
+}
+function refreshTitleSuggestions(kind){
+  const list = document.getElementById("nomen-list");
+  if (!list) return;
+  list.innerHTML = renderTitleSuggestionList(kind);
+}
+function taskDisplayName(t){
+  const raw = String((t && t.title) || "").trim();
+  if (!raw) return "@tarefa";
+  if (raw.charAt(0) === "@" || raw.charAt(0) === "#") return raw;
+  return "@" + raw;
+}
+function taskProjectOf(t){ return t && t.project ? normalizeProject(t.project) : ""; }
+function taskTagOf(t){
+  if (!t) return "";
+  if (t.tag) return normalizeTag(t.tag);
+  const title = String(t.title || "");
+  if (title.charAt(0) === "#") return normalizeTag(title);
+  return "";
+}
+function nomenMarks(t){
+  const tag = taskTagOf(t);
+  const project = taskProjectOf(t);
+  const bits = [];
+  if (tag) bits.push('<span class="mark tag">' + escapeHtml(tag) + "</span>");
+  if (project) bits.push('<span class="mark project">' + escapeHtml(project) + "</span>");
+  return bits.length ? '<div class="task-marks">' + bits.join("") + "</div>" : "";
+}
+function selectedDashTags(){
+  const sel = (STATE.settings.dash && STATE.settings.dash.tags) || [];
+  return sel.map(normalizeTag).filter(Boolean);
+}
+function colorForDashLabel(label){
+  if (!STATE.settings.dashColors) STATE.settings.dashColors = {};
+  if (STATE.settings.dashColors[label]) return STATE.settings.dashColors[label];
+  const used = {};
+  Object.keys(STATE.settings.dashColors).forEach(function(k){ used[STATE.settings.dashColors[k]] = true; });
+  let color = null;
+  for (let i = 0; i < DASH_PALETTE.length; i++){
+    if (!used[DASH_PALETTE[i]]){ color = DASH_PALETTE[i]; break; }
+  }
+  if (!color){
+    let h = 0;
+    for (let i = 0; i < label.length; i++) h = (h * 31 + label.charCodeAt(i)) >>> 0;
+    color = "hsl(" + (h % 360) + " 58% 46%)";
+  }
+  STATE.settings.dashColors[label] = color;
+  return color;
+}
+function entryDashLabel(e){
+  if (e.tag) return normalizeTag(e.tag) || "Sem tag";
+  if (e.taskId){
+    const t = taskById(e.taskId);
+    if (t) return normalizeTag(t.tag || t.title) || "Sem tag";
+  }
+  return normalizeTag(e.subject) || "Sem tag";
+}
+function taskById(id){ return (STATE.tasks || []).filter(function(t){ return t.id === id; })[0] || null; }
+function dashSliceBy(){
+  return (STATE.settings && STATE.settings.dash && STATE.settings.dash.sliceBy) || "tag";
+}
+function setDashSliceBy(mode){
+  if (!STATE.settings.dash) STATE.settings.dash = { preset: "month", from: "", to: "", tags: [] };
+  STATE.settings.dash.sliceBy = mode;
+  persist();
+  render();
+}
+function toggleDashExpand(label){
+  dashExpanded[label] = !dashExpanded[label];
+  render();
+}
+function entryGroupLabel(e, sliceBy){
+  if (sliceBy === "project"){
+    if (e.project){ const p = normalizeProject(e.project); if (p) return p; }
+    if (e.taskId){
+      const t = taskById(e.taskId);
+      if (t && taskProjectOf(t)) return taskProjectOf(t);
+    }
+    return "Sem projeto";
+  }
+  return entryDashLabel(e);
+}
+function entryTaskLabel(e){
+  if (e.taskId){
+    const t = taskById(e.taskId);
+    if (t) return taskDisplayName(t);
+  }
+  return e.subject ? normalizeTaskName(e.subject) : "@sem título";
+}
+function computeDashSlices(){
+  const bounds = dashPeriodBounds();
+  const sliceBy = dashSliceBy();
+  const filter = selectedDashTags();
+  const totals = {};
+  const children = {};
+  (STATE.entries || []).forEach(function(e){
+    if (!e || !e.date || e.date < bounds.from || e.date > bounds.to) return;
+    const tagLabel = entryDashLabel(e);
+    if (filter.length && filter.indexOf(tagLabel) < 0) return;
+    const label = sliceBy === "project" ? entryGroupLabel(e, "project") : tagLabel;
+    const secs = entrySeconds(e);
+    totals[label] = (totals[label] || 0) + secs;
+    if (!children[label]) children[label] = {};
+    const childKey = e.taskId || ("free:" + entryTaskLabel(e));
+    if (!children[label][childKey]) children[label][childKey] = { label: entryTaskLabel(e), seconds: 0 };
+    children[label][childKey].seconds += secs;
+  });
+  const slices = Object.keys(totals).map(function(label){
+    const kids = Object.keys(children[label] || {}).map(function(k){ return children[label][k]; })
+      .sort(function(a, b){ return b.seconds - a.seconds; });
+    return { label: label, seconds: totals[label], color: colorForDashLabel(label), children: kids };
+  }).filter(function(s){ return s.seconds > 0; }).sort(function(a, b){ return b.seconds - a.seconds; });
+  const total = slices.reduce(function(s, x){ return s + x.seconds; }, 0);
+  slices.forEach(function(s){
+    s.pct = total ? (s.seconds / total) * 100 : 0;
+    s.children.forEach(function(c){ c.pct = s.seconds ? (c.seconds / s.seconds) * 100 : 0; });
+  });
+  return { bounds: bounds, slices: slices, total: total, sliceBy: sliceBy };
+}
+function dashDayBuckets(bounds){
+  const from = parseISODate(bounds.from);
+  const to = parseISODate(bounds.to);
+  const totalDays = Math.round((to - from) / 86400000) + 1;
+  if (totalDays <= 0) return { buckets: [], granularity: "day" };
+  const granularity = totalDays > 62 ? "month" : (totalDays > 14 ? "week" : "day");
+  const filter = selectedDashTags();
+  const totals = {};
+  (STATE.entries || []).forEach(function(e){
+    if (!e || !e.date || e.date < bounds.from || e.date > bounds.to) return;
+    if (filter.length && filter.indexOf(entryDashLabel(e)) < 0) return;
+    const d = parseISODate(e.date);
+    let key;
+    if (granularity === "day") key = e.date;
+    else if (granularity === "week") key = toISODate(mondayOf(d));
+    else key = d.getFullYear() + "-" + pad2(d.getMonth() + 1);
+    totals[key] = (totals[key] || 0) + entrySeconds(e);
+  });
+  const buckets = [];
+  const thisYear = new Date().getFullYear();
+  if (granularity === "day"){
+    for (let i = 0; i < totalDays; i++){
+      const d = addDays(from, i);
+      const iso = toISODate(d);
+      buckets.push({ key: iso, label: String(d.getDate()), seconds: totals[iso] || 0 });
+    }
+  } else if (granularity === "week"){
+    let cursor = mondayOf(from);
+    while (cursor <= to){
+      const key = toISODate(cursor);
+      buckets.push({ key: key, label: cursor.getDate() + " " + monthAbbrev(cursor.getMonth()), seconds: totals[key] || 0 });
+      cursor = addDays(cursor, 7);
+    }
+  } else {
+    let cursor = new Date(from.getFullYear(), from.getMonth(), 1);
+    const end = new Date(to.getFullYear(), to.getMonth(), 1);
+    while (cursor <= end){
+      const key = cursor.getFullYear() + "-" + pad2(cursor.getMonth() + 1);
+      const label = monthAbbrev(cursor.getMonth()) + (cursor.getFullYear() !== thisYear ? " " + cursor.getFullYear() : "");
+      buckets.push({ key: key, label: label, seconds: totals[key] || 0 });
+      cursor = new Date(cursor.getFullYear(), cursor.getMonth() + 1, 1);
+    }
+  }
+  return { buckets: buckets, granularity: granularity };
+}
+function renderDashboardModal(){
+  if (!dashModalOpen) return "";
+  const data = computeDashSlices();
+  const dayData = dashDayBuckets(data.bounds);
+  const preset = dashPreset();
+  const filter = selectedDashTags();
+  const tags = knownTags();
+  const sliceBy = data.sliceBy;
+  const presets = [
+    ["week", "Semana"], ["month", "Mês"], ["year", "Ano"],
+    ["7", "7d"], ["30", "30d"], ["90", "90d"], ["custom", "Datas"]
+  ];
+  const presetBtns = presets.map(function(p){
+    return '<button type="button" class="' + (preset === p[0] ? "on" : "") + '" onclick="setDashPreset(\'' + p[0] + '\')">' + p[1] + "</button>";
+  }).join("");
+  const customRow = preset === "custom"
+    ? '<div class="dash-custom"><label class="field"><span>De</span><input type="date" value="' + escapeHtml(data.bounds.from) + '" onchange="setDashCustomDate(\'from\', this.value)"></label><label class="field"><span>Até</span><input type="date" value="' + escapeHtml(data.bounds.to) + '" onchange="setDashCustomDate(\'to\', this.value)"></label></div>'
+    : "";
+  const tagBtns = '<button type="button" class="' + (!filter.length ? "on" : "") + '" onclick="clearDashTags()">Todas</button>' +
+    tags.map(function(tag){
+      const on = filter.indexOf(tag) >= 0;
+      const color = colorForDashLabel(tag);
+      return '<button type="button" class="' + (on ? "on" : "") + '" style="' + (on ? "background:" + color : "") + '" onclick="toggleDashTag(\'' + tag.replace(/'/g, "") + '\')">' + escapeHtml(tag) + "</button>";
+    }).join("");
+
+  const daysWithTime = dayData.buckets.filter(function(b){ return b.seconds > 0; }).length;
+  const avgSeconds = data.total ? data.total / Math.max(1, daysWithTime) : 0;
+  const statsRow = '<div class="dash-stats">' +
+    '<div class="dash-stat"><span class="dash-stat-label">Total</span><span class="dash-stat-value">' + escapeHtml(fmtHMS(data.total)) + '</span></div>' +
+    '<div class="dash-stat"><span class="dash-stat-label">Média diária</span><span class="dash-stat-value">' + escapeHtml(data.total ? fmtDuration(avgSeconds) : "0min") + '</span></div>' +
+  "</div>";
+
+  const maxBar = Math.max.apply(null, [1].concat(dayData.buckets.map(function(b){ return b.seconds; })));
+  const barChart = dayData.buckets.length ? (
+    '<div class="dash-bars" role="img" aria-label="Duração por dia">' +
+    dayData.buckets.map(function(b){
+      const h = b.seconds ? Math.max(4, Math.round((b.seconds / maxBar) * 100)) : 0;
+      return '<div class="dash-bar-col"><span class="dash-bar-value">' + (b.seconds ? escapeHtml(fmtDuration(b.seconds)) : "") + '</span>' +
+        '<div class="dash-bar-track"><div class="dash-bar-fill" style="height:' + h + '%"></div></div>' +
+        '<span class="dash-bar-label">' + escapeHtml(b.label) + "</span></div>";
+    }).join("") + "</div>"
+  ) : "";
+
+  const sliceByRow = '<div class="dash-slice-by"><span class="dash-slice-label">Agrupar por</span><div class="view-toggle">' +
+    '<button type="button" class="' + (sliceBy === "tag" ? "on" : "") + '" onclick="setDashSliceBy(\'tag\')">Tags</button>' +
+    '<button type="button" class="' + (sliceBy === "project" ? "on" : "") + '" onclick="setDashSliceBy(\'project\')">Projetos</button>' +
+    "</div></div>";
+
+  let pieInner;
+  let legend;
+  let breakdown = "";
+  if (!data.total){
+    pieInner = '<div class="dash-pie" style="background:var(--surface-2)"><div class="dash-pie-hole"><span class="dash-pie-total">0h</span><span class="dash-pie-label">total</span></div></div>';
+    legend = '<p class="empty-state">Nenhum tempo neste período' + (filter.length ? " para as tags escolhidas" : "") + ".</p>";
+  } else {
+    let acc = 0;
+    const stops = data.slices.map(function(s){
+      const start = acc;
+      acc += s.pct;
+      return s.color + " " + start.toFixed(2) + "% " + acc.toFixed(2) + "%";
+    }).join(",");
+    pieInner = '<div class="dash-pie" style="background:conic-gradient(' + stops + ')" role="img" aria-label="Distribuição por ' + (sliceBy === "project" ? "projeto" : "tag") + '"><div class="dash-pie-hole"><span class="dash-pie-total">' + escapeHtml(fmtDuration(data.total)) + '</span><span class="dash-pie-label">total</span></div></div>';
+    legend = '<ul class="dash-legend">' + data.slices.map(function(s){
+      return '<li><span class="dash-swatch" style="background:' + s.color + '"></span><span class="dash-legend-name">' + escapeHtml(s.label) + '</span><span class="dash-legend-meta">' + escapeHtml(fmtDuration(s.seconds)) + " · " + Math.round(s.pct) + "%</span></li>";
+    }).join("") + "</ul>";
+    breakdown = '<div class="dash-breakdown"><div class="dash-breakdown-head"><span>' + (sliceBy === "project" ? "Projeto" : "Tag") + '</span><span>Duração</span><span>%</span></div>' +
+      '<ul class="dash-breakdown-list">' + data.slices.map(function(s){
+        const key = s.label.replace(/'/g, "");
+        const expanded = !!dashExpanded[s.label];
+        const childRows = expanded
+          ? '<ul class="dash-breakdown-children">' + (s.children.length ? s.children.map(function(c){
+              return '<li><span class="dash-child-name">' + escapeHtml(c.label) + '</span><span class="dash-child-dur">' + escapeHtml(fmtDuration(c.seconds)) + "</span></li>";
+            }).join("") : '<li class="dash-child-empty">Sem detalhes</li>') + "</ul>"
+          : "";
+        return '<li class="dash-breakdown-row"><button type="button" class="dash-breakdown-toggle" onclick="toggleDashExpand(\'' + key + '\')" aria-expanded="' + (expanded ? "true" : "false") + '">' +
+          '<span class="dash-caret">' + (expanded ? "▾" : "▸") + '</span><span class="dash-swatch" style="background:' + s.color + '"></span>' +
+          '<span class="dash-breakdown-name">' + escapeHtml(s.label) + "</span></button>" +
+          '<span class="dash-breakdown-dur">' + escapeHtml(fmtDuration(s.seconds)) + '</span>' +
+          '<span class="dash-breakdown-pct">' + Math.round(s.pct) + "%</span></li>" + childRows;
+      }).join("") + "</ul></div>";
+  }
+  return '<div class="overlay open dash-modal" onclick="if(event.target===this) toggleDashModal()"><div class="panel">' +
+    '<div class="dash-modal-head"><h3>Resumo</h3><button class="btn btn-icon" type="button" onclick="toggleDashModal()" aria-label="Fechar resumo">✕</button></div>' +
+    '<div class="dash-presets">' + presetBtns + "</div>" + customRow +
+    '<div class="dash-tags">' + tagBtns + "</div>" +
+    statsRow +
+    '<div class="dash-charts-row">' +
+      '<div class="dash-chart-card"><h4>Duração por dia</h4>' + barChart + "</div>" +
+      '<div class="dash-chart-card">' + sliceByRow + '<div class="dash-body">' + pieInner + legend + "</div></div>" +
+    "</div>" +
+    breakdown +
+    '<div class="field-actions"><button class="btn btn-ghost" type="button" onclick="toggleDashModal()">Fechar</button></div>' +
+    "</div></div>";
+}
+function setDashPreset(preset){
+  if (!STATE.settings.dash) STATE.settings.dash = { preset: "month", from: "", to: "", tags: [] };
+  STATE.settings.dash.preset = preset;
+  if (preset === "custom"){
+    const now = new Date();
+    if (!STATE.settings.dash.from) STATE.settings.dash.from = now.getFullYear() + "-" + pad2(now.getMonth() + 1) + "-01";
+    if (!STATE.settings.dash.to) STATE.settings.dash.to = toISODate(now);
+  }
+  persist();
+  render();
+}
+function setDashCustomDate(which, value){
+  if (!STATE.settings.dash) STATE.settings.dash = { preset: "custom", from: "", to: "", tags: [] };
+  STATE.settings.dash.preset = "custom";
+  STATE.settings.dash[which] = value;
+  persist();
+  render();
+}
+function toggleDashTag(tag){
+  if (!STATE.settings.dash) STATE.settings.dash = { preset: "month", from: "", to: "", tags: [] };
+  if (!Array.isArray(STATE.settings.dash.tags)) STATE.settings.dash.tags = [];
+  tag = normalizeTag(tag);
+  const tags = STATE.settings.dash.tags.map(normalizeTag);
+  const i = tags.indexOf(tag);
+  if (i >= 0) tags.splice(i, 1);
+  else tags.push(tag);
+  STATE.settings.dash.tags = tags;
+  persist();
+  render();
+}
+function clearDashTags(){
+  if (!STATE.settings.dash) STATE.settings.dash = { preset: "month", from: "", to: "", tags: [] };
+  STATE.settings.dash.tags = [];
+  persist();
+  render();
+}
+function ensureLists(){
+  if (!Array.isArray(STATE.tasks)) STATE.tasks = [];
+  if (!Array.isArray(STATE.agenda)) STATE.agenda = [];
+  if (!Array.isArray(STATE.entries)) STATE.entries = [];
+  if (!Array.isArray(STATE.tags)) STATE.tags = [];
+  if (!Array.isArray(STATE.projects)) STATE.projects = [];
+  if (!STATE.deleted || typeof STATE.deleted !== "object" || Array.isArray(STATE.deleted)) STATE.deleted = {};
+  if (STATE.settings && STATE.settings.activeTaskId != null) delete STATE.settings.activeTaskId;
+  // Migrate reviews created before the two systems were unified: they had no
+  // mode, and a reviewed task was silenced forever by reviewedAt.
+  (STATE.tasks || []).forEach(function(t){
+    const r = t.review;
+    if (!r || !r.date) return;
+    // A missing `mode` is the only reliable marker of pre-unification data, so
+    // the reschedule below must be gated on it — otherwise this re-fires on
+    // every load and double-advances reviews done today.
+    const wasLegacy = !r.mode;
+    if (!r.mode) r.mode = "fixed";
+    if (r.step == null) r.step = 0;
+    if (r.enabled == null) r.enabled = true;
+    if (wasLegacy && t.reviewedAt && r.enabled && r.date <= (t.reviewedAt || "").slice(0, 10)){
+      const next = advanceReview(r, t.reviewedAt.slice(0, 10));
+      if (next) t.review = next;
+    }
+    if (wasLegacy){ touch(t); migrationDirty = true; }
+  });
+  pruneTombstones(STATE.deleted);
+  if (!STATE.settings || typeof STATE.settings !== "object") STATE.settings = {};
+  STATE.settings.weekDays = 7;
+  if (!STATE.settings.dash || typeof STATE.settings.dash !== "object") STATE.settings.dash = { preset: "month", from: "", to: "", tags: [] };
+  if (!Array.isArray(STATE.settings.dash.tags)) STATE.settings.dash.tags = [];
+  if (!STATE.settings.dashColors || typeof STATE.settings.dashColors !== "object") STATE.settings.dashColors = {};
+  (STATE.tasks || []).concat(STATE.entries || []).forEach(function(item){
+    rememberTag(item.tag || item.title || item.subject, true);
+    rememberProject(item.project, true);
+  });
+}
+function getWeekDays(){ return 7; }
+function pomoTotalSeconds(){
+  const s = getPomodoroSettings();
+  if (!pomo.active) return s.focus * 60;
+  return (pomo.phase === "focus" ? s.focus : (pomo.phase === "long" ? s.long : s.short)) * 60;
+}
+function fmtMS(total){
+  total = Math.max(0, Math.floor(total));
+  const m = Math.floor(total / 60);
+  return pad2(m) + ":" + pad2(total % 60);
+}
+function fmtClockTime(d){
+  try { return d.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" }); }
+  catch (e) { return pad2(d.getHours()) + ":" + pad2(d.getMinutes()); }
+}
+function pomoPhaseMinutes(){
+  const s = getPomodoroSettings();
+  if (!pomo.active) return s.focus;
+  return pomo.phase === "focus" ? s.focus : (pomo.phase === "long" ? s.long : s.short);
+}
+function renderPomoTicksLines(rem, total){
+  const ticks = 60;
+  const cx = 100, cy = 100, rOut = 93, rIn = 86;
+  total = Math.max(1, total);
+  rem = Math.max(0, rem);
+  const elapsedTicks = Math.min(ticks, Math.floor(((total - rem) / total) * ticks));
+  let html = "";
+  for (let i = 0; i < ticks; i++){
+    const deg = (i / ticks) * 360 - 90;
+    const rad = deg * Math.PI / 180;
+    const x1 = (cx + rIn * Math.cos(rad)).toFixed(2);
+    const y1 = (cy + rIn * Math.sin(rad)).toFixed(2);
+    const x2 = (cx + rOut * Math.cos(rad)).toFixed(2);
+    const y2 = (cy + rOut * Math.sin(rad)).toFixed(2);
+    html += '<line class="pomo-tick' + (i < elapsedTicks ? " elapsed" : "") + '" x1="' + x1 + '" y1="' + y1 + '" x2="' + x2 + '" y2="' + y2 + '"/>';
+  }
+  return html;
+}
+function syncPomoDial(){
+  const rem = pomo.active ? pomoRemaining() : pomoTotalSeconds();
+  const total = pomoTotalSeconds() || 1;
+  const ticks = document.getElementById("pomo-ticks");
+  if (ticks) ticks.innerHTML = renderPomoTicksLines(rem, total);
+  const clock = document.getElementById("pomo-clock");
+  if (clock) clock.textContent = fmtMS(rem);
+  const endEl = document.getElementById("pomo-end");
+  if (endEl){
+    const endAt = pomo.active && pomo.running && pomo.endsAt ? pomo.endsAt : Date.now() + rem * 1000;
+    endEl.textContent = fmtClockTime(new Date(endAt));
+  }
+}
+function taskLoggedSeconds(id){
+  return (STATE.entries || []).filter(function(e){ return e.taskId === id; }).reduce(function(s, e){ return s + entrySeconds(e); }, 0);
+}
+function attachTimeToTask(taskId, seconds, source){
+  const t = (STATE.tasks || []).filter(function(x){ return x.id === taskId; })[0];
+  if (!t || seconds <= 0) return false;
+  const tag = rememberTag(t.tag || t.title) || t.title;
+  const project = rememberProject(t.project);
+  STATE.entries.push(touch({
+    id: uid(), date: t.date || toISODate(new Date()), seconds: seconds, minutes: Math.round(seconds / 60),
+    subject: tag || t.title, tag: tag, project: project, notes: "", source: source || "free", taskId: t.id,
+    createdAt: new Date().toISOString()
+  }));
+  persist();
+  return true;
+}
+function showCompletedTasks(){ return !!(STATE.settings && STATE.settings.showCompleted); }
+function isoWeekNum(d){
+  const t = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  t.setDate(t.getDate() + 3 - ((t.getDay() + 6) % 7));
+  const week1 = new Date(t.getFullYear(), 0, 4);
+  return 1 + Math.round(((t - week1) / 86400000 - 3 + ((week1.getDay() + 6) % 7)) / 7);
+}
+function parseTimeMins(t){
+  if (!t || !/^\d{1,2}:\d{2}/.test(String(t))) return null;
+  const p = String(t).split(":");
+  return parseInt(p[0], 10) * 60 + parseInt(p[1], 10);
+}
+function fmtHourLabel(h){ return pad2(h) + ":00"; }
+function calHourStart(){
+  const v = STATE.settings && STATE.settings.calHourStart;
+  return typeof v === "number" ? v : DEFAULT_HOUR_START;
+}
+function calHourEnd(){
+  const v = STATE.settings && STATE.settings.calHourEnd;
+  return typeof v === "number" ? v : DEFAULT_HOUR_END;
+}
+function calHourSpan(){ return calHourEnd() - calHourStart(); }
+function slotsBgStyle(){
+  const n = calHourSpan();
+  return "background-image:repeating-linear-gradient(to bottom,transparent 0,transparent calc(100% / " + n + " - 1px),var(--line) calc(100% / " + n + " - 1px),var(--line) calc(100% / " + n + "));";
+}
+function expandCalHoursEarly(ev){
+  if (ev) ev.stopPropagation();
+  const start = calHourStart();
+  if (start <= 0){ showToast("Já mostra desde meia-noite."); return; }
+  if (!STATE.settings) STATE.settings = {};
+  STATE.settings.calHourStart = start - 1;
+  persist();
+  render();
+}
+function shrinkCalHoursEarly(ev){
+  if (ev) ev.stopPropagation();
+  const start = calHourStart();
+  if (start >= DEFAULT_HOUR_START){ showToast("Horário padrão: a partir das 07:00."); return; }
+  if (!STATE.settings) STATE.settings = {};
+  STATE.settings.calHourStart = start + 1;
+  persist();
+  render();
+}
+function expandCalHoursLate(ev){
+  if (ev) ev.stopPropagation();
+  const end = calHourEnd();
+  if (end >= 24){ showToast("Já mostra até meia-noite."); return; }
+  if (!STATE.settings) STATE.settings = {};
+  STATE.settings.calHourEnd = end + 1;
+  persist();
+  render();
+}
+function shrinkCalHoursLate(ev){
+  if (ev) ev.stopPropagation();
+  const end = calHourEnd();
+  if (end <= DEFAULT_HOUR_END){ showToast("Horário padrão: até 22:00."); return; }
+  if (!STATE.settings) STATE.settings = {};
+  STATE.settings.calHourEnd = end - 1;
+  persist();
+  render();
+}
+function calHourControlsTop(){
+  const parts = [];
+  if (calHourStart() > 0){
+    parts.push('<button type="button" class="tl-hour-expand" onclick="expandCalHoursEarly(event)" title="Mostrar hora antes das ' + fmtHourLabel(calHourStart()) + '">+</button>');
+  }
+  if (calHourStart() < DEFAULT_HOUR_START){
+    parts.push('<button type="button" class="tl-hour-expand" onclick="shrinkCalHoursEarly(event)" title="Ocultar hora antes das ' + fmtHourLabel(calHourStart()) + '">−</button>');
+  }
+  if (!parts.length) return "";
+  return '<div class="tl-hour-controls-top">' + parts.join("") + "</div>";
+}
+function calHourControlsBottom(){
+  const parts = [];
+  if (calHourEnd() > DEFAULT_HOUR_END){
+    parts.push('<button type="button" class="tl-hour-expand" onclick="shrinkCalHoursLate(event)" title="Ocultar hora depois das ' + fmtHourLabel(calHourEnd() - 1) + '">−</button>');
+  }
+  if (calHourEnd() < 24){
+    parts.push('<button type="button" class="tl-hour-expand" onclick="expandCalHoursLate(event)" title="Mostrar hora depois das ' + fmtHourLabel(calHourEnd() - 1) + '">+</button>');
+  }
+  return parts.length ? '<div class="tl-hour-controls-bottom">' + parts.join("") + "</div>" : "";
+}
+function layoutTimed(items){
+  items.sort(function(a, b){ return a.start - b.start || a.end - b.end; });
+  const colEnds = [];
+  items.forEach(function(item){
+    let col = 0;
+    while (col < colEnds.length && colEnds[col] > item.start + 1) col++;
+    colEnds[col] = item.end;
+    item.col = col;
+  });
+  const n = colEnds.length || 1;
+  items.forEach(function(item){ item.cols = n; });
+  return items;
+}
+function blockStyle(item){
+  const span = calHourSpan() * 60;
+  const topPct = Math.max(0, ((item.start - calHourStart() * 60) / span) * 100);
+  const hPct = Math.max(3, ((item.end - item.start) / span) * 100);
+  if (item.cols === 1) return "top:" + topPct + "%;height:" + hPct + "%;left:3px;right:3px";
+  return "top:" + topPct + "%;height:" + hPct + "%;left:calc(" + ((100 / item.cols) * item.col) + "% + 2px);width:calc(" + (100 / item.cols) + "% - 4px)";
+}
+function clipDayMins(start, end){
+  const a = Math.max(start, calHourStart() * 60);
+  const b = Math.min(end, calHourEnd() * 60);
+  if (!(b > a)) return null;
+  return { start: a, end: b };
+}
+function entryStartMins(e){
+  const fromTime = parseTimeMins(e.time);
+  if (fromTime != null) return fromTime;
+  if (e.createdAt){
+    const d = new Date(e.createdAt);
+    if (!isNaN(d.getTime()) && toISODate(d) === e.date) return d.getHours() * 60 + d.getMinutes();
+  }
+  return null;
+}
+function visibleWeekLabel(monday){
+  const n = getWeekDays();
+  const end = addDays(monday, n - 1);
+  const y = monday.getFullYear();
+  const yearSuffix = y !== new Date().getFullYear() ? " de " + y : "";
+  if (monday.getMonth() === end.getMonth()) return monday.getDate() + " a " + end.getDate() + " de " + monthAbbrev(monday.getMonth()) + "." + yearSuffix;
+  return monday.getDate() + " de " + monthAbbrev(monday.getMonth()) + ". a " + end.getDate() + " de " + monthAbbrev(end.getMonth()) + "." + yearSuffix;
+}
+function tasksOn(iso){
+  return (STATE.tasks || []).filter(function(t){ return t.date === iso; }).sort(function(a, b){
+    return (a.time || "99:99").localeCompare(b.time || "99:99") || (a.createdAt || "").localeCompare(b.createdAt || "");
+  });
+}
+function agendaOn(iso){
+  return (STATE.agenda || []).filter(function(a){ return a.date === iso; }).sort(function(a, b){
+    return (a.time || "").localeCompare(b.time || "") || (a.createdAt || "").localeCompare(b.createdAt || "");
+  });
+}
+function reviewPhrase(amount, unit){
+  const n = Math.max(1, parseInt(amount, 10) || 1);
+  if (unit === "weeks") return n + " semana" + (n === 1 ? "" : "s");
+  return n + " dia" + (n === 1 ? "" : "s");
+}
+function kindLabel(kind){
+  if (kind === "prazo") return "Prazo";
+  if (kind === "project") return "Projeto";
+  if (kind === "tag") return "Tag";
+  if (kind === "prova") return "Prova";
+  if (kind === "meta") return "Meta";
+  return "Tarefa";
+}
+function normalizePlanKind(kind){
+  if (kind === "prazo" || kind === "project" || kind === "tag") return kind;
+  if (kind === "meta" || kind === "prova" || kind === "deadline") return "prazo";
+  return "task";
+}
+function planKindTitlePlaceholder(kind){
+  kind = normalizePlanKind(kind);
+  if (kind === "prazo") return "entregar relatório, entrega…";
+  if (kind === "project") return "nome do projeto";
+  if (kind === "tag") return "nome da tag";
+  return "@tarefa  +projeto  #tag";
+}
+function draftDefaultDate(){
+  return nomenDraftDate || selectedDayIso || toISODate(new Date());
+}
+function isFutureIso(iso){
+  return iso > toISODate(new Date());
+}
+function focusCalendarDate(iso){
+  nomenDraftDate = iso;
+  viewWeekStart = mondayOf(parseISODate(iso));
+  selectedDayIso = iso;
+}
+function togglePlanKindFields(kind){
+  kind = normalizePlanKind(kind);
+  const taskOnly = document.getElementById("t-task-only");
+  if (taskOnly) taskOnly.style.display = kind === "task" ? "" : "none";
+  ["t-task-only-review"].forEach(function(id){
+    const el = document.getElementById(id);
+    if (el) el.style.display = kind === "task" ? "" : "none";
+  });
+  const startTimer = document.getElementById("t-start-timer");
+  if (startTimer && kind !== "task") startTimer.checked = false;
+  const titleEl = document.getElementById("t-title");
+  if (titleEl) titleEl.placeholder = planKindTitlePlaceholder(kind);
+  refreshTitleSuggestions(kind);
+  updateTaskFormDate();
+}
+function updateTaskFormDate(){
+  const dateEl = document.getElementById("t-date");
+  const wrap = document.getElementById("t-start-timer-wrap");
+  const chk = document.getElementById("t-start-timer");
+  if (!dateEl || !wrap) return;
+  const future = isFutureIso(dateEl.value);
+  wrap.style.display = future ? "none" : "";
+  if (future && chk) chk.checked = false;
+}
+function fmtHumanDate(iso){
+  const d = parseISODate(iso);
+  return d.getDate() + " de " + monthAbbrev(d.getMonth()) + ".";
+}
+function daysBetweenIso(fromIso, toIso){
+  return Math.round((parseISODate(toIso) - parseISODate(fromIso)) / 86400000);
+}
+const REVIEW_LADDER = [1, 3, 7, 16, 30];
+function reviewIsLadder(r){ return !!r && r.mode !== "fixed"; }
+function reviewIntervalDays(r){
+  if (!r) return 0;
+  if (reviewIsLadder(r)) return REVIEW_LADDER[Math.min(r.step || 0, REVIEW_LADDER.length - 1)];
+  const n = Math.max(1, parseInt(r.amount, 10) || 1);
+  return r.unit === "weeks" ? n * 7 : n;
+}
+function reviewScheduleLabel(r){
+  if (!r) return "";
+  if (reviewIsLadder(r)){
+    const step = Math.min(r.step || 0, REVIEW_LADDER.length - 1);
+    return "escalonada · etapa " + (step + 1) + "/" + REVIEW_LADDER.length + " (" + REVIEW_LADDER[step] + " dia" + (REVIEW_LADDER[step] === 1 ? "" : "s") + ")";
+  }
+  return "a cada " + reviewPhrase(r.amount, r.unit);
+}
+// Advances a review to its next occurrence. Ladder reviews step up the
+// spacing (1, 3, 7, 16, 30) and stay at the top; fixed ones simply repeat.
+function advanceReview(r, fromIso){
+  if (!r) return null;
+  const next = { enabled: true, mode: reviewIsLadder(r) ? "ladder" : "fixed", amount: r.amount || 3, unit: r.unit || "days", step: r.step || 0 };
+  if (reviewIsLadder(r)) next.step = Math.min((r.step || 0) + 1, REVIEW_LADDER.length - 1);
+  next.date = toISODate(addDays(parseISODate(fromIso), reviewIntervalDays(next)));
+  return next;
+}
+function computeTaskReviews(state){
+  const today = toISODate(new Date());
+  return (state.tasks || []).filter(function(t){
+    return t.review && t.review.enabled !== false && t.review.date && t.review.date <= today;
+  }).sort(function(a, b){ return a.review.date.localeCompare(b.review.date); });
+}
+function upcomingAgenda(state){
+  const today = toISODate(new Date());
+  return (state.agenda || []).filter(function(a){ return a.date >= today; }).sort(function(a, b){
+    return a.date.localeCompare(b.date) || (a.time || "").localeCompare(b.time || "");
+  }).slice(0, 12);
+}
+function touch(item){
+  if (item && typeof item === "object") item.updatedAt = Date.now();
+  return item;
+}
+function itemStamp(item){
+  if (!item) return 0;
+  const u = Number(item.updatedAt);
+  if (u) return u;
+  const c = Date.parse(item.createdAt || "");
+  return c || 0;
+}
+function tombstones(){
+  if (!STATE.deleted || typeof STATE.deleted !== "object") STATE.deleted = {};
+  return STATE.deleted;
+}
+function dropItem(list, id){
+  tombstones()[id] = Date.now();
+  return (list || []).filter(function(x){ return !x || x.id !== id; });
+}
+function pruneTombstones(map){
+  const cutoff = Date.now() - 180 * 86400000;
+  Object.keys(map || {}).forEach(function(id){ if (!(map[id] > cutoff)) delete map[id]; });
+  return map;
+}
+function mergeTombstones(remoteMap, localMap){
+  const out = {};
+  [remoteMap || {}, localMap || {}].forEach(function(m){
+    Object.keys(m).forEach(function(id){
+      const at = Number(m[id]) || 0;
+      if (at > (out[id] || 0)) out[id] = at;
+    });
+  });
+  return pruneTombstones(out);
+}
+function mergeById(remoteList, localList, deletedMap){
+  const byId = {};
+  (remoteList || []).concat(localList || []).forEach(function(item){
+    if (!item || !item.id) return;
+    const prev = byId[item.id];
+    if (!prev || itemStamp(item) >= itemStamp(prev)) byId[item.id] = item;
+  });
+  const dels = deletedMap || {};
+  return Object.keys(byId).filter(function(id){
+    const at = Number(dels[id]) || 0;
+    return !(at && at >= itemStamp(byId[id]));
+  }).map(function(id){ return byId[id]; });
+}
+function escapeHtml(s){
+  return String(s == null ? "" : s).replace(/[&<>"']/g, function(c){
+    return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+  });
+}
+function onClickAttr(code){
+  return " onclick='" + String(code).replace(/'/g, "&#39;") + "'";
+}
+function focuslyLogoHtml(){
+  return '<h1 class="app-logo"><span class="focusly-logo" aria-label="Focusly">' +
+    "<span>F</span>" +
+    '<svg class="focusly-ring" viewBox="0 0 100 100" aria-hidden="true">' +
+    '<circle cx="50" cy="50" r="38" fill="none" stroke="var(--logo-track)" stroke-width="13"></circle>' +
+    '<circle cx="50" cy="50" r="38" fill="none" stroke="var(--logo-arc)" stroke-width="13" stroke-linecap="round" stroke-dasharray="171.9 238.8" transform="rotate(-90 50 50)"></circle>' +
+    "</svg><span>cusly</span></span></h1>";
+}
+function showToast(msg){
+  toastMsg = msg;
+  render();
+  if (toastTimer) clearTimeout(toastTimer);
+  toastTimer = setTimeout(function(){ toastMsg = null; render(); }, 3200);
+}
+function getPomodoroSettings(){
+  const d = { focus: 25, short: 5, long: 15, cyclesUntilLong: 4 };
+  const p = STATE.settings && STATE.settings.pomodoro;
+  if (!p) return d;
+  return {
+    focus: p.focus || d.focus,
+    short: p.short || d.short,
+    long: p.long || d.long,
+    cyclesUntilLong: p.cyclesUntilLong || d.cyclesUntilLong
+  };
+}
+function updatePomodoroSetting(key, value){
+  const v = Math.max(1, parseInt(value, 10) || 1);
+  if (!STATE.settings) STATE.settings = {};
+  if (!STATE.settings.pomodoro) STATE.settings.pomodoro = getPomodoroSettings();
+  STATE.settings.pomodoro[key] = v;
+  render();
+  persist();
+}
+function getAudioCtx(){
+  if (!window.__pomoAC){
+    try { window.__pomoAC = new (window.AudioContext || window.webkitAudioContext)(); }
+    catch (e) { window.__pomoAC = null; }
+  }
+  return window.__pomoAC;
+}
+function playTones(freqs){
+  if (muted) return;
+  const ctx = getAudioCtx();
+  if (!ctx) return;
+  if (ctx.state === "suspended") ctx.resume().catch(function(){});
+  let t = ctx.currentTime + 0.02;
+  freqs.forEach(function(f){
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = "sine";
+    osc.frequency.value = f;
+    gain.gain.setValueAtTime(0, t);
+    gain.gain.linearRampToValueAtTime(0.22, t + 0.02);
+    gain.gain.linearRampToValueAtTime(0, t + 0.22);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(t);
+    osc.stop(t + 0.24);
+    t += 0.26;
+  });
+}
+function playBreakAlert(){ playTones([880, 1175]); }
+function playResumeAlert(){ playTones([784, 523]); }
+function toggleMute(){
+  muted = !muted;
+  try { localStorage.setItem("diario-estudos-muted", muted ? "1" : "0"); } catch (e) {}
+  render();
+}
+function applyTheme(){
+  document.documentElement.setAttribute("data-theme", theme === "dark" ? "dark" : "light");
+  const meta = document.querySelector('meta[name="theme-color"]');
+  if (meta) meta.setAttribute("content", theme === "dark" ? "#12122B" : "#F4F4F2");
+}
+function toggleTheme(){
+  theme = theme === "dark" ? "light" : "dark";
+  try { localStorage.setItem("diario-estudos-theme", theme); } catch (e) {}
+  applyTheme();
+  render();
+}
+function durationParts(seconds){
+  const rounded = Math.round(seconds / 60);
+  const minsTotal = seconds >= 15 ? Math.max(1, rounded) : rounded;
+  return { hours: Math.floor(minsTotal / 60), mins: minsTotal % 60, seconds: seconds };
+}
+function liveSeconds(){
+  if (!timer.running) return timer.accumulated || 0;
+  return (timer.accumulated || 0) + Math.floor((Date.now() - timer.startedAt) / 1000);
+}
+function applyTimerElapsed(){
+  if (!timer.running || !timer.startedAt) return;
+  timer.accumulated = (timer.accumulated || 0) + Math.floor((Date.now() - timer.startedAt) / 1000);
+  timer.startedAt = Date.now();
+}
+function pomoRemaining(){
+  if (!pomo.active) return getPomodoroSettings().focus * 60;
+  if (pomo.running && pomo.endsAt) return Math.max(0, Math.round((pomo.endsAt - Date.now()) / 1000));
+  return pomo.pausedRemaining || 0;
+}
+function collectDayBlocks(d, ownedIds){
+  const timed = [];
+  const allDay = [];
+  const showDone = showCompletedTasks();
+  tasksOn(d.iso).forEach(function(t){
+    if (t.done && !showDone) return;
+    const start = parseTimeMins(t.time);
+    const label = taskDisplayName(t);
+    if (start == null){
+      allDay.push({ cls: "tl-chip", title: label, id: t.id, kind: "task" });
+      return;
+    }
+    const clipped = clipDayMins(start, start + 60);
+    if (clipped) timed.push({ cls: "tl-block task" + (t.done ? " done" : ""), title: label, start: clipped.start, end: clipped.end, id: t.id, kind: "task" });
+  });
+  agendaOn(d.iso).forEach(function(a){
+    const start = parseTimeMins(a.time);
+    const label = kindLabel(a.kind) + ": " + a.title;
+    if (start == null){
+      allDay.push({ cls: "tl-chip", title: label });
+      return;
+    }
+    const clipped = clipDayMins(start, start + 60);
+    if (clipped) timed.push({ cls: "tl-block agenda-" + (a.kind || "meta"), title: a.title, start: clipped.start, end: clipped.end });
+  });
+  d.entries.forEach(function(e){
+    const start = entryStartMins(e);
+    const label = e.subject || (e.notes ? String(e.notes).slice(0, 40) : "Estudo");
+    if (start == null){
+      allDay.push({ cls: "tl-chip", title: label + " · " + fmtDuration(entrySeconds(e)), id: e.id, kind: "entry" });
+      return;
+    }
+    const durMin = Math.max(15, Math.round(entrySeconds(e) / 60) || 30);
+    const clipped = clipDayMins(start, start + durMin);
+    if (clipped) timed.push({ cls: "tl-block entry", title: label, start: clipped.start, end: clipped.end, id: e.id, kind: "entry" });
+  });
+  return { timed: layoutTimed(timed), allDay: allDay };
+}
+function dayBundle(iso){
+  const d = parseISODate(iso);
+  const todayIso = toISODate(new Date());
+  const dayEntries = (STATE.entries || []).filter(function(e){ return e.date === iso; }).sort(function(a, b){ return (a.createdAt || "").localeCompare(b.createdAt || ""); });
+  const seconds = dayEntries.reduce(function(s, e){ return s + entrySeconds(e); }, 0);
+  return { date: d, iso: iso, entries: dayEntries, seconds: seconds, isToday: iso === todayIso };
+}
+function hoursColHtml(){
+  const hours = Array.from({ length: calHourSpan() }, function(_, i){
+    return '<div class="tl-hour">' + fmtHourLabel(calHourStart() + i) + "</div>";
+  }).join("");
+  return calHourControlsTop() + hours + calHourControlsBottom();
+}
+function nowLineHtml(colIndex){
+  const now = new Date();
+  const nowMins = now.getHours() * 60 + now.getMinutes();
+  const span = calHourSpan() * 60;
+  if (!(nowMins >= calHourStart() * 60 && nowMins < calHourEnd() * 60)) return "";
+  const nowTop = ((nowMins - calHourStart() * 60) / span) * 100;
+  return '<div class="tl-now' + (colIndex === 0 ? " tl-now-start" : "") + '" style="top:' + nowTop + '%"></div>';
+}
+function timedBlocksHtml(d, ownedIds){
+  const blocks = collectDayBlocks(d, ownedIds);
+  return blocks.timed.map(function(b){
+    const click = "event.stopPropagation()";
+    return '<div class="' + b.cls + '" style="' + blockStyle(b) + '" title="' + escapeHtml(b.title) + '"' + onClickAttr(click) + ">" + escapeHtml(b.title) + "</div>";
+  }).join("");
+}
+function allDayChipsHtml(d, ownedIds){
+  const blocks = collectDayBlocks(d, ownedIds);
+  return blocks.allDay.map(function(c){
+    return '<div class="' + c.cls + '" title="' + escapeHtml(c.title) + '" onclick="event.stopPropagation()">' + escapeHtml(c.title) + "</div>";
+  }).join("");
+}
+function dayAgendaItems(d, ownedIds){
+  const blocks = collectDayBlocks(d, ownedIds);
+  const rows = [];
+  blocks.timed.forEach(function(b){
+    rows.push({ start: b.start, time: pad2(Math.floor(b.start / 60)) + ":" + pad2(b.start % 60), title: b.title });
+  });
+  blocks.allDay.forEach(function(c){
+    rows.push({ start: -1, time: "Dia", title: c.title });
+  });
+  rows.sort(function(a, b){ return a.start - b.start; });
+  if (!rows.length) return '<p class="empty-state">Nada neste dia.</p>';
+  return rows.map(function(r){
+    return '<div class="tl-agenda-item"><span class="tl-agenda-time">' + escapeHtml(r.time) + '</span><span class="tl-agenda-title">' + escapeHtml(r.title) + "</span></div>";
+  }).join("");
+}
+function renderWeekGrid(days, ownedIds){
+  const dayNames = ["Seg","Ter","Qua","Qui","Sex","Sáb","Dom"];
+  const heads = days.map(function(d, i){
+    const wknd = i >= 5 ? " weekend" : "";
+    return '<div class="tl-dayhead' + (d.isToday ? " today" : "") + wknd + '" onclick="selectCalDay(\'' + d.iso + '\')">' + d.date.getDate() + " " + dayNames[i] + "<small>" + monthAbbrev(d.date.getMonth()) + ".</small></div>";
+  }).join("");
+  const allDays = days.map(function(d, i){
+    return '<div class="tl-allday' + (i >= 5 ? " weekend" : "") + '" onclick="openTaskForm(\'' + d.iso + '\')">' + allDayChipsHtml(d, ownedIds) + "</div>";
+  }).join("");
+  const cols = days.map(function(d, i){
+    return '<div class="tl-slots' + (i >= 5 ? " weekend" : "") + '" style="' + slotsBgStyle() + '" onclick="onTimelineClick(event,\'' + d.iso + '\')">' + timedBlocksHtml(d, ownedIds) + nowLineHtml(i) + "</div>";
+  }).join("");
+  return '<div class="tl-grid-wrap"><div class="tl-grid" style="grid-template-columns:42px repeat(7,minmax(0,1fr));grid-template-rows:auto auto 1fr">' +
+    '<div class="tl-corner"></div>' + heads +
+    '<div class="tl-allday-lab"></div>' + allDays +
+    '<div class="tl-hours-col">' + hoursColHtml() + "</div>" + cols +
+    "</div></div>";
+}
+function renderSplitView(ownedIds){
+  const iso = selectedDayIso || toISODate(new Date());
+  const d = dayBundle(iso);
+  const wknd = d.date.getDay() === 0 || d.date.getDay() === 6 ? " weekend" : "";
+  const dayNames = ["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"];
+  const head = '<div class="tl-dayhead' + (d.isToday ? " today" : "") + wknd + '">' + d.date.getDate() + " " + dayNames[d.date.getDay()] + "<small>" + monthAbbrev(d.date.getMonth()) + ".</small></div>";
+  const cal = '<div class="tl-grid-wrap"><div class="tl-grid" style="grid-template-columns:42px minmax(0,1fr);grid-template-rows:auto auto 1fr">' +
+    '<div class="tl-corner"></div>' + head +
+    '<div class="tl-allday-lab"></div>' +
+    '<div class="tl-allday' + wknd + '" onclick="openTaskForm(\'' + d.iso + '\')">' + allDayChipsHtml(d, ownedIds) + "</div>" +
+    '<div class="tl-hours-col">' + hoursColHtml() + "</div>" +
+    '<div class="tl-slots' + wknd + '" style="' + slotsBgStyle() + '" onclick="onTimelineClick(event,\'' + d.iso + '\')">' + timedBlocksHtml(d, ownedIds) + nowLineHtml(0) + "</div>" +
+    "</div></div>";
+  return '<div class="tl-split">' + cal + '<div class="tl-split-side"><div class="tl-agenda-head">Do dia</div>' + dayAgendaItems(d, ownedIds) + "</div></div>";
+}
+function renderListView(days, ownedIds){
+  const dayNames = ["Seg","Ter","Qua","Qui","Sex","Sáb","Dom"];
+  const html = days.map(function(d, i){
+    return '<div class="tl-agenda-day"><div class="tl-agenda-head"><span>' + dayNames[i] + " " + d.date.getDate() + " " + monthAbbrev(d.date.getMonth()) + '.</span><button class="btn btn-link btn-xs" type="button" onclick="openTaskForm(\'' + d.iso + '\')">+ Tarefa</button></div>' + dayAgendaItems(d, ownedIds) + "</div>";
+  }).join("");
+  return '<div class="tl-agenda">' + html + "</div>";
+}
+function renderMonthView(ownedIds){
+  const first = monthAnchor();
+  const start = mondayOf(first);
+  const today = toISODate(new Date());
+  const dows = ["Seg","Ter","Qua","Qui","Sex","Sáb","Dom"].map(function(n){ return '<div class="tl-month-dow">' + n + "</div>"; }).join("");
+  const cells = [];
+  for (let i = 0; i < 42; i++){
+    const date = addDays(start, i);
+    const iso = toISODate(date);
+    const inMonth = date.getMonth() === first.getMonth();
+    const d = dayBundle(iso);
+    const blocks = collectDayBlocks(d, ownedIds);
+    const all = blocks.allDay.concat(blocks.timed);
+    const chips = all.slice(0, 3).map(function(c){ return '<div class="tl-month-chip">' + escapeHtml(c.title) + "</div>"; }).join("");
+    const extra = all.length > 3 ? '<div class="tl-month-chip">+' + (all.length - 3) + "</div>" : "";
+    const wknd = date.getDay() === 0 || date.getDay() === 6 ? " weekend" : "";
+    cells.push('<div class="tl-month-cell' + (inMonth ? "" : " out") + (iso === today ? " today" : "") + wknd + '" onclick="selectCalDay(\'' + iso + '\')"><span class="tl-month-num">' + date.getDate() + "</span>" + chips + extra + "</div>");
+  }
+  return '<div class="tl-month">' + dows + cells.join("") + "</div>";
+}
+function renderViewSwitch(){
+  const icons = {
+    week: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="6" width="16" height="14" rx="2"/><path d="M8 4v4M16 4v4M4 10h16"/></svg>',
+    split: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M15 4v16M17.5 8H20M17.5 12H20M17.5 16H20"/></svg>',
+    list: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="6" cy="7" r="1.15" fill="currentColor" stroke="none"/><path d="M10 7h8"/><circle cx="6" cy="12" r="1.15" fill="currentColor" stroke="none"/><path d="M10 12h8"/><circle cx="6" cy="17" r="1.15" fill="currentColor" stroke="none"/><path d="M10 17h8"/></svg>',
+    month: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M12 4v16M4 12h16"/></svg>'
+  };
+  const labels = { week: "Semana", split: "Dia", list: "Lista", month: "Mês" };
+  return '<div class="view-switch" role="tablist" aria-label="Visualização do calendário">' +
+    ["week","split","list","month"].map(function(v){
+      return '<button type="button" class="' + (calView === v ? "on" : "") + '" aria-label="' + labels[v] + '" onclick="setCalView(\'' + v + '\')">' + icons[v] + "</button>";
+    }).join("") + "</div>";
+}
+function monthAnchor(){
+  const src = selectedDayIso ? parseISODate(selectedDayIso) : addDays(viewWeekStart, 3);
+  return new Date(src.getFullYear(), src.getMonth(), 1);
+}
+function calendarTitle(isCurrentWeek){
+  if (calView === "month"){
+    const d = monthAnchor();
+    const months = ["janeiro","fevereiro","março","abril","maio","junho","julho","agosto","setembro","outubro","novembro","dezembro"];
+    return months[d.getMonth()] + " de " + d.getFullYear();
+  }
+  if (calView === "split"){
+    const iso = selectedDayIso || toISODate(new Date());
+    const d = parseISODate(iso);
+    const names = ["Domingo","Segunda","Terça","Quarta","Quinta","Sexta","Sábado"];
+    return names[d.getDay()] + " · " + d.getDate() + " " + monthAbbrev(d.getMonth()) + ".";
+  }
+  return isCurrentWeek ? ("Esta semana · S" + isoWeekNum(viewWeekStart)) : visibleWeekLabel(viewWeekStart);
+}
+function renderLogAgendaRow(a){
+  const confirming = confirmDeleteAgendaId === a.id;
+  const actions = confirming
+    ? '<button class="btn btn-danger btn-xs" onclick="confirmDeleteAgenda(\'' + a.id + '\')">Confirmar</button><button class="btn btn-ghost btn-xs" onclick="cancelDeleteAgenda()">Cancelar</button>'
+    : '<button class="btn btn-ghost btn-xs" onclick="askDeleteAgenda(\'' + a.id + '\')">Excluir</button>';
+  const meta = [a.time || "", kindLabel(a.kind)].filter(Boolean).join(" · ");
+  return '<li class="entry-row agenda-only"><div class="entry-dur">—</div><div>' +
+    '<div class="entry-tags"><span class="kind-pill kind-' + (a.kind || "prazo") + '">' + kindLabel(a.kind) + "</span></div>" +
+    '<div class="entry-notes">' + escapeHtml(a.title) + "</div>" +
+    '<div class="task-note">' + escapeHtml(meta) + "</div>" +
+    (a.notes ? '<div class="task-note">' + escapeHtml(a.notes) + "</div>" : "") +
+    '</div><div class="entry-actions">' + actions + "</div></li>";
+}
+function renderLogUpcoming(week){
+  const weekIsos = {};
+  week.days.forEach(function(d){ weekIsos[d.iso] = true; });
+  const today = toISODate(new Date());
+  const items = [];
+  upcomingAgenda(STATE).forEach(function(a){
+    if (!weekIsos[a.date]) items.push({ kind: "agenda", data: a, at: a.date + (a.time || "") });
+  });
+  (STATE.tasks || []).filter(function(t){
+    return !t.done && t.date >= today && !weekIsos[t.date];
+  }).forEach(function(t){
+    items.push({ kind: "task", data: t, at: t.date + (t.time || "") });
+  });
+  if (!items.length) return "";
+  items.sort(function(a, b){ return (a.at || "").localeCompare(b.at || ""); });
+  const rows = items.map(function(row){
+    if (row.kind === "agenda") return renderLogAgendaRow(row.data);
+    return renderLogTaskRow(row.data);
+  }).join("");
+  return '<div class="log-day"><div class="log-day-head">À frente</div><ul class="entry-list">' + rows + "</ul></div>";
+}
+function renderLogEntries(){
+  const week = computeWeek(STATE, viewWeekStart);
+  const chunks = [];
+  week.days.forEach(function(d){
+    const items = [];
+    d.entries.forEach(function(e){
+      items.push({ kind: "entry", data: e, at: e.createdAt || e.date || "" });
+    });
+    agendaOn(d.iso).forEach(function(a){
+      items.push({ kind: "agenda", data: a, at: a.createdAt || a.date || "" });
+    });
+    tasksOn(d.iso).forEach(function(t){
+      const linked = d.entries.some(function(e){ return e.taskId === t.id; });
+      if (!linked) items.push({ kind: "task", data: t, at: t.createdAt || t.date || "" });
+    });
+    if (!items.length) return;
+    items.sort(function(a, b){ return (b.at || "").localeCompare(a.at || ""); });
+    const rows = items.map(function(row){
+      if (row.kind === "entry") return renderLogEntryRow(row.data);
+      if (row.kind === "agenda") return renderLogAgendaRow(row.data);
+      return renderLogTaskRow(row.data);
+    }).join("");
+    chunks.push('<div class="log-day"><div class="log-day-head">' + escapeHtml(fmtHumanDate(d.iso)) + (d.isToday ? " · hoje" : "") + '</div><ul class="entry-list">' + rows + "</ul></div>");
+  });
+  const upcoming = renderLogUpcoming(week);
+  const body = chunks.length ? chunks.join("") : "";
+  if (!upcoming && !body) return '<p class="empty-state">Nenhum registro nesta semana.</p>';
+  return upcoming + body;
+}
+function renderLogEntryRow(e){
+  const isLive = timer.entryId === e.id && timer.running;
+  const isPaused = timer.entryId === e.id && !timer.running && (timer.accumulated > 0);
+  const secs = (timer.entryId === e.id && (timer.running || timer.accumulated)) ? liveSeconds() : entrySeconds(e);
+  const confirming = confirmDeleteId === e.id;
+  const actions = confirming
+    ? '<button class="btn btn-danger btn-xs" onclick="confirmDeleteEntry(\'' + e.id + '\')">Confirmar</button><button class="btn btn-ghost btn-xs" onclick="cancelDeleteEntry()">Cancelar</button>'
+    : '<button class="btn btn-ghost btn-xs" onclick="askDeleteEntry(\'' + e.id + '\')">Excluir</button>';
+  const marks = [];
+  if (e.tag) marks.push('<span class="mark tag">#' + escapeHtml(String(e.tag).replace(/^#+/, "")) + "</span>");
+  if (e.project) marks.push('<span class="mark project">+' + escapeHtml(e.project) + "</span>");
+  const meta = [e.time || "", isLive ? "contando…" : (isPaused ? "pausado" : ""), "tempo"].filter(Boolean).join(" · ");
+  return '<li class="entry-row' + (isLive ? " live" : "") + '"><div class="entry-dur">' + (secs > 0 || isLive ? escapeHtml(fmtDuration(secs)) : "—") + '</div><div>' +
+    (marks.length ? '<div class="entry-tags">' + marks.join("") + "</div>" : "") +
+    '<div class="entry-notes">' + escapeHtml(entryDisplayLabel(e)) + "</div>" +
+    '<div class="task-note">' + escapeHtml(meta) + "</div>" +
+    (e.notes ? '<div class="task-note">' + escapeHtml(e.notes) + "</div>" : "") +
+    '</div><div class="entry-actions">' + actions + "</div></li>";
+}
+function renderLogTaskRow(t){
+  const confirming = confirmDeleteTaskId === t.id;
+  const actions = confirming
+    ? '<button class="btn btn-danger btn-xs" onclick="confirmDeleteTask(\'' + t.id + '\')">Confirmar</button><button class="btn btn-ghost btn-xs" onclick="cancelDeleteTask()">Cancelar</button>'
+    : '<button class="btn btn-ghost btn-xs" onclick="askDeleteTask(\'' + t.id + '\')">Excluir</button>';
+  const spent = taskLoggedSeconds(t.id);
+  const meta = [t.time || "", t.done ? "concluída" : "tarefa"].filter(Boolean).join(" · ");
+  return '<li class="entry-row task-only"><div class="entry-dur">' + (spent ? escapeHtml(fmtDuration(spent)) : "—") + '</div><div>' +
+    '<div class="entry-notes">' + escapeHtml(taskDisplayName(t)) + "</div>" +
+    nomenMarks(t) +
+    '<div class="task-note">' + escapeHtml(meta) + "</div>" +
+    (t.notes ? '<div class="task-note">' + escapeHtml(t.notes) + "</div>" : "") +
+    '</div><div class="entry-actions">' + actions + "</div></li>";
+}
+function renderNomenDraftHtml(){
+  const kind = nomenDraftKind || logFilter || "task";
+  const placeholders = {
+    task: "ler capítulo, revisar lista…",
+    project: "heuristica, TCC…",
+    tag: "anatomia, datascience…",
+    deadline: "entregar relatório, prova de anatomia…"
+  };
+  const prefix = kind === "project" ? "+" : (kind === "tag" ? "#" : (kind === "deadline" ? "◷" : "@"));
+  const draftDate = draftDefaultDate();
+  return '<form class="nomen-draft-form" onsubmit="submitNomenDraft(event)">' +
+    '<div class="nomen-draft-line"><span class="nomen-draft-prefix">' + prefix + "</span>" +
+    '<input id="nomen-draft" class="nomen-draft-input" type="text" maxlength="120" placeholder="' + escapeHtml(placeholders[kind] || placeholders.task) + '" autocomplete="off">' +
+    '<button type="submit" class="btn btn-primary btn-xs">Adicionar</button></div>' +
+    '<label class="nomen-draft-date"><span>Para</span><input type="date" id="nomen-date" value="' + draftDate + '"></label></form>';
+}
+function renderTimeline(week, isCurrentWeek){
+  const ownedIds = {};
+  const days = week.days.slice(0, 7);
+  const title = calendarTitle(isCurrentWeek);
+  const showToday = calView === "month"
+    ? !(monthAnchor().getMonth() === new Date().getMonth() && monthAnchor().getFullYear() === new Date().getFullYear())
+    : calView === "split"
+      ? (selectedDayIso || toISODate(new Date())) !== toISODate(new Date())
+      : !isCurrentWeek;
+  let body;
+  if (calView === "split") body = renderSplitView(ownedIds);
+  else if (calView === "list") body = renderListView(days, ownedIds);
+  else if (calView === "month") body = renderMonthView(ownedIds);
+  else body = renderWeekGrid(days, ownedIds);
+  return '<section class="card tl-card"><div class="tl-toolbar"><div class="tl-week"><button class="btn btn-icon" onclick="navCal(-1)" aria-label="Anterior">‹</button>' +
+    '<span>' + escapeHtml(title) + "</span>" +
+    '<button class="btn btn-icon" onclick="navCal(1)" aria-label="Próximo">›</button>' +
+    (showToday ? '<button class="btn btn-link btn-xs" onclick="jumpToday()">Hoje</button>' : "") +
+    "</div>" + renderViewSwitch() + "</div>" + body + "</section>";
+}
+
+function render(){
+  const root = document.getElementById("app");
+  if (!root) return;
+  const wrap = document.querySelector(".tl-grid-wrap");
+  const savedTop = wrap ? wrap.scrollTop : 0;
+  const savedLeft = wrap ? wrap.scrollLeft : 0;
+  const logBodyEl = document.querySelector(".log-body");
+  const savedLog = logBodyEl ? logBodyEl.scrollTop : 0;
+  const week = computeWeek(STATE, viewWeekStart);
+  const isCurrentWeek = toISODate(viewWeekStart) === toISODate(mondayOf(new Date()));
+  const toast = toastMsg ? '<div class="toast">' + escapeHtml(toastMsg) + "</div>" : "";
+  const trayHint = window.focuslyDesktop
+    ? '<p class="tray-hint">Roda na bandeja — fechar a janela minimiza; o cronômetro continua.</p>'
+    : "";
+  const activeNomen = nomenDraftKind || logFilter || "task";
+  const nomenBtns =
+    '<div class="nomen-row">' +
+      '<button type="button" class="nomen-chip' + (activeNomen === "task" ? " on" : "") + '" onclick="openNomenChip(\'task\')"><span class="nomen-ico">@</span> Tarefa</button>' +
+      '<button type="button" class="nomen-chip' + (activeNomen === "deadline" ? " on" : "") + '" onclick="openNomenChip(\'deadline\')"><span class="nomen-ico">◷</span> Prazo</button>' +
+      '<button type="button" class="nomen-chip' + (activeNomen === "project" ? " on" : "") + '" onclick="openNomenChip(\'project\')"><span class="nomen-ico">+</span> Projeto</button>' +
+      '<button type="button" class="nomen-chip' + (activeNomen === "tag" ? " on" : "") + '" onclick="openNomenChip(\'tag\')"><span class="nomen-ico">#</span> Tags</button>' +
+    "</div>";
+  const ps = getPomodoroSettings();
+  const rem = pomoRemaining();
+  const pomoTotal = pomoTotalSeconds();
+  const pomoEndAt = pomo.active && pomo.running && pomo.endsAt ? pomo.endsAt : Date.now() + rem * 1000;
+  const pomoDialBtn = !pomo.active
+    ? '<button class="pomo-stop play" type="button" onclick="startPomodoro()" aria-label="Iniciar"><span></span></button>'
+    : (pomo.running
+      ? '<button class="pomo-stop" type="button" onclick="pausePomodoro()" aria-label="Pausar"><span></span></button>'
+      : '<button class="pomo-stop play" type="button" onclick="resumePomodoro()" aria-label="Retomar"><span></span></button>');
+  let timerPlayBtn;
+  let timerStopBtn = "";
+  if (timer.running){
+    timerPlayBtn = '<button type="button" class="timer-btn timer-btn-play is-pause" onclick="pauseTimer()" aria-label="Pausar"><span class="ico-pause" aria-hidden="true"></span></button>';
+    timerStopBtn = '<button type="button" class="timer-btn timer-btn-stop" onclick="stopTimer()" aria-label="Salvar"><span class="ico-stop" aria-hidden="true"></span></button>';
+  } else if (timer.accumulated){
+    timerPlayBtn = '<button type="button" class="timer-btn timer-btn-play" onclick="startTimer()" aria-label="Continuar"><span class="ico-play" aria-hidden="true"></span></button>';
+    timerStopBtn = '<button type="button" class="timer-btn timer-btn-stop" onclick="stopTimer()" aria-label="Salvar"><span class="ico-stop" aria-hidden="true"></span></button>';
+  } else {
+    timerPlayBtn = '<button type="button" class="timer-btn timer-btn-play" onclick="startTimer()" aria-label="Iniciar"><span class="ico-play" aria-hidden="true"></span></button>';
+  }
+
+  let formHtml = "";
+  if (formMode === "task"){
+    const p = formPrefill || {};
+    const reviewing = !!p.reviewingId;
+    const editing = !!p.editId;
+    const reviewOpen = !!(p.review || p.reviewingId);
+    const planKind = normalizePlanKind(p.planKind || "task");
+    const showPlanKind = !reviewing && !editing;
+    formHtml =
+      '<div class="overlay open" onclick="if(event.target===this) closeForm()">' +
+        '<form class="panel" onsubmit="submitTaskForm(event)">' +
+          "<h3>" + (reviewing ? "Revisar tarefa" : (editing ? "Editar tarefa" : "Nova entrada")) + "</h3>" +
+          (showPlanKind
+            ? '<label class="field"><span>Tipo</span><select id="t-plan-kind" onchange="togglePlanKindFields(this.value)">' +
+              '<option value="task"' + (planKind === "task" ? " selected" : "") + ">Tarefa</option>" +
+              '<option value="prazo"' + (planKind === "prazo" ? " selected" : "") + ">Prazo</option>" +
+              '<option value="project"' + (planKind === "project" ? " selected" : "") + ">Projeto</option>" +
+              '<option value="tag"' + (planKind === "tag" ? " selected" : "") + ">Tag</option></select></label>"
+            : "") +
+          '<div class="field-row"><label class="field"><span>Data</span><input type="date" id="t-date" value="' + (p.date || toISODate(new Date())) + '" required onchange="updateTaskFormDate()"></label>' +
+          '<label class="field"><span>Horário</span><input type="time" id="t-time" value="' + escapeHtml(p.time || "") + '"></label></div>' +
+          '<label class="field"><span>Título</span><input type="text" id="t-title" list="nomen-list" maxlength="120" value="' + escapeHtml(p.title || "") + '" placeholder="' + escapeHtml(planKindTitlePlaceholder(planKind)) + '" autocomplete="off"><datalist id="nomen-list">' + renderTitleSuggestionList(planKind) + "</datalist></label>" +
+          '<label class="field"><span>Anotações</span><textarea id="t-notes" rows="3" placeholder="O que fazer, dúvidas, páginas, exercícios...">' + escapeHtml(p.notes || "") + "</textarea></label>" +
+          '<div id="t-task-only" class="form-time-block"' + (planKind === "task" ? "" : ' style="display:none"') + '>' +
+          '<span class="field-caption">Tempo</span>' +
+          '<div class="field-row"><label class="field"><span>Já gasto · horas</span><input type="number" id="t-hours" min="0" max="23" value="' + (p.hours != null ? p.hours : (p.seconds ? Math.floor(p.seconds / 3600) : "")) + '" placeholder="0"></label>' +
+          '<label class="field"><span>Já gasto · min</span><input type="number" id="t-mins" min="0" max="59" value="' + (p.mins != null ? p.mins : (p.seconds ? Math.floor((p.seconds % 3600) / 60) : "")) + '" placeholder="0"></label></div>' +
+          '<div id="t-start-timer-wrap" class="t-start-timer-wrap"' + (isFutureIso(p.date || toISODate(new Date())) ? ' style="display:none"' : "") + '><label class="check-line"><input type="checkbox" id="t-start-timer"' + (p.startTimer ? " checked" : "") + '><span>Iniciar cronômetro ao salvar</span></label></div></div>' +
+          '<div id="t-task-only-review"' + (planKind === "task" ? "" : ' style="display:none"') + ' class="form-review-block">' +
+            '<label class="check-line"><input type="checkbox" id="t-review" onchange="toggleReviewFields(this.checked)"' + (reviewOpen ? " checked" : "") + '> Precisa rever depois</label>' +
+            '<div id="t-review-details"' + (reviewOpen ? "" : ' style="display:none"') + '>' +
+              '<label class="field"><span>Ritmo da revisão</span><select id="t-rmode" onchange="onReviewModeChange(this.value)">' +
+              '<option value="ladder"' + (p.rmode === "fixed" ? "" : " selected") + ">Escalonada — 1, 3, 7, 16 e 30 dias</option>" +
+              '<option value="fixed"' + (p.rmode === "fixed" ? " selected" : "") + ">Intervalo fixo, sempre igual</option></select></label>" +
+              '<div class="field-row" id="t-fixed-fields"' + (p.rmode === "fixed" ? "" : ' style="display:none"') + '><label class="field"><span>Daqui a</span><input type="number" id="t-amount" min="1" max="365" value="' + (p.amount || 3) + '"></label>' +
+              '<label class="field"><span>Unidade</span><select id="t-unit"><option value="days"' + (p.unit === "weeks" ? "" : " selected") + '>dias</option><option value="weeks"' + (p.unit === "weeks" ? " selected" : "") + ">semanas</option></select></label></div>" +
+            "</div></div>" +
+          '<div class="field-actions"><button type="button" class="btn btn-ghost" onclick="closeForm()">Cancelar</button>' +
+          (editing || reviewing ? "" : '<button type="submit" class="btn btn-ghost" id="t-more" data-more="1">Salvar e outra</button>') +
+          '<button type="submit" class="btn btn-primary" id="t-save">' + (editing ? "Salvar alterações" : "Salvar") + "</button></div>" +
+        "</form></div>";
+  }
+
+  const taskReviews = computeTaskReviews(STATE);
+  let reviewsHtml = "";
+  if (taskReviews.length){
+    reviewsHtml = '<section class="card reviews-card"><h2>Revisões pendentes</h2><ul class="review-list">' +
+      taskReviews.map(function(t){
+        const late = daysBetweenIso(t.review.date, toISODate(new Date()));
+        const when = late <= 0 ? "para hoje" : ("atrasada há " + late + " dia" + (late === 1 ? "" : "s"));
+        return '<li class="review-row"><div class="review-info"><span class="review-subject">' + escapeHtml(taskDisplayName(t)) + '</span><span class="review-meta">' + when + " · " + reviewScheduleLabel(t.review) + (t.reviewedAt ? (" · última revisão em " + fmtHumanDate(t.reviewedAt.slice(0, 10))) : "") + '</span></div><div class="review-actions"><button class="btn btn-ghost btn-xs" onclick="openTaskReview(\'' + t.id + '\')">Revisar agora</button><button class="btn btn-ghost btn-xs" onclick="dismissReview(\'' + t.id + '\')" title="Parar de cobrar esta revisão">Encerrar</button></div></li>';
+      }).join("") + "</ul></section>";
+  }
+
+  const logPanel =
+    '<section class="card log-card"><div class="log-card-head"><h2>Registros</h2><button class="btn btn-icon" type="button" onclick="toggleLog()" aria-label="' + (logOpen ? "Recolher registros" : "Abrir registros") + '">' + (logOpen ? "‹" : "›") + "</button></div>" +
+    '<button class="log-rail" type="button" onclick="toggleLog()"><span>Registros</span></button>' +
+    '<div class="log-pin">' + nomenBtns + renderNomenDraftHtml() +
+    '<div class="log-day-tools"><button class="btn btn-link" type="button" onclick="openTaskFormFromDraft()">Detalhes…</button></div></div>' +
+    '<div class="log-body">' + renderLogEntries() + "</div></section>";
+  const dashModalHtml = renderDashboardModal();
+  const timelineHtml = renderTimeline(week, isCurrentWeek);
+  const pomoModalHtml = !pomoModalOpen ? "" :
+    ('<div class="overlay open pomo-modal" onclick="if(event.target===this) toggleIntervaloModal()">' +
+      '<div class="panel pomo-card"><div class="pomo-card-head"><h2>Intervalo</h2><div class="pomo-card-head-actions"><button class="mute-btn" onclick="toggleMute()" aria-label="Som">' + (muted ? "🔇" : "🔊") + '</button><button class="btn btn-ghost btn-xs" type="button" onclick="toggleIntervaloModal()">Fechar</button></div></div>' +
+    '<div class="pomo-block">' +
+    '<div class="pomo-main">' +
+    '<div class="pomo-dial"><svg viewBox="0 0 200 200" aria-hidden="true"><circle class="pomo-dial-bg" cx="100" cy="100" r="68"/><g id="pomo-ticks">' + renderPomoTicksLines(rem, pomoTotal) + '</g></svg>' +
+    '<div class="pomo-dial-ui"><div class="pomo-dial-duration">' + pomoPhaseMinutes() + " min</div>" +
+    '<div class="pomo-remaining" id="pomo-clock" aria-live="polite">' + fmtMS(rem) + "</div>" +
+    '<div class="pomo-end-time"><span aria-hidden="true">🔔</span> <span id="pomo-end">' + fmtClockTime(new Date(pomoEndAt)) + "</span></div></div></div>" +
+    '<div class="pomo-play-row">' + pomoDialBtn +
+    '<div class="pomo-nudge"><button type="button" onclick="nudgePomo(-5)">-5min</button><button type="button" onclick="nudgePomo(5)">+5min</button></div></div>' +
+    '<div class="pomo-settings"><label class="pomo-setting"><span>Foco (min)</span><input type="number" min="1" max="180" value="' + ps.focus + '" ' + (pomo.active ? "disabled" : "") + ' onchange="updatePomodoroSetting(\'focus\', this.value)"></label>' +
+    '<label class="pomo-setting"><span>Descanso curto</span><input type="number" min="1" max="60" value="' + ps.short + '" ' + (pomo.active ? "disabled" : "") + ' onchange="updatePomodoroSetting(\'short\', this.value)"></label>' +
+    '<label class="pomo-setting"><span>Descanso longo</span><input type="number" min="1" max="120" value="' + ps.long + '" ' + (pomo.active ? "disabled" : "") + ' onchange="updatePomodoroSetting(\'long\', this.value)"></label>' +
+    '<label class="pomo-setting"><span>Ciclos até o longo</span><input type="number" min="1" max="12" value="' + ps.cyclesUntilLong + '" ' + (pomo.active ? "disabled" : "") + ' onchange="updatePomodoroSetting(\'cyclesUntilLong\', this.value)"></label></div>' +
+    "</div>" +
+    (pomo.active ? '<div class="pomo-controls"><button class="btn btn-link btn-xs" onclick="skipPomodoroPhase()">Pular fase</button><button class="btn btn-ghost btn-xs" onclick="stopPomodoro()">Encerrar</button></div>' : "") +
+    "</div></div></div>");
+  const accountHtml = accountOpen ? renderAccountPanel() : "";
+  root.innerHTML =
+    toast +
+    '<header class="app-header"><div class="app-header-text">' + focuslyLogoHtml() + trayHint + '</div>' +
+    '<div class="header-actions"><button class="account-chip" onclick="toggleDashModal()" title="Resumo do tempo registrado">Resumo</button><button class="account-chip" onclick="toggleAccount()" title="Backup e restauração"><span class="dot' + (backupIsStale() ? "" : " ok") + '"></span>Backup</button><button class="theme-toggle" onclick="toggleTheme()" aria-label="Alternar tema">' + (theme === "dark" ? "🌙" : "☀️") + "</button></div></header>" +
+    '<div class="timers-row"><section class="card timer-card" aria-label="Cronômetro livre"><div class="timer-bar">' +
+    '<div class="timer-display" aria-live="polite">' + fmtHMS(liveSeconds()) + '</div>' +
+    '<div class="timer-controls">' + timerPlayBtn + timerStopBtn +
+    '<button class="timer-interval-btn" type="button" onclick="toggleIntervaloModal()" title="Intervalo (pomodoro)" aria-label="Intervalo"><span class="dot' + (pomo.active ? " active" : "") + '"></span></button>' +
+    '</div></div></section></div>' +
+    '<div class="workspace' + (logOpen ? "" : " log-collapsed") + '">' + logPanel + timelineHtml + "</div>" +
+    reviewsHtml +
+    formHtml + accountHtml + dashModalHtml + pomoModalHtml;
+  const wrap2 = document.querySelector(".tl-grid-wrap");
+  if (wrap2){ wrap2.scrollTop = savedTop; wrap2.scrollLeft = savedLeft; }
+  const logBody2 = document.querySelector(".log-body");
+  if (logBody2) logBody2.scrollTop = savedLog;
+  if (focusNomenDraft || nomenDraftKind){
+    const draftEl = document.getElementById("nomen-draft");
+    if (draftEl){ draftEl.focus(); focusNomenDraft = false; }
+  }
+  if (formMode === "task") updateTaskFormDate();
+  syncPomoDial();
+}
+
+function backupDaysAgo(){
+  const at = STATE.settings && STATE.settings.lastBackupAt;
+  if (!at) return null;
+  return Math.floor((Date.now() - at) / 86400000);
+}
+function backupIsStale(){
+  const d = backupDaysAgo();
+  return d === null || d >= 7;
+}
+function openFolderDB(){
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(FOLDER_DB_NAME, 1);
+    req.onupgradeneeded = () => { req.result.createObjectStore(FOLDER_STORE); };
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+async function saveFolderHandle(handle){
+  const db = await openFolderDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(FOLDER_STORE, "readwrite");
+    tx.objectStore(FOLDER_STORE).put(handle, FOLDER_KEY);
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  });
+}
+async function loadFolderHandle(){
+  if (!FS_ACCESS_SUPPORTED) return null;
+  try {
+    const db = await openFolderDB();
+    return await new Promise((resolve) => {
+      const tx = db.transaction(FOLDER_STORE, "readonly");
+      const req = tx.objectStore(FOLDER_STORE).get(FOLDER_KEY);
+      req.onsuccess = () => resolve(req.result || null);
+      req.onerror = () => resolve(null);
+    });
+  } catch (e) { return null; }
+}
+async function clearFolderHandle(){
+  try {
+    const db = await openFolderDB();
+    await new Promise((resolve) => {
+      const tx = db.transaction(FOLDER_STORE, "readwrite");
+      tx.objectStore(FOLDER_STORE).delete(FOLDER_KEY);
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => resolve();
+    });
+  } catch (e) {}
+}
+async function ensureFolderPermission(handle, requestIfNeeded){
+  if (!handle) return false;
+  const opts = { mode: "readwrite" };
+  try {
+    if ((await handle.queryPermission(opts)) === "granted") return true;
+    if (!requestIfNeeded) return false;
+    return (await handle.requestPermission(opts)) === "granted";
+  } catch (e) { return false; }
+}
+async function initBackupFolder(){
+  if (!FS_ACCESS_SUPPORTED) return;
+  backupFolderHandle = await loadFolderHandle();
+  if (backupFolderHandle && accountOpen) render();
+}
+async function chooseBackupFolder(){
+  if (!FS_ACCESS_SUPPORTED) return;
+  let handle;
+  try {
+    handle = await window.showDirectoryPicker({ mode: "readwrite" });
+  } catch (e) { return; } // user cancelled the picker
+  const ok = await ensureFolderPermission(handle, true);
+  if (!ok) { showToast("Permissão negada para essa pasta."); return; }
+  await saveFolderHandle(handle);
+  backupFolderHandle = handle;
+  STATE.settings.backupFolderName = handle.name;
+  persist();
+  render();
+  showToast('Pasta de backup definida: "' + handle.name + '". Os próximos backups vão direto pra lá.');
+}
+async function forgetBackupFolder(){
+  await clearFolderHandle();
+  backupFolderHandle = null;
+  delete STATE.settings.backupFolderName;
+  persist();
+  render();
+  showToast("Pasta de backup esquecida. Voltando ao download manual.");
+}
+async function writeBackupToFolder(handle){
+  const fileHandle = await handle.getFileHandle(FOLDER_BACKUP_FILENAME, { create: true });
+  const writable = await fileHandle.createWritable();
+  await writable.write(JSON.stringify(STATE, null, 2));
+  await writable.close();
+}
+function renderAccountPanel(){
+  const d = backupDaysAgo();
+  const status = d === null
+    ? "Você ainda não fez nenhum backup."
+    : (d === 0 ? "Último backup: hoje." : ("Último backup há " + d + " dia" + (d === 1 ? "" : "s") + "."));
+  const folderName = STATE.settings && STATE.settings.backupFolderName;
+  const folderBlock = !FS_ACCESS_SUPPORTED ? "" :
+    (folderName
+      ? '<p class="hint">Pasta de backup: <strong>' + escapeHtml(folderName) + '</strong>. Salva sozinho, pouco depois de qualquer alteração, sobrescrevendo "' + FOLDER_BACKUP_FILENAME + '" nela — não precisa clicar em nada.</p>' +
+        '<div class="field-actions"><button class="btn btn-ghost" type="button" onclick="chooseBackupFolder()">Trocar pasta</button>' +
+        '<button class="btn btn-ghost" type="button" onclick="forgetBackupFolder()">Esquecer pasta</button></div>'
+      : '<p class="hint">Escolha uma pasta (por exemplo, dentro do seu Google Drive) e os próximos backups são salvos direto nela, sem baixar nada.</p>' +
+        '<div class="field-actions"><button class="btn btn-ghost" type="button" onclick="chooseBackupFolder()">Escolher pasta de backup</button></div>');
+  const primaryLabel = folderName ? "Salvar backup agora" : "Baixar backup";
+  return '<div class="overlay open" onclick="if(event.target===this) toggleAccount()"><div class="panel">' +
+    "<h3>Backup</h3>" +
+    '<p class="hint">Seus dados ficam neste navegador, neste computador. Ninguém mais tem acesso — e ninguém mais tem uma cópia. Faça um backup de vez em quando.</p>' +
+    '<p class="hint' + (backupIsStale() ? " hint-warn" : "") + '">' + escapeHtml(status) + "</p>" +
+    folderBlock +
+    '<div class="field-actions"><button class="btn btn-primary" type="button" onclick="exportJson()">' + primaryLabel + '</button>' +
+    '<label class="btn btn-ghost">Restaurar de um arquivo<input id="import-file" type="file" accept="application/json" hidden onchange="importJson(this.files[0])"></label></div>' +
+    '<details><summary>Como manter o backup em dia</summary>' +
+    (FS_ACCESS_SUPPORTED
+      ? '<p class="hint">Escolhendo uma pasta de backup acima (dentro do Drive, OneDrive ou Dropbox), o programa salva sozinho nela a cada mudança — sem precisar clicar em nada — e o app deles sincroniza para a nuvem.</p>'
+      : '<p class="hint">Salve o arquivo dentro da sua pasta do Google Drive, OneDrive ou Dropbox. O programa deles sincroniza para a nuvem sozinho.</p>') +
+    '<p class="hint">Para levar seus dados para outro computador, baixe (ou pegue da pasta) o backup em um e use <strong>Restaurar</strong> no outro. O que existe nos dois é combinado, e o que você apagou continua apagado.</p></details>' +
+    '<div class="field-actions"><button class="btn btn-ghost" type="button" onclick="toggleAccount()">Fechar</button></div></div></div>';
+}
+
+function navCal(delta){
+  if (calView === "month"){
+    const m = monthAnchor();
+    const d = new Date(m.getFullYear(), m.getMonth() + delta, 1);
+    selectedDayIso = toISODate(d);
+    viewWeekStart = mondayOf(d);
+  } else if (calView === "split"){
+    const iso = selectedDayIso || toISODate(new Date());
+    selectedDayIso = toISODate(addDays(parseISODate(iso), delta));
+    viewWeekStart = mondayOf(parseISODate(selectedDayIso));
+  } else {
+    viewWeekStart = addDays(viewWeekStart, delta * 7);
+  }
+  render();
+}
+function navWeek(delta){ navCal(delta); }
+function setCalView(view){
+  calView = view === "split" || view === "list" || view === "month" ? view : "week";
+  if (calView === "split" && !selectedDayIso) selectedDayIso = toISODate(new Date());
+  if (calView === "split") viewWeekStart = mondayOf(parseISODate(selectedDayIso));
+  try { localStorage.setItem("diario-tarefas-cal-view", calView); } catch (e) {}
+  render();
+}
+function selectCalDay(iso){
+  selectedDayIso = iso;
+  nomenDraftDate = iso;
+  viewWeekStart = mondayOf(parseISODate(iso));
+  calView = "split";
+  try { localStorage.setItem("diario-tarefas-cal-view", calView); } catch (e) {}
+  render();
+}
+function jumpToday(){
+  viewWeekStart = mondayOf(new Date());
+  selectedDayIso = toISODate(new Date());
+  nomenDraftDate = selectedDayIso;
+  render();
+}
+function toggleAccount(){ accountOpen = !accountOpen; render(); }
+function toggleLog(){
+  logOpen = !logOpen;
+  try { localStorage.setItem("diario-tarefas-log-open", logOpen ? "1" : "0"); } catch (e) {}
+  render();
+}
+function toggleDashModal(){
+  dashModalOpen = !dashModalOpen;
+  render();
+}
+function toggleIntervaloModal(){
+  pomoModalOpen = !pomoModalOpen;
+  render();
+}
+function updateTimerLabel(field, value){
+  if (field !== "task" && field !== "project" && field !== "tags") return;
+  timer[field] = value;
+  persistRuntime();
+}
+function timerLabelTitle(){
+  const parts = [];
+  if (timer.task && timer.task.trim()) parts.push("@" + timer.task.trim());
+  if (timer.project && timer.project.trim()) parts.push("+" + timer.project.trim());
+  if (timer.tags && timer.tags.trim()){
+    timer.tags.split(/[,]+/).map(function(t){ return t.trim(); }).filter(Boolean).forEach(function(t){
+      parts.push("#" + t.replace(/^#/, ""));
+    });
+  }
+  return parts.join(" ");
+}
+function openNomenChip(kind){
+  kind = kind === "project" || kind === "tag" || kind === "deadline" ? kind : "task";
+  logFilter = kind === "deadline" ? "deadline" : kind;
+  logOpen = true;
+  nomenDraftKind = kind;
+  focusNomenDraft = true;
+  render();
+}
+function readDraftDate(){
+  const dateEl = document.getElementById("nomen-date");
+  const date = dateEl && dateEl.value ? dateEl.value : draftDefaultDate();
+  nomenDraftDate = date;
+  return date;
+}
+function submitNomenDraft(ev){
+  ev.preventDefault();
+  const input = document.getElementById("nomen-draft");
+  const raw = input ? input.value.trim() : "";
+  if (!raw){ showToast("Digite um nome."); return; }
+  const kind = nomenDraftKind || logFilter;
+  const date = readDraftDate();
+  let parsed = null;
+  if (kind === "deadline"){
+    STATE.agenda.push(touch({
+      id: uid(), date: date, time: "", kind: "prazo", title: raw, notes: "",
+      calendarEventId: null, createdAt: new Date().toISOString()
+    }));
+    focusCalendarDate(date);
+    persist();
+    showToast("Prazo para " + fmtHumanDate(date) + ".");
+    if (input) input.value = "";
+    focusNomenDraft = true;
+    render();
+    return;
+  }
+  if (kind === "project"){
+    const project = rememberProject("+" + raw.replace(/^\++/, ""));
+    if (!project){ showToast("Nome de projeto inválido."); return; }
+    persist();
+    showToast("Projeto " + project + " adicionado.");
+  } else if (kind === "tag"){
+    const tag = rememberTag("#" + raw.replace(/^#+/, ""));
+    if (!tag){ showToast("Nome de tag inválido."); return; }
+    persist();
+    showToast("Tag " + tag + " adicionada.");
+  } else {
+    parsed = parseNomen(raw.charAt(0) === "@" || raw.charAt(0) === "+" || raw.charAt(0) === "#" ? raw : ("@" + raw.replace(/^@+/, "")));
+    if (!parsed.title){ showToast("Informe o nome da tarefa."); return; }
+    rememberTag(parsed.tag);
+    rememberProject(parsed.project);
+    const taskId = uid();
+    STATE.tasks.push(touch({
+      id: taskId, date: date, time: "", title: parsed.title, tag: parsed.tag, project: parsed.project,
+      notes: "", done: false, review: null, reviewedAt: null, calendarEventId: null,
+      createdAt: new Date().toISOString()
+    }));
+    focusCalendarDate(date);
+    persist();
+    if (isFutureIso(date)){
+      showToast("Tarefa agendada para " + fmtHumanDate(date) + ".");
+      if (input) input.value = "";
+      focusNomenDraft = true;
+      render();
+      return;
+    }
+    showToast("Tarefa " + parsed.title + " adicionada.");
+    if (input) input.value = "";
+    armTimerFromDraft(kind, raw, parsed, taskId);
+    focusNomenDraft = true;
+    render();
+    return;
+  }
+  if (input) input.value = "";
+  armTimerFromDraft(kind, raw, parsed, null);
+  focusNomenDraft = true;
+  render();
+}
+function armTimerFromDraft(kind, raw, parsed, taskId){
+  if (pomo.active){ showToast("Encerre o Intervalo antes de iniciar o cronômetro."); return; }
+  if (timer.running){
+    applyTimerElapsed();
+    if (tickTimer){ clearInterval(tickTimer); tickTimer = null; }
+  }
+  timer.accumulated = 0;
+  timer.running = false;
+  timer.startedAt = 0;
+  if (kind === "project"){
+    timer.project = raw.replace(/^\++/, "").trim();
+    timer.task = "";
+    timer.tags = "";
+  } else if (kind === "tag"){
+    timer.tags = raw.replace(/^#+/, "").trim();
+    timer.task = "";
+    timer.project = "";
+  } else if (parsed){
+    timer.task = (parsed.title || "").replace(/^@+/, "");
+    timer.project = parsed.project ? parsed.project.replace(/^\++/, "") : "";
+    timer.tags = parsed.tag ? parsed.tag.replace(/^#+/, "") : "";
+  }
+  timer.running = true;
+  timer.startedAt = Date.now();
+  ensureLiveEntry(taskId || null);
+  startTimerTick();
+  persistRuntime();
+}
+function nudgePomo(deltaMin){
+  const next = Math.max(60, (pomo.active ? pomoRemaining() : pomoTotalSeconds()) + deltaMin * 60);
+  if (!pomo.active){
+    const key = "focus";
+    updatePomodoroSetting(key, Math.round(next / 60));
+    return;
+  }
+  if (pomo.running) pomo.endsAt = Date.now() + next * 1000;
+  else pomo.pausedRemaining = next;
+  persistRuntime();
+  syncPomoDial();
+}
+function onTimelineClick(ev, iso){
+  if (ev.target !== ev.currentTarget) return;
+  const rect = ev.currentTarget.getBoundingClientRect();
+  const frac = Math.max(0, Math.min(0.999, (ev.clientY - rect.top) / rect.height));
+  const mins = calHourStart() * 60 + frac * calHourSpan() * 60;
+  const hour = Math.floor(mins / 60);
+  const snapped = (mins % 60) < 30 ? 0 : 30;
+  openTaskForm(iso, pad2(hour) + ":" + pad2(snapped));
+}
+function onReviewModeChange(value){
+  const fixed = document.getElementById("t-fixed-fields");
+  if (fixed) fixed.style.display = value === "fixed" ? "" : "none";
+}
+function toggleReviewFields(on){
+  const details = document.getElementById("t-review-details");
+  if (details) details.style.display = on ? "" : "none";
+}
+function syncTimerFromTitle(raw){
+  const s = String(raw || "").trim();
+  if (!s) return;
+  const parsed = parseNomen(s.charAt(0) === "@" || s.charAt(0) === "+" || s.charAt(0) === "#" ? s : ("@" + s.replace(/^@+/, "")));
+  if (parsed.title) timer.task = parsed.title.replace(/^@+/, "");
+  if (parsed.project) timer.project = parsed.project.replace(/^\++/, "");
+  if (parsed.tag) timer.tags = parsed.tag.replace(/^#+/, "");
+  persistRuntime();
+}
+function finishTaskForm(opts){
+  opts = opts || {};
+  formBusy = false;
+  timer.entryId = null;
+  const date = opts.date || toISODate(new Date());
+  focusCalendarDate(date);
+  if (opts.addAnother){
+    formMode = "task";
+    formPrefill = {
+      date: date, time: "", title: "", notes: "", planKind: opts.planKind || "task",
+      review: false, amount: 3, unit: "days", startTimer: false
+    };
+  } else {
+    formMode = null;
+    formPrefill = null;
+  }
+  if (opts.startTimer && !isFutureIso(date)){
+    syncTimerFromTitle(opts.title || "");
+    startTimer();
+  }
+  render();
+  persist();
+  if (opts.toast) showToast(opts.toast);
+}
+function dismissReview(id){
+  const t = (STATE.tasks || []).filter(function(x){ return x.id === id; })[0];
+  if (!t || !t.review) return;
+  t.review.enabled = false;
+  touch(t);
+  render();
+  persist();
+  showToast("Revisão encerrada para " + taskDisplayName(t));
+}
+function closeForm(){
+  formBusy = false;
+  formMode = null;
+  formPrefill = null;
+  render();
+}
+function openTaskForm(date, time, extra){
+  extra = extra || {};
+  formMode = "task";
+  formPrefill = {
+    date: date || extra.date || draftDefaultDate(),
+    time: time || extra.time || "",
+    title: extra.title || "",
+    notes: extra.notes || "",
+    planKind: normalizePlanKind(extra.planKind || "task"),
+    review: !!extra.review,
+    rmode: extra.rmode || "ladder",
+    amount: extra.amount || 3,
+    unit: extra.unit || "days",
+    hours: extra.hours,
+    mins: extra.mins,
+    seconds: extra.seconds || 0,
+    reviewingId: extra.reviewingId || null,
+    editId: extra.editId || null,
+    editEntryId: extra.editEntryId || null,
+    startTimer: !!extra.startTimer,
+    source: extra.source || null
+  };
+  render();
+}
+function openTaskFormFromDraft(){
+  const input = document.getElementById("nomen-draft");
+  const raw = input ? input.value.trim() : "";
+  const date = readDraftDate();
+  const kind = nomenDraftKind || logFilter || "task";
+  if (kind === "deadline"){
+    openTaskForm(date, "", { planKind: "prazo", title: raw });
+    return;
+  }
+  if (kind === "project"){
+    openTaskForm(date, "", { planKind: "project", title: raw ? raw.replace(/^\++/, "") : "" });
+    return;
+  }
+  if (kind === "tag"){
+    openTaskForm(date, "", { planKind: "tag", title: raw ? raw.replace(/^#+/, "") : "" });
+    return;
+  }
+  let title = raw;
+  if (raw){
+    const parsed = parseNomen(raw.charAt(0) === "@" || raw.charAt(0) === "+" || raw.charAt(0) === "#" ? raw : ("@" + raw.replace(/^@+/, "")));
+    title = parsed.title ? ("@" + parsed.title.replace(/^@+/, "")) : raw;
+    if (parsed.project) title += " " + parsed.project;
+    if (parsed.tag) title += " " + parsed.tag;
+  }
+  openTaskForm(date, "", { planKind: "task", title: title, startTimer: false });
+}
+function openTaskReview(id){
+  const t = (STATE.tasks || []).filter(function(x){ return x.id === id; })[0];
+  if (!t) return;
+  openTaskForm(toISODate(new Date()), t.time || "", {
+    reviewingId: id,
+    title: t.title,
+    notes: "",
+    review: true,
+    rmode: reviewIsLadder(t.review) ? "ladder" : "fixed",
+    amount: (t.review && t.review.amount) || 3,
+    unit: (t.review && t.review.unit) || "days"
+  });
+}
+function submitTaskForm(ev){
+  ev.preventDefault();
+  if (formBusy) return;
+  const addAnother = !!(ev.submitter && ev.submitter.getAttribute("data-more") === "1");
+  const date = document.getElementById("t-date").value;
+  const time = (document.getElementById("t-time") && document.getElementById("t-time").value) || "";
+  const title = document.getElementById("t-title").value.trim();
+  const notes = document.getElementById("t-notes").value.trim();
+  const planKindEl = document.getElementById("t-plan-kind");
+  const planKind = normalizePlanKind(planKindEl ? planKindEl.value : "task");
+  if (!date){ showToast("Informe a data."); return; }
+  if (!title){ showToast("Informe o título."); return; }
+  formBusy = true;
+  if (planKind === "prazo"){
+    STATE.agenda.push(touch({
+      id: uid(), date: date, time: time || "", kind: "prazo", title: title, notes: notes,
+      calendarEventId: null, createdAt: new Date().toISOString()
+    }));
+    focusCalendarDate(date);
+    finishTaskForm({
+      date: date,
+      addAnother: addAnother,
+      planKind: planKind,
+      toast: "Prazo para " + fmtHumanDate(date) + "."
+    });
+    return;
+  }
+  if (planKind === "project"){
+    const project = rememberProject("+" + title.replace(/^\++/, ""));
+    if (!project){ formBusy = false; showToast("Nome de projeto inválido."); return; }
+    finishTaskForm({
+      date: date,
+      addAnother: addAnother,
+      planKind: planKind,
+      toast: "Projeto " + project + " adicionado."
+    });
+    return;
+  }
+  if (planKind === "tag"){
+    const tag = rememberTag("#" + title.replace(/^#+/, ""));
+    if (!tag){ formBusy = false; showToast("Nome de tag inválido."); return; }
+    finishTaskForm({
+      date: date,
+      addAnother: addAnother,
+      planKind: planKind,
+      toast: "Tag " + tag + " adicionada."
+    });
+    return;
+  }
+  const hoursEl = document.getElementById("t-hours");
+  const minsEl = document.getElementById("t-mins");
+  const hours = hoursEl ? (parseInt(hoursEl.value, 10) || 0) : 0;
+  const mins = minsEl ? (parseInt(minsEl.value, 10) || 0) : 0;
+  let seconds = hours * 3600 + mins * 60;
+  if (!seconds && formPrefill && formPrefill.seconds) seconds = formPrefill.seconds;
+  const reviewEl = document.getElementById("t-review");
+  const wantsReview = !!(reviewEl && reviewEl.checked);
+  const amountEl = document.getElementById("t-amount");
+  const unitEl = document.getElementById("t-unit");
+  const amount = wantsReview && amountEl ? Math.max(1, parseInt(amountEl.value, 10) || 1) : 3;
+  const unit = wantsReview && unitEl && unitEl.value === "weeks" ? "weeks" : "days";
+  const startTimerEl = document.getElementById("t-start-timer");
+  const shouldStartTimer = !!(startTimerEl && startTimerEl.checked && !isFutureIso(date));
+  const editEntryId = formPrefill && formPrefill.editEntryId;
+  const parsed = parseNomen(title.charAt(0) === "@" || title.charAt(0) === "+" || title.charAt(0) === "#" ? title : ("@" + title.replace(/^@+/, "")));
+  if (!parsed.title){ formBusy = false; showToast("Informe o título, ex.: @ler capítulo +projeto #tag."); return; }
+  const tag = rememberTag(parsed.tag);
+  const project = rememberProject(parsed.project);
+  const rmodeEl = document.getElementById("t-rmode");
+  const rmode = wantsReview && rmodeEl && rmodeEl.value === "fixed" ? "fixed" : "ladder";
+  const reviewingId = formPrefill && formPrefill.reviewingId;
+  const editId = formPrefill && formPrefill.editId;
+  if (editId){
+    const t = (STATE.tasks || []).filter(function(x){ return x.id === editId; })[0];
+    if (!t){ formBusy = false; showToast("Tarefa não encontrada."); return; }
+    t.date = date;
+    t.time = time;
+    t.title = parsed.title;
+    t.tag = tag;
+    t.project = project;
+    t.notes = notes;
+    t.review = wantsReview
+      ? advanceReview({ mode: rmode, amount: amount, unit: unit, step: (t.review && t.review.step) || (rmode === "ladder" ? -1 : 0) }, date)
+      : (t.review ? Object.assign({}, t.review, { enabled: false }) : null);
+    touch(t);
+    if (seconds > 0){
+      writeEntryRecord({
+        editEntryId: editEntryId, date: date, time: time, seconds: seconds,
+        subject: tag || parsed.title, tag: tag, project: project, notes: notes,
+        source: "task", taskId: t.id
+      });
+    }
+    finishTaskForm({
+      date: date, startTimer: shouldStartTimer, title: title,
+      toast: "Tarefa atualizada" + (seconds > 0 ? (" · " + fmtDuration(seconds)) : "") + "."
+    });
+    return;
+  }
+  if (reviewingId){
+    const t = (STATE.tasks || []).filter(function(x){ return x.id === reviewingId; })[0];
+    if (t){
+      t.reviewedAt = new Date().toISOString();
+      if (notes) t.notes = t.notes ? (t.notes + "\n" + notes) : notes;
+      t.review = wantsReview
+        ? advanceReview({ mode: rmode, amount: amount, unit: unit, step: (t.review && t.review.step) || 0 }, date)
+        : (t.review ? Object.assign({}, t.review, { enabled: false }) : null);
+      touch(t);
+      if (seconds > 0){
+        if (editEntryId){
+          writeEntryRecord({
+            editEntryId: editEntryId, date: date, time: time, seconds: seconds,
+            subject: tag || parsed.title, tag: tag, project: project, notes: notes,
+            source: "review", taskId: t.id
+          });
+        } else {
+          attachTimeToTask(t.id, seconds, "review");
+        }
+      }
+      finishTaskForm({
+        date: date, startTimer: shouldStartTimer, title: title,
+        toast: t.review && t.review.enabled
+          ? ("Revisada. Próxima " + reviewScheduleLabel(t.review) + ", em " + fmtHumanDate(t.review.date) + ".")
+          : "Revisada. Não vou mais cobrar essa."
+      });
+      return;
+    }
+  }
+  const review = wantsReview
+    ? advanceReview({ mode: rmode, amount: amount, unit: unit, step: rmode === "ladder" ? -1 : 0 }, date)
+    : null;
+  const task = {
+    id: uid(), date: date, time: time, title: parsed.title, tag: tag, project: project, notes: notes, done: false,
+    review: review, reviewedAt: null, calendarEventId: null,
+    createdAt: new Date().toISOString()
+  };
+  STATE.tasks.push(touch(task));
+  if (seconds > 0){
+    writeEntryRecord({
+      editEntryId: editEntryId, date: date, time: time, seconds: seconds,
+      subject: tag || parsed.title, tag: tag, project: project, notes: notes,
+      source: formPrefill && formPrefill.source || "task", taskId: task.id
+    });
+  }
+  const extra = seconds > 0 ? (" · " + fmtDuration(seconds)) : "";
+  finishTaskForm({
+    date: date,
+    addAnother: addAnother,
+    startTimer: shouldStartTimer,
+    title: title,
+    toast: addAnother
+      ? ("Salva" + extra + ". Pode acrescentar outra no mesmo dia.")
+      : (review ? ("Tarefa salva" + extra + ". Rever em " + fmtHumanDate(review.date) + ".") : ("Tarefa salva" + extra))
+  });
+}
+function toggleTaskDone(id){
+  STATE.tasks.forEach(function(t){ if (t.id === id){ t.done = !t.done; touch(t); } });
+  render();
+  persist();
+}
+function askDeleteTask(id){
+  confirmDeleteTaskId = id;
+  confirmDeleteId = null;
+  confirmDeleteAgendaId = null;
+  logOpen = true;
+  render();
+}
+function cancelDeleteTask(){ confirmDeleteTaskId = null; render(); }
+function confirmDeleteTask(id){
+  (STATE.entries || []).slice().forEach(function(e){
+    if (e.taskId === id){
+      if (timer.entryId === e.id){
+        if (tickTimer){ clearInterval(tickTimer); tickTimer = null; }
+        timer = { running: false, startedAt: 0, accumulated: 0, entryId: null, task: timer.task, project: timer.project, tags: timer.tags };
+        persistRuntime();
+      }
+      STATE.entries = dropItem(STATE.entries, e.id);
+    }
+  });
+  STATE.tasks = dropItem(STATE.tasks, id);
+  if (STATE.settings && STATE.settings.activeTaskId === id) STATE.settings.activeTaskId = "";
+  confirmDeleteTaskId = null;
+  render();
+  persist();
+  showToast("Tarefa excluída.");
+}
+function askDeleteTag(tag){
+  confirmDeleteTagName = normalizeTag(tag);
+  confirmDeleteProjectName = null; confirmDeleteId = null; confirmDeleteTaskId = null; confirmDeleteAgendaId = null;
+  logOpen = true;
+  render();
+}
+function cancelDeleteTag(){ confirmDeleteTagName = null; render(); }
+function confirmDeleteTag(tag){
+  tag = normalizeTag(tag);
+  if (!tag) return;
+  STATE.tags = (STATE.tags || []).filter(function(t){ return normalizeTag(t) !== tag; });
+  (STATE.tasks || []).forEach(function(t){
+    if (taskTagOf(t) === tag){
+      t.tag = "";
+      if (String(t.title || "").charAt(0) === "#") t.title = normalizeTaskName(t.title.replace(/^#+/, ""));
+      touch(t);
+    }
+  });
+  (STATE.entries || []).slice().forEach(function(e){
+    const matches = (e.tag && normalizeTag(e.tag) === tag) || normalizeTag(e.subject) === tag;
+    if (matches) STATE.entries = dropItem(STATE.entries, e.id);
+  });
+  if (STATE.settings){
+    if (STATE.settings.dashColors) delete STATE.settings.dashColors[tag];
+    if (STATE.settings.dash && Array.isArray(STATE.settings.dash.tags)){
+      STATE.settings.dash.tags = STATE.settings.dash.tags.filter(function(t){ return normalizeTag(t) !== tag; });
+    }
+  }
+  confirmDeleteTagName = null;
+  render();
+  persist();
+  showToast("Tag excluída junto com os registros de tempo.");
+}
+function askDeleteProject(project){
+  confirmDeleteProjectName = project;
+  confirmDeleteTagName = null; confirmDeleteId = null; confirmDeleteTaskId = null; confirmDeleteAgendaId = null;
+  render();
+}
+function cancelDeleteProject(){ confirmDeleteProjectName = null; render(); }
+function confirmDeleteProject(project){
+  STATE.projects = (STATE.projects || []).filter(function(p){ return normalizeProject(p) !== project; });
+  (STATE.tasks || []).forEach(function(t){ if (taskProjectOf(t) === project){ t.project = ""; touch(t); } });
+  (STATE.entries || []).forEach(function(e){ if (e.project && normalizeProject(e.project) === project){ e.project = ""; touch(e); } });
+  confirmDeleteProjectName = null;
+  render();
+  persist();
+  showToast("Projeto excluído e removido de tudo que o usava.");
+}
+function askDeleteAgenda(id){ confirmDeleteAgendaId = id; confirmDeleteId = null; confirmDeleteTaskId = null; render(); }
+function cancelDeleteAgenda(){ confirmDeleteAgendaId = null; render(); }
+function confirmDeleteAgenda(id){
+  const item = (STATE.agenda || []).filter(function(x){ return x.id === id; })[0];
+  STATE.agenda = dropItem(STATE.agenda, id);
+  confirmDeleteAgendaId = null;
+  render();
+  persist();
+}
+function askDeleteEntry(id){
+  confirmDeleteId = id;
+  confirmDeleteTaskId = null;
+  confirmDeleteAgendaId = null;
+  logOpen = true;
+  render();
+}
+function cancelDeleteEntry(){ confirmDeleteId = null; render(); }
+function confirmDeleteEntry(id){
+  const e = findEntry(id);
+  const taskId = e && e.taskId;
+  if (timer.entryId === id){
+    if (tickTimer){ clearInterval(tickTimer); tickTimer = null; }
+    timer = { running: false, startedAt: 0, accumulated: 0, entryId: null, task: timer.task, project: timer.project, tags: timer.tags };
+    persistRuntime();
+  }
+  STATE.entries = dropItem(STATE.entries, id);
+  if (taskId){
+    const stillLinked = (STATE.entries || []).some(function(x){ return x.taskId === taskId; });
+    if (!stillLinked) STATE.tasks = dropItem(STATE.tasks, taskId);
+  }
+  confirmDeleteId = null;
+  render();
+  persist();
+  showToast("Registro excluído.");
+}
+function startTimer(){
+  if (pomo.active){ showToast("Encerre o Intervalo antes de iniciar o cronômetro livre."); return; }
+  if (!timer.entryId) ensureLiveEntry(null);
+  timer.running = true;
+  timer.startedAt = Date.now();
+  render();
+  startTimerTick();
+  persistRuntime();
+}
+function pauseTimer(){
+  applyTimerElapsed();
+  syncLiveEntrySeconds(timer.accumulated || 0);
+  persist();
+  timer.running = false;
+  if (tickTimer){ clearInterval(tickTimer); tickTimer = null; }
+  render();
+  persistRuntime();
+}
+function stopTimer(){
+  applyTimerElapsed();
+  if (tickTimer){ clearInterval(tickTimer); tickTimer = null; }
+  const seconds = timer.accumulated || 0;
+  const label = timerLabelTitle();
+  const entryId = timer.entryId;
+  syncLiveEntrySeconds(seconds);
+  if (entryId){
+    const e = findEntry(entryId);
+    if (e){ e.live = false; touch(e); }
+  }
+  persist();
+  const saved = { task: timer.task, project: timer.project, tags: timer.tags };
+  timer = { running: false, startedAt: 0, accumulated: 0, entryId: entryId, task: saved.task, project: saved.project, tags: saved.tags };
+  persistRuntime();
+  if (seconds <= 0){
+    if (entryId){
+      const e = findEntry(entryId);
+      if (e && e.live && entrySeconds(e) <= 0) STATE.entries = dropItem(STATE.entries, entryId);
+      timer.entryId = null;
+      persist();
+    }
+    render();
+    return;
+  }
+  const parts = durationParts(seconds);
+  openTaskForm(toISODate(new Date()), "", {
+    hours: parts.hours, mins: parts.mins, seconds: seconds, source: "free", title: label, editEntryId: entryId
+  });
+}
+function startTimerTick(){
+  if (tickTimer) clearInterval(tickTimer);
+  tickTimer = setInterval(function(){
+    const secs = liveSeconds();
+    const el = document.querySelector(".timer-display");
+    if (el) el.textContent = fmtHMS(secs);
+    syncLiveEntrySeconds(secs);
+    const liveDur = document.querySelector(".entry-row.live .entry-dur");
+    if (liveDur) liveDur.textContent = fmtDuration(secs);
+  }, 250);
+}
+function haltFreeTimer(){
+  if (!timer.running && !timer.accumulated) return 0;
+  applyTimerElapsed();
+  if (tickTimer){ clearInterval(tickTimer); tickTimer = null; }
+  const seconds = timer.accumulated || 0;
+  syncLiveEntrySeconds(seconds);
+  if (seconds > 0) persist();
+  const saved = { task: timer.task, project: timer.project, tags: timer.tags, entryId: timer.entryId };
+  timer = { running: false, startedAt: 0, accumulated: 0, entryId: saved.entryId, task: saved.task, project: saved.project, tags: saved.tags };
+  persistRuntime();
+  return seconds;
+}
+function startPomodoro(){
+  const label = timerLabelTitle();
+  const entryId = timer.entryId;
+  const freed = haltFreeTimer();
+  const s = getPomodoroSettings();
+  pomo = { active: true, phase: "focus", endsAt: Date.now() + s.focus * 60 * 1000, pausedRemaining: 0, running: true, posInSet: 1, intervalId: null, resumeTimerAfter: false };
+  pomoModalOpen = true;
+  getAudioCtx();
+  render();
+  startPomodoroTick();
+  persistRuntime();
+  if (freed >= 60){
+    const parts = durationParts(freed);
+    openTaskForm(toISODate(new Date()), "", {
+      hours: parts.hours, mins: parts.mins, seconds: freed, source: "free", title: label, editEntryId: entryId
+    });
+  } else if (freed > 0){
+    showToast("Cronômetro livre encerrado (" + fmtDuration(freed) + " não lançados)");
+  }
+}
+function pauseIntoBreak(){
+  const s = getPomodoroSettings();
+  applyTimerElapsed();
+  timer.running = false;
+  if (tickTimer){ clearInterval(tickTimer); tickTimer = null; }
+  persistRuntime();
+  pomo = { active: true, phase: "short", endsAt: Date.now() + s.short * 60 * 1000, pausedRemaining: 0, running: true, posInSet: 1, intervalId: null, resumeTimerAfter: true };
+  pomoModalOpen = true;
+  getAudioCtx();
+  playBreakAlert();
+  render();
+  startPomodoroTick();
+  persistRuntime();
+  showToast("Intervalo de " + s.short + " min. O cronômetro volta sozinho no fim.");
+}
+function pausePomodoro(){
+  if (!pomo.active) return;
+  pomo.pausedRemaining = pomoRemaining();
+  pomo.running = false;
+  pomo.endsAt = 0;
+  if (pomo.intervalId){ clearInterval(pomo.intervalId); pomo.intervalId = null; }
+  render();
+  persistRuntime();
+}
+function resumePomodoro(){
+  if (!pomo.active) return;
+  pomo.running = true;
+  pomo.endsAt = Date.now() + (pomo.pausedRemaining || 0) * 1000;
+  render();
+  startPomodoroTick();
+  persistRuntime();
+}
+function stopPomodoro(){
+  if (pomo.intervalId){ clearInterval(pomo.intervalId); pomo.intervalId = null; }
+  const elapsed = pomo.phase === "focus" ? Math.max(0, pomoTotalSeconds() - pomoRemaining()) : 0;
+  pomo = { active: false, phase: "focus", endsAt: 0, pausedRemaining: 0, running: false, posInSet: 1, intervalId: null };
+  pomoModalOpen = false;
+  try { sessionStorage.removeItem("diario-pomo-snapshot"); } catch (e) {}
+  if (elapsed > 0){
+    const parts = durationParts(elapsed);
+    openTaskForm(toISODate(new Date()), "", { hours: parts.hours, mins: parts.mins, seconds: elapsed });
+    return;
+  }
+  render();
+}
+function skipPomodoroPhase(){
+  if (!pomo.active) return;
+  if (pomo.intervalId){ clearInterval(pomo.intervalId); pomo.intervalId = null; }
+  completePomodoroPhase(true);
+}
+function startPomodoroTick(){
+  if (pomo.intervalId) clearInterval(pomo.intervalId);
+  pomo.intervalId = setInterval(function(){
+    const rem = pomoRemaining();
+    syncPomoDial();
+    if (pomo.running && rem <= 0){
+      clearInterval(pomo.intervalId);
+      pomo.intervalId = null;
+      completePomodoroPhase(false);
+    }
+  }, 250);
+}
+function completePomodoroPhase(isSkip){
+  const s = getPomodoroSettings();
+  if (pomo.phase === "focus"){
+    playBreakAlert();
+    const total = s.focus * 60;
+    const elapsed = isSkip ? Math.max(0, total - pomoRemaining()) : total;
+    const isLong = pomo.posInSet % s.cyclesUntilLong === 0;
+    pomo.phase = isLong ? "long" : "short";
+    pomo.running = true;
+    pomo.endsAt = Date.now() + (isLong ? s.long : s.short) * 60 * 1000;
+    if (elapsed > 0){
+      const parts = durationParts(elapsed);
+      formMode = "task";
+      formPrefill = {
+        date: toISODate(new Date()), time: "", title: "", notes: "",
+        review: false, amount: 3, unit: "days",
+        hours: parts.hours, mins: parts.mins, seconds: elapsed
+      };
+    }
+    render();
+    startPomodoroTick();
+    persistRuntime();
+  } else {
+    playResumeAlert();
+    if (pomo.resumeTimerAfter){
+      if (pomo.intervalId){ clearInterval(pomo.intervalId); pomo.intervalId = null; }
+      pomo = { active: false, phase: "focus", endsAt: 0, pausedRemaining: 0, running: false, posInSet: 1, intervalId: null, resumeTimerAfter: false };
+      pomoModalOpen = false;
+      try { sessionStorage.removeItem("diario-pomo-snapshot"); } catch (e) {}
+      startTimer();
+      showToast("Intervalo terminou. Cronômetro retomado.");
+      return;
+    }
+    const wasLong = pomo.phase === "long";
+    pomo.phase = "focus";
+    pomo.running = true;
+    pomo.posInSet = wasLong ? 1 : pomo.posInSet + 1;
+    pomo.endsAt = Date.now() + s.focus * 60 * 1000;
+    render();
+    startPomodoroTick();
+    persistRuntime();
+  }
+}
+function persistRuntime(){
+  try {
+    localStorage.setItem("diario-estudos-timer", JSON.stringify(timer));
+    if (pomo.active){
+      sessionStorage.setItem("diario-pomo-snapshot", JSON.stringify({
+        phase: pomo.phase, endsAt: pomo.endsAt, pausedRemaining: pomoRemaining(),
+        running: pomo.running, posInSet: pomo.posInSet, resumeTimerAfter: !!pomo.resumeTimerAfter, savedAt: Date.now()
+      }));
+    } else sessionStorage.removeItem("diario-pomo-snapshot");
+  } catch (e) {}
+}
+function persist(){
+  STATE.updatedAt = Date.now();
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(STATE)); } catch (e) {}
+  persistRuntime();
+  scheduleAutoBackup();
+}
+const AUTO_BACKUP_DEBOUNCE_MS = 20000;
+const AUTO_BACKUP_DEADLINE_MS = 120000;
+let autoBackupDebounceTimer = null;
+let autoBackupDeadlineTimer = null;
+function scheduleAutoBackup(){
+  if (!FS_ACCESS_SUPPORTED) return;
+  if (!(STATE.settings && STATE.settings.backupFolderName)) return;
+  if (autoBackupDebounceTimer) clearTimeout(autoBackupDebounceTimer);
+  autoBackupDebounceTimer = setTimeout(runAutoBackup, AUTO_BACKUP_DEBOUNCE_MS);
+  if (!autoBackupDeadlineTimer) autoBackupDeadlineTimer = setTimeout(runAutoBackup, AUTO_BACKUP_DEADLINE_MS);
+}
+function flushAutoBackup(){
+  if (autoBackupDebounceTimer || autoBackupDeadlineTimer) runAutoBackup();
+}
+async function runAutoBackup(){
+  if (autoBackupDebounceTimer) { clearTimeout(autoBackupDebounceTimer); autoBackupDebounceTimer = null; }
+  if (autoBackupDeadlineTimer) { clearTimeout(autoBackupDeadlineTimer); autoBackupDeadlineTimer = null; }
+  if (!FS_ACCESS_SUPPORTED) return;
+  if (!(STATE.settings && STATE.settings.backupFolderName)) return;
+  let handle = backupFolderHandle;
+  if (!handle) handle = await loadFolderHandle();
+  if (!handle) return;
+  backupFolderHandle = handle;
+  const ok = await ensureFolderPermission(handle, false); // never prompt from the background
+  if (!ok) return;
+  try {
+    await writeBackupToFolder(handle);
+    STATE.settings.lastBackupAt = Date.now();
+    STATE.updatedAt = Date.now();
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(STATE)); } catch (e) {}
+    if (accountOpen) render();
+  } catch (e) {}
+}
+function loadState(){
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw){
+      const parsed = JSON.parse(raw);
+      if (parsed && Array.isArray(parsed.entries)) STATE = parsed;
+    }
+  } catch (e) {}
+  ensureLists();
+  if (!STATE.entries.length){
+    try {
+      const oldRaw = localStorage.getItem("conta-estudo-v1");
+      if (oldRaw){
+        const old = JSON.parse(oldRaw);
+        const entries = [];
+        Object.keys(old.days || {}).forEach(function(date){
+          const day = old.days[date];
+          (day.sessions || []).forEach(function(s, idx){
+            entries.push({
+              id: s.id || uid(),
+              date: date,
+              seconds: s.seconds || 0,
+              subject: s.subject || "",
+              notes: idx === 0 ? (day.notes || "") : "",
+              source: s.kind === "manual" ? "manual" : "free",
+              createdAt: new Date(s.endedAt || Date.now()).toISOString()
+            });
+          });
+        });
+        if (entries.length){ STATE.entries = entries; persist(); }
+      }
+    } catch (e) {}
+  }
+  if (migrationDirty){
+    migrationDirty = false;
+    STATE.updatedAt = Date.now();
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(STATE)); } catch (e) {}
+  }
+  try {
+    const t = JSON.parse(localStorage.getItem("diario-estudos-timer") || "null");
+    if (t && (t.running || t.accumulated || t.task || t.project || t.tags)) timer = t;
+    if (timer.running && timer.startedAt) startTimerTick();
+  } catch (e) {}
+  try { muted = localStorage.getItem("diario-estudos-muted") === "1"; } catch (e) {}
+  try {
+    const stored = localStorage.getItem("diario-estudos-theme");
+    if (stored === "light" || stored === "dark") theme = stored;
+    else theme = (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) ? "dark" : "light";
+  } catch (e) {}
+  try { logOpen = localStorage.getItem("diario-tarefas-log-open") !== "0"; } catch (e) {}
+  try {
+    const v = localStorage.getItem("diario-tarefas-cal-view");
+    if (v === "split" || v === "list" || v === "month" || v === "week") calView = v;
+  } catch (e) {}
+  selectedDayIso = toISODate(new Date());
+  applyTheme();
+  try {
+    const snap = JSON.parse(sessionStorage.getItem("diario-pomo-snapshot") || "null");
+    if (snap && snap.phase){
+      sessionStorage.removeItem("diario-pomo-snapshot");
+      let remaining = snap.pausedRemaining;
+      if (snap.running && snap.endsAt) remaining = Math.round((snap.endsAt - Date.now()) / 1000);
+      pomo = { active: true, phase: snap.phase, endsAt: snap.running ? Date.now() + Math.max(0, remaining) * 1000 : 0, pausedRemaining: Math.max(0, remaining || 0), running: !!snap.running, posInSet: snap.posInSet || 1, intervalId: null, resumeTimerAfter: !!snap.resumeTimerAfter };
+      if (pomo.running && pomoRemaining() <= 0) completePomodoroPhase(false);
+      else if (pomo.running) startPomodoroTick();
+    }
+  } catch (e) {}
+}
+function mergeDiary(remote){
+  if (!remote) return;
+  if (!Array.isArray(remote.entries)) return;
+  const remoteAt = remote.updatedAt || 0;
+  const deleted = mergeTombstones(remote.deleted, tombstones());
+  STATE = {
+    entries: mergeById(remote.entries, STATE.entries, deleted),
+    tasks: mergeById(remote.tasks, STATE.tasks, deleted),
+    agenda: mergeById(remote.agenda, STATE.agenda, deleted),
+    tags: STATE.tags,
+    projects: STATE.projects,
+    deleted: deleted,
+    settings: (remoteAt > (STATE.updatedAt || 0) ? (remote.settings || STATE.settings) : (STATE.settings || remote.settings || {})),
+    updatedAt: Math.max(remoteAt, STATE.updatedAt || 0)
+  };
+  ensureLists();
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(STATE)); } catch (e) {}
+}
+async function exportJson(){
+  let handle = backupFolderHandle;
+  if (!handle && FS_ACCESS_SUPPORTED && STATE.settings && STATE.settings.backupFolderName) {
+    handle = await loadFolderHandle();
+    backupFolderHandle = handle;
+  }
+  if (handle) {
+    const ok = await ensureFolderPermission(handle, true);
+    if (ok) {
+      try {
+        await writeBackupToFolder(handle);
+        STATE.settings.lastBackupAt = Date.now();
+        persist();
+        render();
+        showToast('Backup salvo em "' + handle.name + '".');
+        return;
+      } catch (e) {
+        showToast("Não consegui salvar na pasta escolhida. Baixando o arquivo normalmente.");
+      }
+    } else {
+      showToast("Sem permissão para a pasta escolhida. Baixando o arquivo normalmente.");
+    }
+  }
+  const blob = new Blob([JSON.stringify(STATE, null, 2)], { type: "application/json" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "diario-tarefas-" + toISODate(new Date()) + ".json";
+  a.click();
+  URL.revokeObjectURL(a.href);
+  STATE.settings.lastBackupAt = Date.now();
+  persist();
+  render();
+  showToast("Backup baixado. Guarde-o na sua pasta do Drive.");
+}
+function importJson(file){
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(){
+    try {
+      const parsed = JSON.parse(reader.result);
+      if (!parsed || !Array.isArray(parsed.entries)) throw new Error("invalid");
+      const before = (STATE.tasks || []).length + (STATE.entries || []).length + (STATE.agenda || []).length;
+      mergeDiary(parsed);
+      const after = (STATE.tasks || []).length + (STATE.entries || []).length + (STATE.agenda || []).length;
+      persist();
+      render();
+      const added = after - before;
+      showToast(added > 0
+        ? ("Backup combinado. " + added + " item" + (added === 1 ? "" : "ns") + " a mais.")
+        : "Backup combinado. Nada de novo neste arquivo.");
+    } catch (e) { showToast("Arquivo inválido"); }
+  };
+  reader.readAsText(file);
+}
+
+document.addEventListener("visibilitychange", function(){
+  if (document.visibilityState === "visible"){
+    if (timer.running) applyTimerElapsed();
+    if (pomo.active && pomo.running && pomoRemaining() <= 0) completePomodoroPhase(false);
+    persistRuntime();
+  }
+});
+document.addEventListener("keydown", function(e){
+  if (e.key === "Escape"){ formMode = null; accountOpen = false; render(); }
+});
+window.addEventListener("beforeunload", persistRuntime);
+
+viewWeekStart = mondayOf(new Date());
+loadState();
+render();
+initBackupFolder();
+document.addEventListener("visibilitychange", function(){ if (document.hidden) flushAutoBackup(); });
+window.addEventListener("pagehide", flushAutoBackup);
+</script>
+</body>
+</html>

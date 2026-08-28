@@ -1,0 +1,10 @@
+# Cloudflare Pages — use no painel ou via CLI:
+#   npm run build
+#   npx wrangler pages deploy dist --project-name focusly
+#
+# Build command:  npm run build
+# Output dir:     dist
+
+name = "focusly"
+pages_build_output_dir = "dist"
+compatibility_date = "2024-01-01"

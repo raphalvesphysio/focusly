@@ -1,0 +1,9 @@
+{
+  "appUrl": "http://127.0.0.1:3847",
+  "serveLocally": true,
+  "backupPath": "C:\\Users\\rapha\\Projects\\Backups",
+  "server": {
+    "host": "127.0.0.1",
+    "port": 3847
+  }
+}

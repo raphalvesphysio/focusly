@@ -1,0 +1,18 @@
+{
+  "name": "Focusly",
+  "short_name": "Focusly",
+  "description": "Tempo, tarefas, revisões e agenda.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F4F4F2",
+  "theme_color": "#F4F4F2",
+  "lang": "pt-BR",
+  "icons": [
+    {
+      "src": "favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

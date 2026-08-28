@@ -1,0 +1,10 @@
+node_modules
+.git
+desktop
+scripts/make-icon.py
+*.vbs
+*.lnk
+icon.ico
+icon.png
+Dockerfile
+.dockerignore

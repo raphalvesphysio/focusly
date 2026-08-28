@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#F4F4F2">
+<title>Focusly</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<div class="shell">
+  <header class="top">
+    <h1 class="logo">Focusly</h1>
+    <p class="tagline">App na nuvem · dados no seu backup local</p>
+  </header>
+
+  <section class="card" id="setup-card">
+    <h2>Onde ficam seus dados</h2>
+    <p class="hint">O servidor só entrega o programa. Tarefas, tempo e agenda ficam em <strong>diario-tarefas-backup.json</strong> na pasta que você escolher (OneDrive, iCloud Drive, etc.).</p>
+    <p class="status" id="backup-status">Carregando…</p>
+    <div class="actions">
+      <button type="button" class="btn primary" id="btn-choose">Escolher pasta de backup</button>
+      <button type="button" class="btn" id="btn-save">Salvar backup agora</button>
+      <label class="btn ghost">Restaurar de arquivo<input type="file" accept="application/json" hidden id="import-file"></label>
+    </div>
+    <p class="hint small" id="platform-hint"></p>
+  </section>
+
+  <section class="card" id="timer-card">
+    <h2>Cronômetro (protótipo de sessão)</h2>
+    <p class="hint">Ao iniciar, grava no backup na hora. Se fechar sem finalizar, ao reabrir sincroniza com o relógio atual (ex.: abriu 13:00, reabriu 14:00 → 1h).</p>
+    <p class="timer-display" id="timer-display">0:00:00</p>
+    <p class="hint small" id="timer-meta"></p>
+    <div class="actions">
+      <button type="button" class="btn primary" id="btn-timer-start">Iniciar</button>
+      <button type="button" class="btn" id="btn-timer-pause">Pausar</button>
+      <button type="button" class="btn" id="btn-timer-finish">Finalizar</button>
+    </div>
+  </section>
+
+  <section class="card muted">
+    <h2>Próximo passo</h2>
+    <p class="hint">A interface completa (cronômetro, calendário, tarefas) será portada para esta versão. Enquanto isso, a versão anterior continua em <a href="/legacy/">/legacy</a> para referência.</p>
+    <pre class="stats" id="state-stats"></pre>
+  </section>
+</div>
+<script type="module" src="/src/app.js"></script>
+</body>
+</html>
