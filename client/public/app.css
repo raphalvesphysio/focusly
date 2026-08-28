@@ -6,6 +6,8 @@
   --line: #e6e4e0;
   --accent: #7a2f60;
   --accent-soft: #f3e0ec;
+  --logo-track: rgba(122, 47, 96, 0.4);
+  --logo-arc: #7a2f60;
   font-family: "IBM Plex Sans", system-ui, sans-serif;
 }
 @media (prefers-color-scheme: dark) {
@@ -17,6 +19,8 @@
     --line: rgba(255, 255, 255, 0.12);
     --accent: #a78bfa;
     --accent-soft: rgba(167, 139, 250, 0.14);
+    --logo-track: rgba(255, 255, 255, 0.45);
+    --logo-arc: #a78bfa;
   }
 }
 * { box-sizing: border-box; }
@@ -34,9 +38,27 @@ body {
 .top { margin-bottom: 1.5rem; }
 .logo {
   margin: 0;
+  display: inline-flex;
+  align-items: baseline;
   font-family: "Source Serif 4", Georgia, serif;
-  color: var(--accent);
+  color: var(--ink);
   font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1;
+}
+.logo-my {
+  font-family: "Caveat", cursive;
+  font-weight: 700;
+  margin-right: 0.02em;
+}
+.logo-ring {
+  width: 0.6em;
+  height: 0.6em;
+  display: inline-block;
+  margin: 0 0.01em;
+  position: relative;
+  top: 0.07em;
 }
 .tagline { margin: 0.35rem 0 0; color: var(--ink-muted); }
 .card {

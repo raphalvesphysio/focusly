@@ -62,7 +62,7 @@ const server = http.createServer(function (req, res) {
   const url = req.url || "/";
 
   if (url === "/health") {
-    return send(res, 200, JSON.stringify({ ok: true, app: "focusly", mode: "static" }), "application/json; charset=utf-8");
+    return send(res, 200, JSON.stringify({ ok: true, app: "myfocusly", mode: "static" }), "application/json; charset=utf-8");
   }
 
   const filePath = resolveFile(url);
@@ -78,7 +78,7 @@ const server = http.createServer(function (req, res) {
 });
 
 server.listen(port, host, function () {
-  console.log("Focusly — servidor estatico (sem dados de usuario)");
+  console.log("MyFocusly — servidor estatico (sem dados de usuario)");
   console.log("URL:", cfg.appUrl);
   console.log("Escutando:", "http://" + host + ":" + port);
   if (isProd) console.log("NODE_ENV=production");

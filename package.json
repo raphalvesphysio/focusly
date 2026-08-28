@@ -2,7 +2,7 @@
   "name": "focusly",
   "private": true,
   "version": "2.0.0",
-  "description": "Focusly — app web, backup local do usuario",
+  "description": "MyFocusly — app web, backup local do usuario",
   "scripts": {
     "icons": "python scripts/make-icon.py",
     "build": "node scripts/prepare-static.js",

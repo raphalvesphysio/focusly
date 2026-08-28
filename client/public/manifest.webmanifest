@@ -1,6 +1,6 @@
 {
-  "name": "Focusly",
-  "short_name": "Focusly",
+  "name": "MyFocusly",
+  "short_name": "MyFocusly",
   "description": "Tempo, tarefas, revisões e agenda.",
   "start_url": "/",
   "display": "standalone",
