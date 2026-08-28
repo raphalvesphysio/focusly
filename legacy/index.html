@@ -2177,7 +2177,10 @@ async function initBackupFolder(){
   if (backupFolderHandle && accountOpen) render();
 }
 async function chooseBackupFolder(){
-  if (!FS_ACCESS_SUPPORTED) return;
+  if (!FS_ACCESS_SUPPORTED) {
+    showToast("Pasta automática: abra no Chrome ou Edge (PC). Ou use Baixar backup.");
+    return;
+  }
   let handle;
   try {
     handle = await window.showDirectoryPicker({ mode: "readwrite" });
@@ -2211,13 +2214,15 @@ function renderAccountPanel(){
     ? "Você ainda não fez nenhum backup."
     : (d === 0 ? "Último backup: hoje." : ("Último backup há " + d + " dia" + (d === 1 ? "" : "s") + "."));
   const folderName = STATE.settings && STATE.settings.backupFolderName;
-  const folderBlock = !FS_ACCESS_SUPPORTED ? "" :
-    (folderName
-      ? '<p class="hint">Pasta de backup: <strong>' + escapeHtml(folderName) + '</strong>. Salva sozinho, pouco depois de qualquer alteração, sobrescrevendo "' + FOLDER_BACKUP_FILENAME + '" nela — não precisa clicar em nada.</p>' +
-        '<div class="field-actions"><button class="btn btn-ghost" type="button" onclick="chooseBackupFolder()">Trocar pasta</button>' +
-        '<button class="btn btn-ghost" type="button" onclick="forgetBackupFolder()">Esquecer pasta</button></div>'
-      : '<p class="hint">Escolha uma pasta (por exemplo, dentro do seu Google Drive) e os próximos backups são salvos direto nela, sem baixar nada.</p>' +
-        '<div class="field-actions"><button class="btn btn-ghost" type="button" onclick="chooseBackupFolder()">Escolher pasta de backup</button></div>');
+  const folderHint = FS_ACCESS_SUPPORTED
+    ? "Escolha uma pasta (ex.: Backups, OneDrive) — o app salva sozinho nela."
+    : "Neste navegador só dá para <strong>Baixar backup</strong>. Para escolher pasta, use <strong>Chrome ou Edge</strong> no PC.";
+  const folderBlock = folderName
+    ? '<p class="hint">Pasta de backup: <strong>' + escapeHtml(folderName) + '</strong>. Salva sozinho em "' + FOLDER_BACKUP_FILENAME + '".</p>' +
+      '<div class="field-actions"><button class="btn btn-ghost" type="button" onclick="chooseBackupFolder()">Trocar pasta</button>' +
+      '<button class="btn btn-ghost" type="button" onclick="forgetBackupFolder()">Esquecer pasta</button></div>'
+    : '<p class="hint">' + folderHint + '</p>' +
+      '<div class="field-actions"><button class="btn btn-ghost" type="button" onclick="chooseBackupFolder()">Escolher pasta de backup</button></div>';
   const primaryLabel = folderName ? "Salvar backup agora" : "Baixar backup";
   return '<div class="overlay open" onclick="if(event.target===this) toggleAccount()"><div class="panel">' +
     "<h3>Backup</h3>" +
