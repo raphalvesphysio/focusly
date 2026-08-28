@@ -2173,9 +2173,10 @@ async function ensureFolderPermission(handle, requestIfNeeded){
   } catch (e) { return false; }
 }
 async function initBackupFolder(){
-  if (!FS_ACCESS_SUPPORTED) return;
+  if (!FS_ACCESS_SUPPORTED) return false;
   backupFolderHandle = await loadFolderHandle();
-  if (backupFolderHandle && accountOpen) render();
+  if (!backupFolderHandle) return false;
+  return syncFromBackupFolder(backupFolderHandle, false);
 }
 async function chooseBackupFolder(){
   if (!FS_ACCESS_SUPPORTED) {
@@ -2191,6 +2192,7 @@ async function chooseBackupFolder(){
   await saveFolderHandle(handle);
   backupFolderHandle = handle;
   STATE.settings.backupFolderName = handle.name;
+  await syncFromBackupFolder(handle, false);
   persist();
   render();
   showToast('Pasta de backup definida: "' + handle.name + '". Os próximos backups vão direto pra lá.');
@@ -2209,6 +2211,25 @@ async function writeBackupToFolder(handle){
   await writable.write(JSON.stringify(STATE, null, 2));
   await writable.close();
 }
+async function readBackupFromFolder(handle){
+  const fileHandle = await handle.getFileHandle(FOLDER_BACKUP_FILENAME);
+  const file = await fileHandle.getFile();
+  return JSON.parse(await file.text());
+}
+async function syncFromBackupFolder(handle, requestPermission){
+  if (!handle) return false;
+  const ok = await ensureFolderPermission(handle, requestPermission);
+  if (!ok) return false;
+  backupFolderHandle = handle;
+  try {
+    const remote = await readBackupFromFolder(handle);
+    if (!remote || !Array.isArray(remote.entries)) return false;
+    mergeDiary(remote);
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
 function renderAccountPanel(){
   const d = backupDaysAgo();
   const status = d === null
@@ -2219,7 +2240,7 @@ function renderAccountPanel(){
     ? "Escolha uma pasta (ex.: Backups, OneDrive) — o app salva sozinho nela."
     : "Neste navegador só dá para <strong>Baixar backup</strong>. Para escolher pasta, use <strong>Chrome ou Edge</strong> no PC.";
   const folderBlock = folderName
-    ? '<p class="hint">Pasta de backup: <strong>' + escapeHtml(folderName) + '</strong>. Salva sozinho em "' + FOLDER_BACKUP_FILENAME + '".</p>' +
+    ? '<p class="hint">Pasta de backup: <strong>' + escapeHtml(folderName) + '</strong>. Salva sozinho em "' + FOLDER_BACKUP_FILENAME + '". Ao abrir, combina com o que estiver nessa pasta.</p>' +
       '<div class="field-actions"><button class="btn btn-ghost" type="button" onclick="chooseBackupFolder()">Trocar pasta</button>' +
       '<button class="btn btn-ghost" type="button" onclick="forgetBackupFolder()">Esquecer pasta</button></div>'
     : '<p class="hint">' + folderHint + '</p>' +
@@ -3221,8 +3242,11 @@ window.addEventListener("beforeunload", persistRuntime);
 
 viewWeekStart = mondayOf(new Date());
 loadState();
-render();
-initBackupFolder();
+initBackupFolder().then(function(synced){
+  if (synced) persist();
+  if (FS_ACCESS_SUPPORTED && !(STATE.settings && STATE.settings.backupFolderName)) accountOpen = true;
+  render();
+});
 document.addEventListener("visibilitychange", function(){ if (document.hidden) flushAutoBackup(); });
 window.addEventListener("pagehide", flushAutoBackup);
 </script>
