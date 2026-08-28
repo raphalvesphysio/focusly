@@ -3,5 +3,7 @@ MyFocusly
 
 Link: https://myfocusly.netlify.app/legacy/
 
-Windows: clique duas vezes em Iniciar-MyFocusly.vbs
+Windows: clique duas vezes em Iniciar-MyFocusly.bat
 Na 1a vez: Backup > Escolher pasta de backup (Chrome ou Edge).
+
+Se o antivirus bloquear, use o link acima no navegador.
