@@ -1,6 +1,9 @@
 [build]
-  command = "npm run build"
+  command = "node scripts/prepare-static.js"
   publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "22"
 
 [[redirects]]
   from = "/legacy"
