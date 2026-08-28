@@ -1,0 +1,21 @@
+Set sh = CreateObject("WScript.Shell")
+Set fso = CreateObject("Scripting.FileSystemObject")
+appUrl = "https://myfocusly.netlify.app/legacy/"
+profileDir = sh.ExpandEnvironmentStrings("%LOCALAPPDATA%") & "\MyFocusly\BrowserProfile"
+If Not fso.FolderExists(profileDir) Then sh.Run "cmd /c mkdir """ & profileDir & """", 0, True
+
+edge = sh.ExpandEnvironmentStrings("%ProgramFiles(x86)%") & "\Microsoft\Edge\Application\msedge.exe"
+If Not fso.FileExists(edge) Then edge = sh.ExpandEnvironmentStrings("%ProgramFiles%") & "\Microsoft\Edge\Application\msedge.exe"
+If fso.FileExists(edge) Then
+  sh.Run """" & edge & """ --user-data-dir=""" & profileDir & """ --app=" & appUrl, 1, False
+  WScript.Quit
+End If
+
+chrome = sh.ExpandEnvironmentStrings("%ProgramFiles%") & "\Google\Chrome\Application\chrome.exe"
+If Not fso.FileExists(chrome) Then chrome = sh.ExpandEnvironmentStrings("%ProgramFiles(x86)%") & "\Google\Chrome\Application\chrome.exe"
+If fso.FileExists(chrome) Then
+  sh.Run """" & chrome & """ --user-data-dir=""" & profileDir & """ --app=" & appUrl, 1, False
+  WScript.Quit
+End If
+
+sh.Run appUrl
