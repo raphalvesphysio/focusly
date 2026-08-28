@@ -26,11 +26,4 @@ pngs[-1].convert("RGBA").save(
     format="ICO",
     sizes=[(256, 256), (128, 128), (64, 64), (48, 48), (32, 32), (16, 16)]
 )
-share = ROOT / "compartilhar" / "MyFocusly.ico"
-if share.parent.is_dir():
-    pngs[-1].convert("RGBA").save(
-        share,
-        format="ICO",
-        sizes=[(256, 256), (128, 128), (64, 64), (48, 48), (32, 32), (16, 16)]
-    )
-print("icon.ico, icon.png e compartilhar/MyFocusly.ico gerados.")
+print("icon.ico e icon.png gerados.")
