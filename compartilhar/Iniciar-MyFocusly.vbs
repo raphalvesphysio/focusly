@@ -19,3 +19,4 @@ If fso.FileExists(chrome) Then
 End If
 
 sh.Run appUrl
+
