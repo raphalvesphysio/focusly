@@ -21,7 +21,6 @@ import {
   writeStateToFolder,
 } from "./fs-access.js";
 import {
-  emptyTimer,
   getTimer,
   isTimerOpen,
   liveTimerSeconds,
@@ -41,15 +40,7 @@ function notify() {
   });
 }
 
-function desktopBackup() {
-  return window.focuslyDesktop && window.focuslyDesktop.backup;
-}
-
 function hasBackupTarget() {
-  const d = desktopBackup();
-  if (d && d.isAvailable && d.isAvailable()) {
-    return !!(state.settings && state.settings.backupFolderName);
-  }
   return !!(state.settings && state.settings.backupFolderName);
 }
 
@@ -79,32 +70,17 @@ export function getTimerSession() {
 }
 
 async function readBackupState() {
-  const d = desktopBackup();
-  if (d && d.isAvailable && d.isAvailable()) {
-    try {
-      const config = await d.getConfig();
-      if (config && config.folderName) {
-        state.settings = state.settings || {};
-        state.settings.backupFolderName = config.folderName;
-      }
-      return await d.read();
-    } catch (e) {
-      return null;
-    }
+  if (!FS_ACCESS_SUPPORTED) return null;
+  let handle = folderHandle || (await loadFolderHandle());
+  if (!handle) return null;
+  const ok = await ensureFolderPermission(handle, false);
+  if (!ok) return null;
+  folderHandle = handle;
+  try {
+    return await readStateFromFolder(handle);
+  } catch (e) {
+    return null;
   }
-  if (FS_ACCESS_SUPPORTED) {
-    let handle = folderHandle || (await loadFolderHandle());
-    if (!handle) return null;
-    const ok = await ensureFolderPermission(handle, false);
-    if (!ok) return null;
-    folderHandle = handle;
-    try {
-      return await readStateFromFolder(handle);
-    } catch (e) {
-      return null;
-    }
-  }
-  return null;
 }
 
 export async function initStore() {
@@ -137,7 +113,7 @@ export async function saveStore(partial) {
 }
 
 function scheduleAutoBackup() {
-  if (!hasBackupTarget()) return;
+  if (!FS_ACCESS_SUPPORTED || !hasBackupTarget()) return;
   if (debounceTimer) clearTimeout(debounceTimer);
   debounceTimer = setTimeout(runAutoBackup, AUTO_BACKUP_DEBOUNCE_MS);
   if (!deadlineTimer) deadlineTimer = setTimeout(runAutoBackup, AUTO_BACKUP_DEADLINE_MS);
@@ -160,26 +136,13 @@ async function runAutoBackup() {
     clearTimeout(deadlineTimer);
     deadlineTimer = null;
   }
-  if (!hasBackupTarget()) return;
-
+  if (!FS_ACCESS_SUPPORTED || !hasBackupTarget()) return;
   try {
     await writeBackupNow(false);
   } catch (e) {}
 }
 
 export async function chooseBackupFolder() {
-  const d = desktopBackup();
-  if (d && d.isAvailable && d.isAvailable()) {
-    const config = await d.chooseFolder();
-    if (!config) return null;
-    state.settings = state.settings || {};
-    state.settings.backupFolderName = config.folderName;
-    state.settings.lastBackupAt = Date.now();
-    await saveCachedState(state);
-    notify();
-    return config;
-  }
-
   if (!FS_ACCESS_SUPPORTED) return null;
   const handle = await pickBackupFolder();
   if (!handle) return null;
@@ -195,8 +158,6 @@ export async function chooseBackupFolder() {
 }
 
 export async function forgetBackupFolder() {
-  const d = desktopBackup();
-  if (d && d.isAvailable && d.isAvailable()) await d.forget();
   await clearFolderHandle();
   folderHandle = null;
   if (state.settings) delete state.settings.backupFolderName;
@@ -207,16 +168,6 @@ export async function forgetBackupFolder() {
 export async function writeBackupNow(requestPermission) {
   state.updatedAt = Date.now();
   await saveCachedState(state);
-
-  const d = desktopBackup();
-  if (d && d.isAvailable && d.isAvailable()) {
-    await d.write(state);
-    state.settings = state.settings || {};
-    state.settings.lastBackupAt = Date.now();
-    await saveCachedState(state);
-    notify();
-    return { mode: "desktop" };
-  }
 
   let handle = folderHandle;
   if (!handle && FS_ACCESS_SUPPORTED) handle = await loadFolderHandle();
@@ -252,7 +203,6 @@ export async function importBackupFile(file) {
   return state;
 }
 
-/** INÍCIO — grava sessão aberta no backup na hora (ex.: tarefa aberta 13:00). */
 export async function startTimerSession(meta) {
   meta = meta || {};
   const now = Date.now();
@@ -279,7 +229,6 @@ export async function startTimerSession(meta) {
   return state.runtime.timer;
 }
 
-/** Pausa — congela segundos até aqui; backup imediato. */
 export async function pauseTimerSession() {
   const timer = getTimer(state);
   if (!timer || timer.status !== "open") return null;
@@ -295,7 +244,6 @@ export async function pauseTimerSession() {
   return state.runtime.timer;
 }
 
-/** FIM — encerra sessão; sem retorno de FIM o backup mantém status open. */
 export async function finishTimerSession() {
   const timer = getTimer(state);
   if (!timer || timer.status === "finished") return null;
@@ -320,6 +268,5 @@ export function backupStatus() {
     folderName: name || "",
     lastBackupAt: last || 0,
     fsAccess: FS_ACCESS_SUPPORTED,
-    desktop: !!(desktopBackup() && desktopBackup().isAvailable && desktopBackup().isAvailable()),
   };
 }

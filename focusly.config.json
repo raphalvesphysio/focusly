@@ -1,6 +1,5 @@
 {
   "appUrl": "https://myfocusly.netlify.app/legacy/",
-  "serveLocally": true,
   "backupPath": "C:\\Users\\rapha\\Projects\\Backups",
   "server": {
     "host": "127.0.0.1",

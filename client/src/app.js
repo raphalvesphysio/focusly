@@ -109,15 +109,12 @@ function render(st) {
   st = st || getState();
   statusEl.textContent = formatBackupStatus();
   const s = backupStatus();
-  if (s.desktop) {
-    platformEl.textContent =
-      "Windows (app na bandeja): backup gravado direto na pasta escolhida.";
-  } else if (s.fsAccess) {
+  if (s.fsAccess) {
     platformEl.textContent =
       "Navegador com acesso a pasta: backup automático na pasta escolhida.";
   } else {
     platformEl.textContent =
-      "iPad / Safari: escolha a pasta quando possível, ou use Restaurar pelo app Arquivos (OneDrive/iCloud).";
+      "Use Baixar backup e guarde em sua pasta (ex.: Backups, iCloud, OneDrive).";
   }
   renderTimer(st);
   renderStats(st);

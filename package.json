@@ -2,23 +2,18 @@
   "name": "focusly",
   "private": true,
   "version": "2.0.0",
-  "description": "Focusly — app hospedado, dados no backup local",
-  "main": "desktop/main.js",
+  "description": "Focusly — app web, backup local do usuario",
   "scripts": {
     "icons": "python scripts/make-icon.py",
     "build": "node scripts/prepare-static.js",
     "serve": "node server/serve.js",
     "serve:dist": "npm run build && npx --yes serve dist -l 3847",
-    "desktop": "node scripts/launch-desktop.js",
     "dev": "node server/serve.js",
-    "start": "node scripts/launch-desktop.js",
+    "start": "node server/serve.js",
     "deploy:netlify": "npm run build && npx --yes netlify-cli deploy --prod --dir=dist",
     "deploy:firebase": "npm run build && npx --yes firebase-tools deploy --only hosting",
     "deploy:cloudflare": "npm run build && npx --yes wrangler pages deploy dist --project-name focusly",
     "docker:build": "docker build -t focusly-app .",
     "docker:run": "docker compose up -d"
-  },
-  "devDependencies": {
-    "electron": "^33.2.0"
   }
 }

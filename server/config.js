@@ -40,7 +40,6 @@ function loadConfig() {
   return {
     root: ROOT,
     appUrl,
-    serveLocally: file.serveLocally !== false && !process.env.FOCUSLY_REMOTE_ONLY,
     backupPath:
       process.env.FOCUSLY_BACKUP_PATH ||
       file.backupPath ||

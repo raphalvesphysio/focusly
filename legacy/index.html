@@ -541,12 +541,6 @@ const DEFAULT_HOUR_START = 7;
 const DEFAULT_HOUR_END = 23;
 const DASH_PALETTE = ["#9C407C","#3B5BDB","#0CA678","#C97C1E","#A8412A","#5B3FA0","#1C7ED6","#2B8A3E","#E8590C","#7048E8","#0B7285","#C2255C"];
 const FS_ACCESS_SUPPORTED = typeof window !== "undefined" && typeof window.showDirectoryPicker === "function";
-function desktopBackupApi(){ return window.focuslyDesktop && window.focuslyDesktop.backup; }
-function desktopBackupOn(){
-  var d = desktopBackupApi();
-  return !!(d && d.isAvailable && d.isAvailable());
-}
-function canUseBackupFolder(){ return FS_ACCESS_SUPPORTED || desktopBackupOn(); }
 const FOLDER_DB_NAME = "diario-tarefas-fs";
 const FOLDER_STORE = "handles";
 const FOLDER_KEY = "backup-folder";
@@ -1985,9 +1979,6 @@ function render(){
   const week = computeWeek(STATE, viewWeekStart);
   const isCurrentWeek = toISODate(viewWeekStart) === toISODate(mondayOf(new Date()));
   const toast = toastMsg ? '<div class="toast">' + escapeHtml(toastMsg) + "</div>" : "";
-  const trayHint = window.focuslyDesktop
-    ? '<p class="tray-hint">Roda na bandeja — fechar a janela minimiza; o cronômetro continua.</p>'
-    : "";
   const activeNomen = nomenDraftKind || logFilter || "task";
   const nomenBtns =
     '<div class="nomen-row">' +
@@ -2100,7 +2091,7 @@ function render(){
   const accountHtml = accountOpen ? renderAccountPanel() : "";
   root.innerHTML =
     toast +
-    '<header class="app-header"><div class="app-header-text">' + focuslyLogoHtml() + trayHint + '</div>' +
+    '<header class="app-header"><div class="app-header-text">' + focuslyLogoHtml() + '</div>' +
     '<div class="header-actions"><button class="account-chip" onclick="toggleDashModal()" title="Resumo do tempo registrado">Resumo</button><button class="account-chip" onclick="toggleAccount()" title="Backup e restauração"><span class="dot' + (backupIsStale() ? "" : " ok") + '"></span>Backup</button><button class="theme-toggle" onclick="toggleTheme()" aria-label="Alternar tema">' + (theme === "dark" ? "🌙" : "☀️") + "</button></div></header>" +
     '<div class="timers-row"><section class="card timer-card" aria-label="Cronômetro livre"><div class="timer-bar">' +
     '<div class="timer-display" aria-live="polite">' + fmtHMS(liveSeconds()) + '</div>' +
@@ -2181,34 +2172,11 @@ async function ensureFolderPermission(handle, requestIfNeeded){
   } catch (e) { return false; }
 }
 async function initBackupFolder(){
-  if (desktopBackupOn()){
-    try {
-      var config = await desktopBackupApi().getConfig();
-      if (config && config.folderName){
-        STATE.settings = STATE.settings || {};
-        STATE.settings.backupFolderName = config.folderName;
-        var remote = await desktopBackupApi().read();
-        if (remote && Array.isArray(remote.entries)) mergeDiary(remote);
-        persist();
-      }
-    } catch (e) {}
-  }
-  if (!FS_ACCESS_SUPPORTED) { if (accountOpen) render(); return; }
+  if (!FS_ACCESS_SUPPORTED) return;
   backupFolderHandle = await loadFolderHandle();
   if (backupFolderHandle && accountOpen) render();
 }
 async function chooseBackupFolder(){
-  if (desktopBackupOn()){
-    var config = await desktopBackupApi().chooseFolder();
-    if (!config) return;
-    STATE.settings = STATE.settings || {};
-    STATE.settings.backupFolderName = config.folderName;
-    STATE.settings.lastBackupAt = Date.now();
-    persist();
-    render();
-    showToast('Pasta de backup definida: "' + config.folderName + '".');
-    return;
-  }
   if (!FS_ACCESS_SUPPORTED) return;
   let handle;
   try {
@@ -2224,7 +2192,6 @@ async function chooseBackupFolder(){
   showToast('Pasta de backup definida: "' + handle.name + '". Os próximos backups vão direto pra lá.');
 }
 async function forgetBackupFolder(){
-  if (desktopBackupOn()) await desktopBackupApi().forget();
   await clearFolderHandle();
   backupFolderHandle = null;
   delete STATE.settings.backupFolderName;
@@ -2244,12 +2211,12 @@ function renderAccountPanel(){
     ? "Você ainda não fez nenhum backup."
     : (d === 0 ? "Último backup: hoje." : ("Último backup há " + d + " dia" + (d === 1 ? "" : "s") + "."));
   const folderName = STATE.settings && STATE.settings.backupFolderName;
-  const folderBlock = !canUseBackupFolder() ? "" :
+  const folderBlock = !FS_ACCESS_SUPPORTED ? "" :
     (folderName
       ? '<p class="hint">Pasta de backup: <strong>' + escapeHtml(folderName) + '</strong>. Salva sozinho, pouco depois de qualquer alteração, sobrescrevendo "' + FOLDER_BACKUP_FILENAME + '" nela — não precisa clicar em nada.</p>' +
         '<div class="field-actions"><button class="btn btn-ghost" type="button" onclick="chooseBackupFolder()">Trocar pasta</button>' +
         '<button class="btn btn-ghost" type="button" onclick="forgetBackupFolder()">Esquecer pasta</button></div>'
-      : '<p class="hint">Escolha uma pasta (por exemplo, <strong>Backups</strong> ou dentro do OneDrive) e os próximos backups são salvos direto nela.</p>' +
+      : '<p class="hint">Escolha uma pasta (por exemplo, dentro do seu Google Drive) e os próximos backups são salvos direto nela, sem baixar nada.</p>' +
         '<div class="field-actions"><button class="btn btn-ghost" type="button" onclick="chooseBackupFolder()">Escolher pasta de backup</button></div>');
   const primaryLabel = folderName ? "Salvar backup agora" : "Baixar backup";
   return '<div class="overlay open" onclick="if(event.target===this) toggleAccount()"><div class="panel">' +
@@ -2260,9 +2227,9 @@ function renderAccountPanel(){
     '<div class="field-actions"><button class="btn btn-primary" type="button" onclick="exportJson()">' + primaryLabel + '</button>' +
     '<label class="btn btn-ghost">Restaurar de um arquivo<input id="import-file" type="file" accept="application/json" hidden onchange="importJson(this.files[0])"></label></div>' +
     '<details><summary>Como manter o backup em dia</summary>' +
-    (FS_ACCESS_SUPPORTED || desktopBackupOn()
-      ? '<p class="hint">Escolhendo uma pasta de backup acima (Backups, Drive, OneDrive…), o programa salva sozinho nela a cada mudança.</p>'
-      : '<p class="hint">No navegador, use <strong>Baixar backup</strong> e guarde em C:\\Users\\rapha\\Projects\\Backups — ou abra pelo <strong>Focusly.vbs</strong> no PC.</p>') +
+    (FS_ACCESS_SUPPORTED
+      ? '<p class="hint">Escolhendo uma pasta de backup acima (dentro do Drive, OneDrive ou Dropbox), o programa salva sozinho nela a cada mudança — sem precisar clicar em nada — e o app deles sincroniza para a nuvem.</p>'
+      : '<p class="hint">Salve o arquivo dentro da sua pasta do Google Drive, OneDrive ou Dropbox. O programa deles sincroniza para a nuvem sozinho.</p>') +
     '<p class="hint">Para levar seus dados para outro computador, baixe (ou pegue da pasta) o backup em um e use <strong>Restaurar</strong> no outro. O que existe nos dois é combinado, e o que você apagou continua apagado.</p></details>' +
     '<div class="field-actions"><button class="btn btn-ghost" type="button" onclick="toggleAccount()">Fechar</button></div></div></div>';
 }
@@ -3065,7 +3032,7 @@ const AUTO_BACKUP_DEADLINE_MS = 120000;
 let autoBackupDebounceTimer = null;
 let autoBackupDeadlineTimer = null;
 function scheduleAutoBackup(){
-  if (!canUseBackupFolder()) return;
+  if (!FS_ACCESS_SUPPORTED) return;
   if (!(STATE.settings && STATE.settings.backupFolderName)) return;
   if (autoBackupDebounceTimer) clearTimeout(autoBackupDebounceTimer);
   autoBackupDebounceTimer = setTimeout(runAutoBackup, AUTO_BACKUP_DEBOUNCE_MS);
@@ -3077,18 +3044,6 @@ function flushAutoBackup(){
 async function runAutoBackup(){
   if (autoBackupDebounceTimer) { clearTimeout(autoBackupDebounceTimer); autoBackupDebounceTimer = null; }
   if (autoBackupDeadlineTimer) { clearTimeout(autoBackupDeadlineTimer); autoBackupDeadlineTimer = null; }
-  if (!canUseBackupFolder()) return;
-  if (!(STATE.settings && STATE.settings.backupFolderName)) return;
-  if (desktopBackupOn()){
-    try {
-      await desktopBackupApi().write(STATE);
-      STATE.settings.lastBackupAt = Date.now();
-      STATE.updatedAt = Date.now();
-      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(STATE)); } catch (e) {}
-      if (accountOpen) render();
-    } catch (e) {}
-    return;
-  }
   if (!FS_ACCESS_SUPPORTED) return;
   if (!(STATE.settings && STATE.settings.backupFolderName)) return;
   let handle = backupFolderHandle;
@@ -3192,18 +3147,6 @@ function mergeDiary(remote){
   try { localStorage.setItem(STORAGE_KEY, JSON.stringify(STATE)); } catch (e) {}
 }
 async function exportJson(){
-  if (desktopBackupOn() && STATE.settings && STATE.settings.backupFolderName){
-    try {
-      await desktopBackupApi().write(STATE);
-      STATE.settings.lastBackupAt = Date.now();
-      persist();
-      render();
-      showToast('Backup salvo em "' + STATE.settings.backupFolderName + '".');
-      return;
-    } catch (e) {
-      showToast("Não consegui salvar na pasta. Tentando download…");
-    }
-  }
   let handle = backupFolderHandle;
   if (!handle && FS_ACCESS_SUPPORTED && STATE.settings && STATE.settings.backupFolderName) {
     handle = await loadFolderHandle();
