@@ -9,6 +9,7 @@ Opcao A — so o link (qualquer aparelho)
 Opcao B — atalho no Windows (recomendado no PC)
   1. Envie esta pasta inteira (zip).
   2. A pessoa executa Criar-Atalho-Desktop.vbs
+     (icone oficial: MyFocusly.ico).
      (ou clica duas vezes em Iniciar-MyFocusly.vbs).
   3. Na 1a abertura: Backup > Escolher pasta de backup.
   4. Depois abre ja sincronizado com o arquivo local.
