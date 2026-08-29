@@ -547,9 +547,9 @@ const FOLDER_STORE = "handles";
 const FOLDER_KEY = "backup-folder";
 const FOLDER_BACKUP_FILENAME = "diario-tarefas-backup.json";
 
-let STATE = { entries: [], tasks: [], agenda: [], tags: [], projects: [], deleted: {}, settings: {}, updatedAt: 0 };
+let STATE = { entries: [], tasks: [], agenda: [], tags: [], projects: [], subjectsByTag: {}, deleted: {}, settings: {}, updatedAt: 0 };
 let viewWeekStart = null;
-let timer = { running: false, startedAt: 0, accumulated: 0, entryId: null };
+let timer = { running: false, startedAt: 0, accumulated: 0, entryId: null, subtag: "" };
 let formBusy = false;
 let tickTimer = null;
 let formMode = null;
@@ -616,8 +616,9 @@ function findEntry(id){
   return (STATE.entries || []).filter(function(x){ return x.id === id; })[0] || null;
 }
 function entryDisplayLabel(e){
+  const path = entryTagPath(e);
+  if (path) return path;
   if (e.project && !e.tag && !(e.subject && e.subject !== e.project)) return "+" + e.project;
-  if (e.tag && !e.subject) return "#" + String(e.tag).replace(/^#+/, "");
   return e.subject || e.tag || e.project || "Estudo";
 }
 function liveEntrySubject(){
@@ -633,12 +634,14 @@ function ensureLiveEntry(taskId){
     return existing;
   }
   const date = selectedDayIso || toISODate(new Date());
-  const tag = timer.tags ? (rememberTag("#" + String(timer.tags).replace(/^#+/, "")) || "") : "";
+  const tagPath = parseTagPath(timer.tags + (timer.subtag ? ("/" + timer.subtag) : ""));
+  const tag = tagPath.tag ? rememberTag(tagPath.tag) : (timer.tags ? rememberTag("#" + String(timer.tags).replace(/^#+/, "")) || "" : "");
+  const subtag = tagPath.subtag ? rememberSubject(tag, tagPath.subtag) : (timer.subtag ? rememberSubject(tag, timer.subtag) : "");
   const project = timer.project ? (rememberProject("+" + String(timer.project).replace(/^\++/, "")) || "") : "";
-  const subject = timer.task || tag || project || "Estudo";
+  const subject = timer.task || formatTagPath(tag, subtag) || tag || project || "Estudo";
   const entry = touch({
     id: uid(), date: date, time: "", seconds: 0, minutes: 0,
-    subject: subject, tag: tag || "", project: project || "",
+    subject: subject, tag: tag || "", subtag: subtag || "", project: project || "",
     notes: "", source: "live", taskId: taskId || null, live: true,
     createdAt: new Date().toISOString()
   });
@@ -664,6 +667,7 @@ function upsertEntryFromForm(entryId, data){
   e.minutes = Math.round((data.seconds || 0) / 60);
   e.subject = data.subject;
   e.tag = data.tag || "";
+  e.subtag = data.subtag || "";
   e.project = data.project || "";
   e.notes = data.notes || "";
   e.source = data.source || "manual";
@@ -684,7 +688,7 @@ function writeEntryRecord(data){
   STATE.entries.push(touch({
     id: uid(), date: data.date, time: data.time || "", seconds: data.seconds,
     minutes: Math.round(data.seconds / 60), subject: data.subject, tag: data.tag || "",
-    project: data.project || "", notes: data.notes || "", source: data.source || "manual",
+    subtag: data.subtag || "", project: data.project || "", notes: data.notes || "", source: data.source || "manual",
     taskId: data.taskId || null, live: false, createdAt: new Date().toISOString()
   }));
   return true;
@@ -741,9 +745,72 @@ function dashPeriodBounds(){
 function normalizeTag(raw){
   let s = String(raw || "").trim().toLowerCase();
   s = s.replace(/^#+/, "");
+  s = s.replace(/\/.*$/, "");
   s = s.replace(/[^a-z0-9áàâãéêíóôõúç_-]+/g, "");
   if (!s) return "";
   return "#" + s;
+}
+function normalizeSubtag(raw){
+  let s = String(raw || "").trim().toLowerCase();
+  s = s.replace(/^#+/, "");
+  s = s.replace(/[^a-z0-9áàâãéêíóôõúç_-]+/g, "");
+  return s;
+}
+function parseTagPath(raw){
+  let s = String(raw || "").trim().replace(/^#+/, "");
+  const i = s.indexOf("/");
+  if (i < 0) return { tag: normalizeTag(s), subtag: "" };
+  return { tag: normalizeTag(s.slice(0, i)), subtag: normalizeSubtag(s.slice(i + 1)) };
+}
+function formatTagPath(tag, subtag){
+  if (!tag) return "";
+  return subtag ? (tag + "/" + subtag) : tag;
+}
+function ensureSubjectsStore(){
+  if (!STATE.subjectsByTag || typeof STATE.subjectsByTag !== "object" || Array.isArray(STATE.subjectsByTag)) STATE.subjectsByTag = {};
+}
+function rememberSubject(tag, subtag){
+  const t = normalizeTag(tag);
+  const s = normalizeSubtag(subtag);
+  if (!t || !s) return "";
+  ensureSubjectsStore();
+  if (!Array.isArray(STATE.subjectsByTag[t])) STATE.subjectsByTag[t] = [];
+  if (STATE.subjectsByTag[t].indexOf(s) < 0) STATE.subjectsByTag[t].push(s);
+  STATE.subjectsByTag[t].sort(function(a, b){ return a.localeCompare(b, "pt"); });
+  return s;
+}
+function subjectsOfTag(tag){
+  ensureSubjectsStore();
+  const t = normalizeTag(tag);
+  return t && Array.isArray(STATE.subjectsByTag[t]) ? STATE.subjectsByTag[t].slice() : [];
+}
+function mergeSubjectsByTag(local, remote){
+  const out = Object.assign({}, local || {});
+  Object.keys(remote || {}).forEach(function(tag){
+    const n = normalizeTag(tag);
+    if (!n) return;
+    const set = {};
+    (out[n] || []).concat(remote[tag] || []).forEach(function(s){
+      const sub = normalizeSubtag(s);
+      if (sub) set[sub] = true;
+    });
+    out[n] = Object.keys(set).sort(function(a, b){ return a.localeCompare(b, "pt"); });
+  });
+  return out;
+}
+function entrySubtagOf(e){
+  if (!e) return "";
+  if (e.subtag) return normalizeSubtag(e.subtag);
+  if (e.taskId){
+    const t = taskById(e.taskId);
+    if (t && t.subtag) return normalizeSubtag(t.subtag);
+  }
+  return "";
+}
+function entryTagPath(e){
+  const tag = e && e.tag ? normalizeTag(e.tag) : "";
+  const sub = entrySubtagOf(e);
+  return formatTagPath(tag, sub);
 }
 function knownTags(){
   const map = {};
@@ -787,8 +854,17 @@ function uniqueKeep(list){
 function parseNomen(raw){
   let s = String(raw || "").trim();
   const tags = [];
+  let subtag = "";
   let project = "";
-  s = s.replace(/(^|\s)#([^\s#]+)/g, function(_, sp, body){
+  s = s.replace(/(^|\s)#([^\s#+@]+)\/([^\s#+@]+)/g, function(_, sp, area, sub){
+    const path = parseTagPath(area + "/" + sub);
+    if (path.tag){
+      tags.push(path.tag);
+      if (path.subtag){ subtag = path.subtag; rememberSubject(path.tag, path.subtag); }
+    }
+    return " ";
+  });
+  s = s.replace(/(^|\s)#([^\s#+@/]+)/g, function(_, sp, body){
     const t = normalizeTag(body);
     if (t) tags.push(t);
     return " ";
@@ -802,7 +878,9 @@ function parseNomen(raw){
   let title = normalizeTaskName(s);
   if (!title && tags[0]) title = normalizeTaskName(tags[0].replace(/^#/, ""));
   if (!title && project) title = normalizeTaskName(project.replace(/^\+/, ""));
-  return { title: title, project: project, tag: tags[0] || "", tags: uniqueKeep(tags) };
+  const tag = tags[0] || "";
+  if (tag && subtag) rememberSubject(tag, subtag);
+  return { title: title, project: project, tag: tag, subtag: subtag, tags: uniqueKeep(tags) };
 }
 function rememberProject(raw, silent){
   const project = normalizeProject(raw);
@@ -882,7 +960,7 @@ function taskDisplayName(t){
 function taskProjectOf(t){ return t && t.project ? normalizeProject(t.project) : ""; }
 function taskTagOf(t){
   if (!t) return "";
-  if (t.tag) return normalizeTag(t.tag);
+  if (t.tag) return formatTagPath(normalizeTag(t.tag), t.subtag ? normalizeSubtag(t.subtag) : "");
   const title = String(t.title || "");
   if (title.charAt(0) === "#") return normalizeTag(title);
   return "";
@@ -920,9 +998,14 @@ function entryDashLabel(e){
   if (e.tag) return normalizeTag(e.tag) || "Sem tag";
   if (e.taskId){
     const t = taskById(e.taskId);
-    if (t) return normalizeTag(t.tag || t.title) || "Sem tag";
+    if (t && t.tag) return normalizeTag(t.tag) || "Sem tag";
   }
   return normalizeTag(e.subject) || "Sem tag";
+}
+function entryDashChildLabel(e){
+  const sub = entrySubtagOf(e);
+  if (sub) return sub;
+  return entryTaskLabel(e);
 }
 function taskById(id){ return (STATE.tasks || []).filter(function(t){ return t.id === id; })[0] || null; }
 function dashSliceBy(){
@@ -970,8 +1053,9 @@ function computeDashSlices(){
     const secs = entrySeconds(e);
     totals[label] = (totals[label] || 0) + secs;
     if (!children[label]) children[label] = {};
-    const childKey = e.taskId || ("free:" + entryTaskLabel(e));
-    if (!children[label][childKey]) children[label][childKey] = { label: entryTaskLabel(e), seconds: 0 };
+    const childKey = entrySubtagOf(e) || e.taskId || ("free:" + entryTaskLabel(e));
+    const childLabel = entryDashChildLabel(e);
+    if (!children[label][childKey]) children[label][childKey] = { label: childLabel, seconds: 0 };
     children[label][childKey].seconds += secs;
   });
   const slices = Object.keys(totals).map(function(label){
@@ -1167,6 +1251,7 @@ function ensureLists(){
   if (!Array.isArray(STATE.entries)) STATE.entries = [];
   if (!Array.isArray(STATE.tags)) STATE.tags = [];
   if (!Array.isArray(STATE.projects)) STATE.projects = [];
+  ensureSubjectsStore();
   if (!STATE.deleted || typeof STATE.deleted !== "object" || Array.isArray(STATE.deleted)) STATE.deleted = {};
   if (STATE.settings && STATE.settings.activeTaskId != null) delete STATE.settings.activeTaskId;
   // Migrate reviews created before the two systems were unified: they had no
@@ -1196,6 +1281,7 @@ function ensureLists(){
   (STATE.tasks || []).concat(STATE.entries || []).forEach(function(item){
     rememberTag(item.tag || item.title || item.subject, true);
     rememberProject(item.project, true);
+    if (item.tag && item.subtag) rememberSubject(item.tag, item.subtag);
   });
 }
 function getWeekDays(){ return 7; }
@@ -1259,7 +1345,8 @@ function attachTimeToTask(taskId, seconds, source){
   const project = rememberProject(t.project);
   STATE.entries.push(touch({
     id: uid(), date: t.date || toISODate(new Date()), seconds: seconds, minutes: Math.round(seconds / 60),
-    subject: tag || t.title, tag: tag, project: project, notes: "", source: source || "free", taskId: t.id,
+    subject: formatTagPath(tag, t.subtag) || t.title, tag: tag, subtag: t.subtag ? normalizeSubtag(t.subtag) : "",
+    project: project, notes: "", source: source || "free", taskId: t.id,
     createdAt: new Date().toISOString()
   }));
   persist();
@@ -1937,7 +2024,7 @@ function renderNomenDraftHtml(){
   const placeholders = {
     task: "ler capítulo, revisar lista…",
     project: "heuristica, TCC…",
-    tag: "anatomia, datascience…",
+    tag: "anatomia, datascience… ou pod/anatomia",
     deadline: "entregar relatório, prova de anatomia…"
   };
   const prefix = kind === "project" ? "+" : (kind === "tag" ? "#" : (kind === "deadline" ? "◷" : "@"));
@@ -2313,7 +2400,7 @@ function toggleIntervaloModal(){
   render();
 }
 function updateTimerLabel(field, value){
-  if (field !== "task" && field !== "project" && field !== "tags") return;
+  if (field !== "task" && field !== "project" && field !== "tags" && field !== "subtag") return;
   timer[field] = value;
   persistRuntime();
 }
@@ -2322,9 +2409,8 @@ function timerLabelTitle(){
   if (timer.task && timer.task.trim()) parts.push("@" + timer.task.trim());
   if (timer.project && timer.project.trim()) parts.push("+" + timer.project.trim());
   if (timer.tags && timer.tags.trim()){
-    timer.tags.split(/[,]+/).map(function(t){ return t.trim(); }).filter(Boolean).forEach(function(t){
-      parts.push("#" + t.replace(/^#/, ""));
-    });
+    const path = formatTagPath(normalizeTag(timer.tags), timer.subtag ? normalizeSubtag(timer.subtag) : "");
+    if (path) parts.push(path);
   }
   return parts.join(" ");
 }
@@ -2369,18 +2455,22 @@ function submitNomenDraft(ev){
     persist();
     showToast("Projeto " + project + " adicionado.");
   } else if (kind === "tag"){
-    const tag = rememberTag("#" + raw.replace(/^#+/, ""));
+    const path = parseTagPath(raw);
+    const tag = rememberTag(path.tag || ("#" + raw.replace(/^#+/, "")));
     if (!tag){ showToast("Nome de tag inválido."); return; }
+    if (path.subtag) rememberSubject(tag, path.subtag);
     persist();
-    showToast("Tag " + tag + " adicionada.");
+    showToast(path.subtag ? (formatTagPath(tag, path.subtag) + " salvo em " + tag + ".") : ("Tag " + tag + " adicionada."));
   } else {
     parsed = parseNomen(raw.charAt(0) === "@" || raw.charAt(0) === "+" || raw.charAt(0) === "#" ? raw : ("@" + raw.replace(/^@+/, "")));
     if (!parsed.title){ showToast("Informe o nome da tarefa."); return; }
     rememberTag(parsed.tag);
+    if (parsed.subtag) rememberSubject(parsed.tag, parsed.subtag);
     rememberProject(parsed.project);
     const taskId = uid();
     STATE.tasks.push(touch({
-      id: taskId, date: date, time: "", title: parsed.title, tag: parsed.tag, project: parsed.project,
+      id: taskId, date: date, time: "", title: parsed.title, tag: parsed.tag, subtag: parsed.subtag || "",
+      project: parsed.project,
       notes: "", done: false, review: null, reviewedAt: null, calendarEventId: null,
       createdAt: new Date().toISOString()
     }));
@@ -2418,14 +2508,18 @@ function armTimerFromDraft(kind, raw, parsed, taskId){
     timer.project = raw.replace(/^\++/, "").trim();
     timer.task = "";
     timer.tags = "";
+    timer.subtag = "";
   } else if (kind === "tag"){
-    timer.tags = raw.replace(/^#+/, "").trim();
+    const path = parseTagPath(raw);
+    timer.tags = path.tag ? path.tag.replace(/^#+/, "") : raw.replace(/^#+/, "").trim();
+    timer.subtag = path.subtag || "";
     timer.task = "";
     timer.project = "";
   } else if (parsed){
     timer.task = (parsed.title || "").replace(/^@+/, "");
     timer.project = parsed.project ? parsed.project.replace(/^\++/, "") : "";
     timer.tags = parsed.tag ? parsed.tag.replace(/^#+/, "") : "";
+    timer.subtag = parsed.subtag || "";
   }
   timer.running = true;
   timer.startedAt = Date.now();
@@ -2469,6 +2563,7 @@ function syncTimerFromTitle(raw){
   if (parsed.title) timer.task = parsed.title.replace(/^@+/, "");
   if (parsed.project) timer.project = parsed.project.replace(/^\++/, "");
   if (parsed.tag) timer.tags = parsed.tag.replace(/^#+/, "");
+  if (parsed.subtag) timer.subtag = parsed.subtag;
   persistRuntime();
 }
 function finishTaskForm(opts){
@@ -2612,13 +2707,15 @@ function submitTaskForm(ev){
     return;
   }
   if (planKind === "tag"){
-    const tag = rememberTag("#" + title.replace(/^#+/, ""));
+    const path = parseTagPath(title);
+    const tag = rememberTag(path.tag || ("#" + title.replace(/^#+/, "")));
     if (!tag){ formBusy = false; showToast("Nome de tag inválido."); return; }
+    if (path.subtag) rememberSubject(tag, path.subtag);
     finishTaskForm({
       date: date,
       addAnother: addAnother,
       planKind: planKind,
-      toast: "Tag " + tag + " adicionada."
+      toast: path.subtag ? (formatTagPath(tag, path.subtag) + " salvo.") : ("Tag " + tag + " adicionada.")
     });
     return;
   }
@@ -2640,6 +2737,7 @@ function submitTaskForm(ev){
   const parsed = parseNomen(title.charAt(0) === "@" || title.charAt(0) === "+" || title.charAt(0) === "#" ? title : ("@" + title.replace(/^@+/, "")));
   if (!parsed.title){ formBusy = false; showToast("Informe o título, ex.: @ler capítulo +projeto #tag."); return; }
   const tag = rememberTag(parsed.tag);
+  const subtag = parsed.subtag ? rememberSubject(tag, parsed.subtag) : "";
   const project = rememberProject(parsed.project);
   const rmodeEl = document.getElementById("t-rmode");
   const rmode = wantsReview && rmodeEl && rmodeEl.value === "fixed" ? "fixed" : "ladder";
@@ -2652,6 +2750,7 @@ function submitTaskForm(ev){
     t.time = time;
     t.title = parsed.title;
     t.tag = tag;
+    t.subtag = subtag;
     t.project = project;
     t.notes = notes;
     t.review = wantsReview
@@ -2661,7 +2760,7 @@ function submitTaskForm(ev){
     if (seconds > 0){
       writeEntryRecord({
         editEntryId: editEntryId, date: date, time: time, seconds: seconds,
-        subject: tag || parsed.title, tag: tag, project: project, notes: notes,
+        subject: formatTagPath(tag, subtag) || parsed.title, tag: tag, subtag: subtag, project: project, notes: notes,
         source: "task", taskId: t.id
       });
     }
@@ -2684,7 +2783,7 @@ function submitTaskForm(ev){
         if (editEntryId){
           writeEntryRecord({
             editEntryId: editEntryId, date: date, time: time, seconds: seconds,
-            subject: tag || parsed.title, tag: tag, project: project, notes: notes,
+            subject: formatTagPath(tag, subtag) || parsed.title, tag: tag, subtag: subtag, project: project, notes: notes,
             source: "review", taskId: t.id
           });
         } else {
@@ -2704,7 +2803,7 @@ function submitTaskForm(ev){
     ? advanceReview({ mode: rmode, amount: amount, unit: unit, step: rmode === "ladder" ? -1 : 0 }, date)
     : null;
   const task = {
-    id: uid(), date: date, time: time, title: parsed.title, tag: tag, project: project, notes: notes, done: false,
+    id: uid(), date: date, time: time, title: parsed.title, tag: tag, subtag: subtag, project: project, notes: notes, done: false,
     review: review, reviewedAt: null, calendarEventId: null,
     createdAt: new Date().toISOString()
   };
@@ -2712,7 +2811,7 @@ function submitTaskForm(ev){
   if (seconds > 0){
     writeEntryRecord({
       editEntryId: editEntryId, date: date, time: time, seconds: seconds,
-      subject: tag || parsed.title, tag: tag, project: project, notes: notes,
+      subject: formatTagPath(tag, subtag) || parsed.title, tag: tag, subtag: subtag, project: project, notes: notes,
       source: formPrefill && formPrefill.source || "task", taskId: task.id
     });
   }
@@ -2745,7 +2844,7 @@ function confirmDeleteTask(id){
     if (e.taskId === id){
       if (timer.entryId === e.id){
         if (tickTimer){ clearInterval(tickTimer); tickTimer = null; }
-        timer = { running: false, startedAt: 0, accumulated: 0, entryId: null, task: timer.task, project: timer.project, tags: timer.tags };
+        timer = { running: false, startedAt: 0, accumulated: 0, entryId: null, task: timer.task, project: timer.project, tags: timer.tags, subtag: timer.subtag || "" };
         persistRuntime();
       }
       STATE.entries = dropItem(STATE.entries, e.id);
@@ -2828,7 +2927,7 @@ function confirmDeleteEntry(id){
   const taskId = e && e.taskId;
   if (timer.entryId === id){
     if (tickTimer){ clearInterval(tickTimer); tickTimer = null; }
-    timer = { running: false, startedAt: 0, accumulated: 0, entryId: null, task: timer.task, project: timer.project, tags: timer.tags };
+    timer = { running: false, startedAt: 0, accumulated: 0, entryId: null, task: timer.task, project: timer.project, tags: timer.tags, subtag: timer.subtag || "" };
     persistRuntime();
   }
   STATE.entries = dropItem(STATE.entries, id);
@@ -2871,8 +2970,8 @@ function stopTimer(){
     if (e){ e.live = false; touch(e); }
   }
   persist();
-  const saved = { task: timer.task, project: timer.project, tags: timer.tags };
-  timer = { running: false, startedAt: 0, accumulated: 0, entryId: entryId, task: saved.task, project: saved.project, tags: saved.tags };
+  const saved = { task: timer.task, project: timer.project, tags: timer.tags, subtag: timer.subtag || "" };
+  timer = { running: false, startedAt: 0, accumulated: 0, entryId: entryId, task: saved.task, project: saved.project, tags: saved.tags, subtag: saved.subtag };
   persistRuntime();
   if (seconds <= 0){
     if (entryId){
@@ -2907,8 +3006,8 @@ function haltFreeTimer(){
   const seconds = timer.accumulated || 0;
   syncLiveEntrySeconds(seconds);
   if (seconds > 0) persist();
-  const saved = { task: timer.task, project: timer.project, tags: timer.tags, entryId: timer.entryId };
-  timer = { running: false, startedAt: 0, accumulated: 0, entryId: saved.entryId, task: saved.task, project: saved.project, tags: saved.tags };
+  const saved = { task: timer.task, project: timer.project, tags: timer.tags, subtag: timer.subtag || "", entryId: timer.entryId };
+  timer = { running: false, startedAt: 0, accumulated: 0, entryId: saved.entryId, task: saved.task, project: saved.project, tags: saved.tags, subtag: saved.subtag };
   persistRuntime();
   return seconds;
 }
@@ -3127,7 +3226,7 @@ function loadState(){
   }
   try {
     const t = JSON.parse(localStorage.getItem("diario-estudos-timer") || "null");
-    if (t && (t.running || t.accumulated || t.task || t.project || t.tags)) timer = t;
+    if (t && (t.running || t.accumulated || t.task || t.project || t.tags || t.subtag)) timer = t;
     if (timer.running && timer.startedAt) startTimerTick();
   } catch (e) {}
   try { muted = localStorage.getItem("diario-estudos-muted") === "1"; } catch (e) {}
@@ -3166,6 +3265,7 @@ function mergeDiary(remote){
     agenda: mergeById(remote.agenda, STATE.agenda, deleted),
     tags: STATE.tags,
     projects: STATE.projects,
+    subjectsByTag: mergeSubjectsByTag(STATE.subjectsByTag, remote.subjectsByTag),
     deleted: deleted,
     settings: (remoteAt > (STATE.updatedAt || 0) ? (remote.settings || STATE.settings) : (STATE.settings || remote.settings || {})),
     updatedAt: Math.max(remoteAt, STATE.updatedAt || 0)

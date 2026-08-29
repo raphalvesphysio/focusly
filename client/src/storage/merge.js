@@ -56,6 +56,7 @@ export function mergeState(local, remote) {
     agenda: mergeById(remote.agenda, local.agenda, deleted),
     tags: local.tags,
     projects: local.projects,
+    subjectsByTag: Object.assign({}, remote.subjectsByTag || {}, local.subjectsByTag || {}),
     deleted,
     runtime: runtime || local.runtime || remote.runtime || {},
     settings:

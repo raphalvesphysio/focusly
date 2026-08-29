@@ -13,6 +13,7 @@ export function emptyState() {
     agenda: [],
     tags: [],
     projects: [],
+    subjectsByTag: {},
     deleted: {},
     settings: {},
     runtime: {},
