@@ -1784,12 +1784,22 @@ function pomoRemaining(){
   if (pomo.running && pomo.endsAt) return Math.max(0, Math.round((pomo.endsAt - Date.now()) / 1000));
   return pomo.pausedRemaining || 0;
 }
+function taskHasLogEntry(t, iso){
+  const start = parseTimeMins(t.time);
+  return (STATE.entries || []).some(function(e){
+    if (e.date !== iso || entrySeconds(e) <= 0) return false;
+    if (e.taskId === t.id) return true;
+    if (start != null && entryStartMins(e) === start) return true;
+    return false;
+  });
+}
 function collectDayBlocks(d, ownedIds){
   const timed = [];
   const allDay = [];
   const showDone = showCompletedTasks();
   tasksOn(d.iso).forEach(function(t){
     if (t.done && !showDone) return;
+    if (taskHasLogEntry(t, d.iso)) return;
     const start = parseTimeMins(t.time);
     const label = taskDisplayName(t);
     if (start == null){
@@ -2849,6 +2859,8 @@ function submitTaskForm(ev){
       subject: formatTagPath(tag, subtag) || parsed.title, tag: tag, subtag: subtag, project: project, notes: notes,
       source: formPrefill && formPrefill.source || "task", taskId: task.id
     });
+    task.time = "";
+    touch(task);
   }
   const extra = seconds > 0 ? (" · " + fmtDuration(seconds)) : "";
   finishTaskForm({
