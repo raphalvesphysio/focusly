@@ -25,21 +25,6 @@ copyDir(PUBLIC, DIST);
 copyDir(SRC, path.join(DIST, "src"));
 copyDir(LEGACY, path.join(DIST, "legacy"));
 
-const supabaseCfg = path.join(ROOT, "supabase.config.json");
-let supabaseJson = null;
-if (fs.existsSync(supabaseCfg)) {
-  supabaseJson = fs.readFileSync(supabaseCfg, "utf8");
-} else if (process.env.SUPABASE_URL && process.env.SUPABASE_ANON_KEY) {
-  supabaseJson = JSON.stringify({
-    url: process.env.SUPABASE_URL,
-    anonKey: process.env.SUPABASE_ANON_KEY,
-  }, null, 2);
-}
-if (supabaseJson) {
-  fs.writeFileSync(path.join(DIST, "supabase.config.json"), supabaseJson);
-  fs.writeFileSync(path.join(DIST, "legacy", "supabase.config.json"), supabaseJson);
-}
-
 fs.writeFileSync(
   path.join(DIST, "_redirects"),
   "/legacy    /legacy/index.html   200\n/legacy/   /legacy/index.html   200\n",
