@@ -322,11 +322,17 @@ h1{font-family:"Fraunces", Georgia, serif;font-weight:600;font-size:2rem;margin:
 .log-day-head{font-size:0.78rem;text-transform:uppercase;letter-spacing:0.06em;color:var(--ink-muted);font-weight:600;}
 .log-section{display:flex;flex-direction:column;gap:8px;}
 .entry-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px;}
-.entry-row{display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:start;padding:10px 12px;background:var(--surface-2);border-radius:10px;}
+.entry-row{display:grid;grid-template-columns:4.8rem 1fr auto;gap:8px 10px;align-items:start;padding:10px 12px;background:var(--surface-2);border-radius:10px;}
 .entry-row.live{outline:1px solid color-mix(in srgb,var(--accent) 35%,transparent);}
 .entry-row.task-only{outline:1px dashed color-mix(in srgb,var(--line) 80%,transparent);}
 .entry-row.agenda-only{outline:1px dashed color-mix(in srgb,var(--highlight) 35%,transparent);}
-.entry-dur{font-family:"IBM Plex Mono", monospace;font-size:0.86rem;font-weight:600;color:var(--accent-strong);font-variant-numeric:tabular-nums;white-space:nowrap;padding-top:1px;}
+.entry-row.gcal-only{outline:1px dashed color-mix(in srgb,#3B5BDB 45%,transparent);}
+.log-times{display:flex;flex-direction:column;gap:1px;font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums;}
+.log-time-start{font-size:0.82rem;font-weight:600;color:var(--accent-strong);}
+.log-time-end{font-size:0.76rem;color:var(--ink-muted);}
+.log-time-allday{font-size:0.72rem;font-weight:700;color:var(--highlight);text-transform:uppercase;letter-spacing:0.04em;line-height:1.3;padding-top:2px;}
+.entry-dur{font-family:"IBM Plex Mono", monospace;font-size:0.78rem;font-weight:600;color:var(--ink-muted);font-variant-numeric:tabular-nums;white-space:nowrap;}
+.cloud-gcal-toggle{margin:4px 0 0;}
 .entry-notes{font-size:0.92rem;overflow-wrap:anywhere;}
 .entry-notes-empty{color:var(--ink-faint);font-style:italic;}
 .entry-tags{display:flex;align-items:center;gap:6px;margin-bottom:4px;flex-wrap:wrap;}
@@ -354,8 +360,6 @@ h1{font-family:"Fraunces", Georgia, serif;font-weight:600;font-size:2rem;margin:
 .task-title{font-weight:600;font-size:0.95rem;overflow-wrap:anywhere;}
 .task-note,.agenda-note{font-size:0.85rem;color:var(--ink-muted);overflow-wrap:anywhere;margin-top:2px;}
 .kind-pill{font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;padding:2px 8px;border-radius:999px;white-space:nowrap;}
-.kind-meta{background:var(--accent-soft);color:var(--accent-strong);}
-.kind-prova{background:var(--danger-soft);color:var(--danger);}
 .kind-prazo{background:var(--highlight-soft);color:var(--highlight);}
 .kind-rever{background:var(--highlight-soft);color:var(--highlight);}
 .cal-dot{font-size:0.72rem;color:var(--ink-faint);}
@@ -371,12 +375,12 @@ h1{font-family:"Fraunces", Georgia, serif;font-weight:600;font-size:2rem;margin:
 .dash-custom{display:flex;gap:8px;align-items:end;flex-wrap:wrap;}
 .dash-custom .field{margin:0;}
 .dash-custom input{padding:6px 8px;font-size:0.85rem;}
-.dash-tags{display:flex;flex-wrap:wrap;gap:6px;}
-.dash-tags button{
-  background:var(--surface-2);border:1px solid var(--line);color:var(--ink);border-radius:999px;
-  padding:4px 10px;font-size:0.75rem;font-weight:600;cursor:pointer;
+.dash-search-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;}
+.dash-search-row input{
+  flex:1;min-width:160px;padding:8px 12px;border:1px solid var(--line);border-radius:999px;
+  background:var(--surface-2);color:var(--ink);font-size:0.85rem;
 }
-.dash-tags button.on{color:#fff;border-color:transparent;}
+.dash-period-label{font-size:0.78rem;color:var(--ink-muted);font-weight:600;white-space:nowrap;}
 .dash-body{display:flex;flex-direction:column;gap:12px;align-items:center;}
 .dash-pie{
   width:min(100%,200px);aspect-ratio:1;border-radius:50%;margin:0 auto;
@@ -405,6 +409,9 @@ h1{font-family:"Fraunces", Georgia, serif;font-weight:600;font-size:2rem;margin:
 .dash-bar-track{width:100%;flex:1;display:flex;align-items:flex-end;min-height:0;}
 .dash-bar-fill{width:100%;background:var(--accent);border-radius:4px 4px 0 0;min-height:0;}
 .dash-bar-label{font-size:0.64rem;color:var(--ink-muted);white-space:nowrap;}
+.dash-type-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:4px;}
+.dash-type-row .view-toggle{flex-wrap:wrap;border-radius:999px;}
+.dash-type-row .view-toggle button{padding:5px 12px;font-size:0.74rem;}
 .dash-slice-by{display:flex;align-items:center;justify-content:space-between;gap:8px;}
 .dash-slice-label{font-size:0.72rem;color:var(--ink-muted);font-weight:600;}
 .view-toggle{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;}
@@ -513,9 +520,7 @@ input,textarea{font-size:0.95rem;color:var(--ink);background:var(--bg);border:1p
 .tl-now{position:absolute;left:0;right:0;height:2px;background:var(--now);z-index:3;pointer-events:none;}
 .tl-now::before{content:none;}
 .tl-now-start::before{content:"";position:absolute;left:-5px;top:-4px;width:10px;height:10px;border-radius:50%;background:var(--now);}
-.tl-block.agenda-prova{background:#A8412A;}
 .tl-block.agenda-prazo{background:#C97C1E;}
-.tl-block.agenda-meta{background:var(--accent);}
 .tl-block.gcal{background:#3B5BDB;}
 .tl-chip{font-size:0.68rem;padding:3px 6px;border-radius:5px;background:var(--accent-soft);color:var(--accent-strong);font-weight:600;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}
 .tl-chip.gcal{background:#3B5BDB;color:#fff;}
@@ -589,6 +594,7 @@ let pomo = { active: false, phase: "focus", endsAt: 0, pausedRemaining: 0, runni
 let pomoModalOpen = false;
 let backupFolderHandle = null;
 let migrationDirty = false;
+let gcalLastRange = "";
 
 function pad2(n){ return n < 10 ? "0" + n : "" + n; }
 function uid(){ return "e" + Date.now().toString(36) + Math.random().toString(36).slice(2, 8); }
@@ -668,6 +674,11 @@ function syncLiveEntrySeconds(seconds){
   if (!e) return;
   e.seconds = Math.max(0, seconds || 0);
   e.minutes = Math.round(e.seconds / 60);
+  if (!e.time){
+    const now = new Date();
+    if (toISODate(now) === e.date) e.time = pad2(now.getHours()) + ":" + pad2(now.getMinutes());
+  }
+  applyEntryEndFields(e);
   touch(e);
 }
 function upsertEntryFromForm(entryId, data){
@@ -677,6 +688,9 @@ function upsertEntryFromForm(entryId, data){
   e.time = data.time || "";
   e.seconds = data.seconds;
   e.minutes = Math.round((data.seconds || 0) / 60);
+  const endFields = computeEntryEndFields(data.date, data.time || "", data.seconds || 0);
+  e.endDate = endFields.endDate;
+  e.endTime = endFields.endTime;
   e.subject = data.subject;
   e.tag = data.tag || "";
   e.subtag = data.subtag || "";
@@ -688,6 +702,12 @@ function upsertEntryFromForm(entryId, data){
   touch(e);
   return true;
 }
+function applyEntryEndFields(entry){
+  const endFields = computeEntryEndFields(entry.date, entry.time || "", entrySeconds(entry));
+  entry.endDate = endFields.endDate;
+  entry.endTime = endFields.endTime;
+  return entry;
+}
 function writeEntryRecord(data){
   if (data.editEntryId){
     if ((data.seconds || 0) <= 0){
@@ -697,9 +717,10 @@ function writeEntryRecord(data){
     return upsertEntryFromForm(data.editEntryId, data);
   }
   if ((data.seconds || 0) <= 0) return false;
+  const endFields = computeEntryEndFields(data.date, data.time || "", data.seconds);
   STATE.entries.push(touch({
-    id: uid(), date: data.date, time: data.time || "", seconds: data.seconds,
-    minutes: Math.round(data.seconds / 60), subject: data.subject, tag: data.tag || "",
+    id: uid(), date: data.date, endDate: endFields.endDate, time: data.time || "", endTime: endFields.endTime,
+    seconds: data.seconds, minutes: Math.round(data.seconds / 60), subject: data.subject, tag: data.tag || "",
     subtag: data.subtag || "", project: data.project || "", notes: data.notes || "", source: data.source || "manual",
     taskId: data.taskId || null, live: false, createdAt: new Date().toISOString()
   }));
@@ -985,10 +1006,6 @@ function nomenMarks(t){
   if (project) bits.push('<span class="mark project">' + escapeHtml(project) + "</span>");
   return bits.length ? '<div class="task-marks">' + bits.join("") + "</div>" : "";
 }
-function selectedDashTags(){
-  const sel = (STATE.settings.dash && STATE.settings.dash.tags) || [];
-  return sel.map(normalizeTag).filter(Boolean);
-}
 function colorForDashLabel(label){
   if (!STATE.settings.dashColors) STATE.settings.dashColors = {};
   if (STATE.settings.dashColors[label]) return STATE.settings.dashColors[label];
@@ -1021,13 +1038,44 @@ function entryDashChildLabel(e){
 }
 function taskById(id){ return (STATE.tasks || []).filter(function(t){ return t.id === id; })[0] || null; }
 function dashSliceBy(){
-  return (STATE.settings && STATE.settings.dash && STATE.settings.dash.sliceBy) || "tag";
+  const mode = STATE.settings && STATE.settings.dash && STATE.settings.dash.sliceBy;
+  if (mode === "task" || mode === "prazo" || mode === "project") return mode;
+  return "tag";
+}
+function dashSearchQuery(){
+  return String(STATE.settings && STATE.settings.dash && STATE.settings.dash.search || "").trim().toLowerCase();
+}
+function matchesDashSearch(label, q){
+  if (!q) return true;
+  return String(label || "").toLowerCase().indexOf(q) >= 0;
+}
+function setDashSearch(value){
+  if (!STATE.settings.dash) STATE.settings.dash = { preset: "month", from: "", to: "", search: "" };
+  STATE.settings.dash.search = String(value || "");
+  render();
 }
 function setDashSliceBy(mode){
-  if (!STATE.settings.dash) STATE.settings.dash = { preset: "month", from: "", to: "", tags: [] };
-  STATE.settings.dash.sliceBy = mode;
+  if (!STATE.settings.dash) STATE.settings.dash = { preset: "month", from: "", to: "", search: "" };
+  if (mode === "task" || mode === "prazo" || mode === "project" || mode === "tag") STATE.settings.dash.sliceBy = mode;
+  else STATE.settings.dash.sliceBy = "tag";
   persist();
   render();
+}
+function prazosOnDate(iso){
+  return (STATE.agenda || []).filter(function(a){
+    return a.date === iso;
+  });
+}
+function entryPrazoLabel(e){
+  const items = prazosOnDate(e.date);
+  if (!items.length) return "Sem prazo no dia";
+  return String(items[0].title || "Prazo").trim() || "Prazo";
+}
+function dashSliceLabel(mode){
+  if (mode === "task") return "Tarefa";
+  if (mode === "prazo") return "Prazo";
+  if (mode === "project") return "Projeto";
+  return "Tag";
 }
 function toggleDashExpand(label){
   dashExpanded[label] = !dashExpanded[label];
@@ -1042,7 +1090,22 @@ function entryGroupLabel(e, sliceBy){
     }
     return "Sem projeto";
   }
+  if (sliceBy === "task") return entryTaskLabel(e);
+  if (sliceBy === "prazo") return entryPrazoLabel(e);
   return entryDashLabel(e);
+}
+function entrySliceLabel(e, sliceBy){
+  return entryGroupLabel(e, sliceBy);
+}
+function entryDashChildForSlice(e, sliceBy){
+  if (sliceBy === "task"){
+    const tag = entryDashLabel(e);
+    if (tag && tag !== "Sem tag") return tag;
+    return entryGroupLabel(e, "project");
+  }
+  if (sliceBy === "prazo") return entryTaskLabel(e);
+  if (sliceBy === "project") return entryDashChildLabel(e);
+  return entryDashChildLabel(e);
 }
 function entryTaskLabel(e){
   if (e.taskId){
@@ -1054,19 +1117,18 @@ function entryTaskLabel(e){
 function computeDashSlices(){
   const bounds = dashPeriodBounds();
   const sliceBy = dashSliceBy();
-  const filter = selectedDashTags();
+  const q = dashSearchQuery();
   const totals = {};
   const children = {};
   (STATE.entries || []).forEach(function(e){
     if (!e || !e.date || e.date < bounds.from || e.date > bounds.to) return;
-    const tagLabel = entryDashLabel(e);
-    if (filter.length && filter.indexOf(tagLabel) < 0) return;
-    const label = sliceBy === "project" ? entryGroupLabel(e, "project") : tagLabel;
+    const label = entrySliceLabel(e, sliceBy);
+    if (!matchesDashSearch(label, q)) return;
     const secs = entrySeconds(e);
     totals[label] = (totals[label] || 0) + secs;
     if (!children[label]) children[label] = {};
     const childKey = entrySubtagOf(e) || e.taskId || ("free:" + entryTaskLabel(e));
-    const childLabel = entryDashChildLabel(e);
+    const childLabel = entryDashChildForSlice(e, sliceBy);
     if (!children[label][childKey]) children[label][childKey] = { label: childLabel, seconds: 0 };
     children[label][childKey].seconds += secs;
   });
@@ -1088,11 +1150,12 @@ function dashDayBuckets(bounds){
   const totalDays = Math.round((to - from) / 86400000) + 1;
   if (totalDays <= 0) return { buckets: [], granularity: "day" };
   const granularity = totalDays > 62 ? "month" : (totalDays > 14 ? "week" : "day");
-  const filter = selectedDashTags();
+  const sliceBy = dashSliceBy();
+  const q = dashSearchQuery();
   const totals = {};
   (STATE.entries || []).forEach(function(e){
     if (!e || !e.date || e.date < bounds.from || e.date > bounds.to) return;
-    if (filter.length && filter.indexOf(entryDashLabel(e)) < 0) return;
+    if (!matchesDashSearch(entrySliceLabel(e, sliceBy), q)) return;
     const d = parseISODate(e.date);
     let key;
     if (granularity === "day") key = e.date;
@@ -1132,9 +1195,8 @@ function renderDashboardModal(){
   const data = computeDashSlices();
   const dayData = dashDayBuckets(data.bounds);
   const preset = dashPreset();
-  const filter = selectedDashTags();
-  const tags = knownTags();
   const sliceBy = data.sliceBy;
+  const search = (STATE.settings.dash && STATE.settings.dash.search) || "";
   const presets = [
     ["week", "Semana"], ["month", "Mês"], ["year", "Ano"],
     ["7", "7d"], ["30", "30d"], ["90", "90d"], ["custom", "Datas"]
@@ -1145,12 +1207,13 @@ function renderDashboardModal(){
   const customRow = preset === "custom"
     ? '<div class="dash-custom"><label class="field"><span>De</span><input type="date" value="' + escapeHtml(data.bounds.from) + '" onchange="setDashCustomDate(\'from\', this.value)"></label><label class="field"><span>Até</span><input type="date" value="' + escapeHtml(data.bounds.to) + '" onchange="setDashCustomDate(\'to\', this.value)"></label></div>'
     : "";
-  const tagBtns = '<button type="button" class="' + (!filter.length ? "on" : "") + '" onclick="clearDashTags()">Todas</button>' +
-    tags.map(function(tag){
-      const on = filter.indexOf(tag) >= 0;
-      const color = colorForDashLabel(tag);
-      return '<button type="button" class="' + (on ? "on" : "") + '" style="' + (on ? "background:" + color : "") + '" onclick="toggleDashTag(\'' + tag.replace(/'/g, "") + '\')">' + escapeHtml(tag) + "</button>";
-    }).join("");
+  const typeBtns = ["task", "prazo", "project", "tag"].map(function(mode){
+    return '<button type="button" class="' + (sliceBy === mode ? "on" : "") + '" onclick="setDashSliceBy(\'' + mode + '\')">' + dashSliceLabel(mode) + "</button>";
+  }).join("");
+  const typeRow = '<div class="dash-type-row"><div class="view-toggle">' + typeBtns + "</div></div>";
+  const searchRow = '<div class="dash-search-row">' +
+    '<input type="search" placeholder="Buscar ' + dashSliceLabel(sliceBy).toLowerCase() + '…" value="' + escapeHtml(search) + '" oninput="setDashSearch(this.value)">' +
+    '<span class="dash-period-label">' + escapeHtml(data.bounds.label || "") + "</span></div>";
 
   const daysWithTime = dayData.buckets.filter(function(b){ return b.seconds > 0; }).length;
   const avgSeconds = data.total ? data.total / Math.max(1, daysWithTime) : 0;
@@ -1170,17 +1233,16 @@ function renderDashboardModal(){
     }).join("") + "</div>"
   ) : "";
 
-  const sliceByRow = '<div class="dash-slice-by"><span class="dash-slice-label">Agrupar por</span><div class="view-toggle">' +
-    '<button type="button" class="' + (sliceBy === "tag" ? "on" : "") + '" onclick="setDashSliceBy(\'tag\')">Tags</button>' +
-    '<button type="button" class="' + (sliceBy === "project" ? "on" : "") + '" onclick="setDashSliceBy(\'project\')">Projetos</button>' +
-    "</div></div>";
+  const sliceLabel = dashSliceLabel(sliceBy);
+  const chartTitle = '<h4>Por ' + sliceLabel.toLowerCase() + "</h4>";
 
   let pieInner;
   let legend;
   let breakdown = "";
+  const searchHint = dashSearchQuery() ? ' para "' + escapeHtml(search.trim()) + '"' : "";
   if (!data.total){
     pieInner = '<div class="dash-pie" style="background:var(--surface-2)"><div class="dash-pie-hole"><span class="dash-pie-total">0h</span><span class="dash-pie-label">total</span></div></div>';
-    legend = '<p class="empty-state">Nenhum tempo neste período' + (filter.length ? " para as tags escolhidas" : "") + ".</p>";
+    legend = '<p class="empty-state">Nenhum tempo neste período' + searchHint + ".</p>";
   } else {
     let acc = 0;
     const stops = data.slices.map(function(s){
@@ -1188,11 +1250,11 @@ function renderDashboardModal(){
       acc += s.pct;
       return s.color + " " + start.toFixed(2) + "% " + acc.toFixed(2) + "%";
     }).join(",");
-    pieInner = '<div class="dash-pie" style="background:conic-gradient(' + stops + ')" role="img" aria-label="Distribuição por ' + (sliceBy === "project" ? "projeto" : "tag") + '"><div class="dash-pie-hole"><span class="dash-pie-total">' + escapeHtml(fmtDuration(data.total)) + '</span><span class="dash-pie-label">total</span></div></div>';
+    pieInner = '<div class="dash-pie" style="background:conic-gradient(' + stops + ')" role="img" aria-label="Distribuição por ' + sliceLabel.toLowerCase() + '"><div class="dash-pie-hole"><span class="dash-pie-total">' + escapeHtml(fmtDuration(data.total)) + '</span><span class="dash-pie-label">total</span></div></div>';
     legend = '<ul class="dash-legend">' + data.slices.map(function(s){
       return '<li><span class="dash-swatch" style="background:' + s.color + '"></span><span class="dash-legend-name">' + escapeHtml(s.label) + '</span><span class="dash-legend-meta">' + escapeHtml(fmtDuration(s.seconds)) + " · " + Math.round(s.pct) + "%</span></li>";
     }).join("") + "</ul>";
-    breakdown = '<div class="dash-breakdown"><div class="dash-breakdown-head"><span>' + (sliceBy === "project" ? "Projeto" : "Tag") + '</span><span>Duração</span><span>%</span></div>' +
+    breakdown = '<div class="dash-breakdown"><div class="dash-breakdown-head"><span>' + sliceLabel + '</span><span>Duração</span><span>%</span></div>' +
       '<ul class="dash-breakdown-list">' + data.slices.map(function(s){
         const key = s.label.replace(/'/g, "");
         const expanded = !!dashExpanded[s.label];
@@ -1211,18 +1273,18 @@ function renderDashboardModal(){
   return '<div class="overlay open dash-modal" onclick="if(event.target===this) toggleDashModal()"><div class="panel">' +
     '<div class="dash-modal-head"><h3>Resumo</h3><button class="btn btn-icon" type="button" onclick="toggleDashModal()" aria-label="Fechar resumo">✕</button></div>' +
     '<div class="dash-presets">' + presetBtns + "</div>" + customRow +
-    '<div class="dash-tags">' + tagBtns + "</div>" +
+    typeRow + searchRow +
     statsRow +
     '<div class="dash-charts-row">' +
       '<div class="dash-chart-card"><h4>Duração por dia</h4>' + barChart + "</div>" +
-      '<div class="dash-chart-card">' + sliceByRow + '<div class="dash-body">' + pieInner + legend + "</div></div>" +
+      '<div class="dash-chart-card">' + chartTitle + '<div class="dash-body">' + pieInner + legend + "</div></div>" +
     "</div>" +
     breakdown +
     '<div class="field-actions"><button class="btn btn-ghost" type="button" onclick="toggleDashModal()">Fechar</button></div>' +
     "</div></div>";
 }
 function setDashPreset(preset){
-  if (!STATE.settings.dash) STATE.settings.dash = { preset: "month", from: "", to: "", tags: [] };
+  if (!STATE.settings.dash) STATE.settings.dash = { preset: "month", from: "", to: "", search: "" };
   STATE.settings.dash.preset = preset;
   if (preset === "custom"){
     const now = new Date();
@@ -1233,27 +1295,9 @@ function setDashPreset(preset){
   render();
 }
 function setDashCustomDate(which, value){
-  if (!STATE.settings.dash) STATE.settings.dash = { preset: "custom", from: "", to: "", tags: [] };
+  if (!STATE.settings.dash) STATE.settings.dash = { preset: "custom", from: "", to: "", search: "" };
   STATE.settings.dash.preset = "custom";
   STATE.settings.dash[which] = value;
-  persist();
-  render();
-}
-function toggleDashTag(tag){
-  if (!STATE.settings.dash) STATE.settings.dash = { preset: "month", from: "", to: "", tags: [] };
-  if (!Array.isArray(STATE.settings.dash.tags)) STATE.settings.dash.tags = [];
-  tag = normalizeTag(tag);
-  const tags = STATE.settings.dash.tags.map(normalizeTag);
-  const i = tags.indexOf(tag);
-  if (i >= 0) tags.splice(i, 1);
-  else tags.push(tag);
-  STATE.settings.dash.tags = tags;
-  persist();
-  render();
-}
-function clearDashTags(){
-  if (!STATE.settings.dash) STATE.settings.dash = { preset: "month", from: "", to: "", tags: [] };
-  STATE.settings.dash.tags = [];
   persist();
   render();
 }
@@ -1287,9 +1331,13 @@ function ensureLists(){
   pruneTombstones(STATE.deleted);
   if (!STATE.settings || typeof STATE.settings !== "object") STATE.settings = {};
   STATE.settings.weekDays = 7;
-  if (!STATE.settings.dash || typeof STATE.settings.dash !== "object") STATE.settings.dash = { preset: "month", from: "", to: "", tags: [] };
-  if (!Array.isArray(STATE.settings.dash.tags)) STATE.settings.dash.tags = [];
+  if (!STATE.settings.dash || typeof STATE.settings.dash !== "object") STATE.settings.dash = { preset: "month", from: "", to: "", search: "", sliceBy: "tag" };
+  if (STATE.settings.dash.search == null) STATE.settings.dash.search = "";
+  if (!STATE.settings.dash.sliceBy) STATE.settings.dash.sliceBy = "tag";
   if (!STATE.settings.dashColors || typeof STATE.settings.dashColors !== "object") STATE.settings.dashColors = {};
+  (STATE.agenda || []).forEach(function(a){ normalizeEventItem(a); });
+  (STATE.tasks || []).forEach(function(t){ normalizeEventItem(t); });
+  (STATE.entries || []).forEach(function(e){ applyEntryEndFields(e); });
   (STATE.tasks || []).concat(STATE.entries || []).forEach(function(item){
     rememberTag(item.tag || item.title || item.subject, true);
     rememberProject(item.project, true);
@@ -1355,12 +1403,12 @@ function attachTimeToTask(taskId, seconds, source){
   if (!t || seconds <= 0) return false;
   const tag = rememberTag(t.tag || t.title) || t.title;
   const project = rememberProject(t.project);
-  STATE.entries.push(touch({
-    id: uid(), date: t.date || toISODate(new Date()), seconds: seconds, minutes: Math.round(seconds / 60),
+  STATE.entries.push(touch(applyEntryEndFields({
+    id: uid(), date: t.date || toISODate(new Date()), time: t.time || "", seconds: seconds, minutes: Math.round(seconds / 60),
     subject: formatTagPath(tag, t.subtag) || t.title, tag: tag, subtag: t.subtag ? normalizeSubtag(t.subtag) : "",
     project: project, notes: "", source: source || "free", taskId: t.id,
     createdAt: new Date().toISOString()
-  }));
+  })));
   persist();
   return true;
 }
@@ -1375,6 +1423,98 @@ function parseTimeMins(t){
   if (!t || !/^\d{1,2}:\d{2}/.test(String(t))) return null;
   const p = String(t).split(":");
   return parseInt(p[0], 10) * 60 + parseInt(p[1], 10);
+}
+function fmtMinsAsTime(mins){
+  mins = Math.max(0, Math.floor(mins));
+  if (mins >= 1440) return "24:00";
+  return pad2(Math.floor(mins / 60)) + ":" + pad2(mins % 60);
+}
+function normalizeEventItem(item){
+  if (!item) return item;
+  if (item.allDay == null) item.allDay = !item.time && !item.endTime;
+  if (!item.endDate) item.endDate = item.date;
+  if (item.endDate < item.date) item.endDate = item.date;
+  return item;
+}
+function eventDaySpan(item){
+  item = normalizeEventItem(item);
+  const from = item.date || toISODate(new Date());
+  let to = item.endDate || from;
+  if (!item.allDay && item.time && item.endTime){
+    const sm = parseTimeMins(item.time);
+    const em = parseTimeMins(item.endTime);
+    if (sm != null && em != null && em <= sm && to === from){
+      to = toISODate(addDays(parseISODate(from), 1));
+    }
+  }
+  if (to < from) to = from;
+  return { from: from, to: to };
+}
+function itemCoversDay(item, iso){
+  const span = eventDaySpan(item);
+  return iso >= span.from && iso <= span.to;
+}
+function clipEventOnDay(item, iso){
+  item = normalizeEventItem(item);
+  if (!itemCoversDay(item, iso)) return null;
+  if (item.allDay || (!item.time && !item.endTime)) return { allDay: true };
+  const span = eventDaySpan(item);
+  const sm = parseTimeMins(item.time);
+  const em = parseTimeMins(item.endTime);
+  const endMins = em != null ? em : (sm != null ? sm + 60 : 1440);
+  if (sm == null) return { allDay: true };
+  if (iso === span.from && iso === span.to){
+    if (endMins > sm) return { start: sm, end: Math.min(endMins, 1440), continues: endMins > 1440 };
+    return { start: sm, end: 1440, continues: true };
+  }
+  if (iso === span.from) return { start: sm, end: 1440, continues: true };
+  if (iso === span.to){
+    const end = span.from === span.to ? endMins : (endMins > 1440 && span.to !== span.from ? endMins - 1440 : endMins);
+    return { start: 0, end: end };
+  }
+  return { start: 0, end: 1440, fullDay: true };
+}
+function entryAsTimedEvent(e){
+  if (e.endDate && e.endTime) return normalizeEventItem({ date: e.date, endDate: e.endDate, time: e.time || "", endTime: e.endTime, allDay: !e.time && !e.endTime });
+  const sm = parseTimeMins(e.time);
+  const secs = entrySeconds(e);
+  if (sm == null || !secs) return normalizeEventItem({ date: e.date, endDate: e.date, time: e.time || "", endTime: e.endTime || "", allDay: !e.time });
+  const total = sm + Math.round(secs / 60);
+  const extraDays = Math.floor(total / 1440);
+  const endMins = total % 1440;
+  return normalizeEventItem({
+    date: e.date,
+    endDate: toISODate(addDays(parseISODate(e.date), extraDays)),
+    time: e.time,
+    endTime: fmtMinsAsTime(endMins === 0 && extraDays ? 1440 : endMins),
+    allDay: false
+  });
+}
+function computeEntryEndFields(date, time, seconds){
+  const ev = entryAsTimedEvent({ date: date, time: time, seconds: seconds });
+  return { endDate: ev.endDate, endTime: ev.endTime || "" };
+}
+function fmtLogTimeCells(item, iso){
+  const clip = clipEventOnDay(item, iso);
+  if (!clip) return { html: '<span class="log-time-allday">—</span>', sub: "" };
+  if (clip.allDay) return { html: '<span class="log-time-allday">Dia inteiro</span>', sub: "" };
+  const span = eventDaySpan(item);
+  let endLabel = fmtMinsAsTime(clip.end);
+  if (clip.continues || (iso === span.from && span.to > span.from)) endLabel = "24:00";
+  return {
+    html: '<div class="log-times"><span class="log-time-start">' + escapeHtml(fmtMinsAsTime(clip.start)) + '</span><span class="log-time-end">' + escapeHtml(endLabel) + "</span></div>",
+    sub: ""
+  };
+}
+function pushBlockForDay(blocks, item, iso, cls, title, id, kind){
+  const clip = clipEventOnDay(item, iso);
+  if (!clip) return;
+  if (clip.allDay || clip.fullDay){
+    blocks.allDay.push({ cls: cls.replace("tl-block", "tl-chip"), title: title, id: id, kind: kind });
+    return;
+  }
+  const clipped = clipDayMins(clip.start, clip.end);
+  if (clipped) blocks.timed.push({ cls: cls, title: title, start: clipped.start, end: clipped.end, id: id, kind: kind });
 }
 function fmtHourLabel(h){ return pad2(h) + ":00"; }
 function calHourStart(){
@@ -1491,14 +1631,43 @@ function visibleWeekLabel(monday){
   return monday.getDate() + " de " + monthAbbrev(monday.getMonth()) + ". a " + end.getDate() + " de " + monthAbbrev(end.getMonth()) + "." + yearSuffix;
 }
 function tasksOn(iso){
-  return (STATE.tasks || []).filter(function(t){ return t.date === iso; }).sort(function(a, b){
+  return (STATE.tasks || []).filter(function(t){ return itemCoversDay(t, iso); }).sort(function(a, b){
     return (a.time || "99:99").localeCompare(b.time || "99:99") || (a.createdAt || "").localeCompare(b.createdAt || "");
   });
 }
 function agendaOn(iso){
-  return (STATE.agenda || []).filter(function(a){ return a.date === iso; }).sort(function(a, b){
+  return (STATE.agenda || []).filter(function(a){ return itemCoversDay(a, iso); }).sort(function(a, b){
     return (a.time || "").localeCompare(b.time || "") || (a.createdAt || "").localeCompare(b.createdAt || "");
   });
+}
+function entriesOn(iso){
+  return (STATE.entries || []).filter(function(e){ return itemCoversDay(entryAsTimedEvent(e), iso); }).sort(function(a, b){
+    return (a.time || "99:99").localeCompare(b.time || "99:99") || (a.createdAt || "").localeCompare(b.createdAt || "");
+  });
+}
+function gcalOn(iso){
+  if (!window.MyFocuslyCloud || !MyFocuslyCloud.isGcalEnabled || !MyFocuslyCloud.isGcalEnabled()) return [];
+  return (MyFocuslyCloud.getGcalEvents() || []).filter(function(ev){ return itemCoversDay(ev, iso); });
+}
+function visibleCalRange(){
+  if (calView === "month"){
+    const anchor = monthAnchor();
+    const start = new Date(anchor.getFullYear(), anchor.getMonth(), 1);
+    const end = new Date(anchor.getFullYear(), anchor.getMonth() + 1, 0);
+    return { from: toISODate(start), to: toISODate(end) };
+  }
+  const monday = viewWeekStart || mondayOf(new Date());
+  return { from: toISODate(monday), to: toISODate(addDays(monday, 6)) };
+}
+function maybeRefreshGcal(){
+  if (!window.MyFocuslyCloud || !MyFocuslyCloud.isGcalEnabled || !MyFocuslyCloud.isGcalEnabled()) return;
+  const range = visibleCalRange();
+  const key = range.from + "|" + range.to;
+  if (key === gcalLastRange) return;
+  gcalLastRange = key;
+  MyFocuslyCloud.fetchGcalEvents(range.from, range.to).then(function(){
+    render();
+  }).catch(function(){});
 }
 function reviewPhrase(amount, unit){
   const n = Math.max(1, parseInt(amount, 10) || 1);
@@ -1506,16 +1675,15 @@ function reviewPhrase(amount, unit){
   return n + " dia" + (n === 1 ? "" : "s");
 }
 function kindLabel(kind){
+  kind = normalizePlanKind(kind || "task");
   if (kind === "prazo") return "Prazo";
   if (kind === "project") return "Projeto";
   if (kind === "tag") return "Tag";
-  if (kind === "prova") return "Prova";
-  if (kind === "meta") return "Meta";
   return "Tarefa";
 }
 function normalizePlanKind(kind){
-  if (kind === "prazo" || kind === "project" || kind === "tag") return kind;
-  if (kind === "meta" || kind === "prova" || kind === "deadline") return "prazo";
+  if (kind === "prazo" || kind === "project" || kind === "tag" || kind === "task") return kind;
+  if (kind === "deadline" || kind === "meta" || kind === "prova") return "prazo";
   return "task";
 }
 function planKindTitlePlaceholder(kind){
@@ -1577,6 +1745,28 @@ function togglePlanKindFields(kind){
   if (titleEl) titleEl.placeholder = planKindTitlePlaceholder(kind);
   refreshTitleSuggestions(kind);
   updateTaskFormDate();
+  if (kind === "prazo"){
+    const allDayEl = document.getElementById("t-all-day");
+    togglePrazoAllDay(!!(allDayEl && allDayEl.checked));
+  }
+}
+function togglePrazoAllDay(on){
+  const times = document.getElementById("t-prazo-times");
+  if (times) times.style.display = on ? "none" : "";
+}
+function readScheduleFields(date){
+  const allDayEl = document.getElementById("t-all-day");
+  const endDateEl = document.getElementById("t-end-date");
+  const endTimeEl = document.getElementById("t-end-time-prazo");
+  const timePrazoEl = document.getElementById("t-time-prazo");
+  const allDay = !!(allDayEl && allDayEl.checked);
+  const endDate = (endDateEl && endDateEl.value) || date;
+  return {
+    allDay: allDay,
+    endDate: endDate < date ? date : endDate,
+    time: allDay ? "" : ((timePrazoEl && timePrazoEl.value) || ""),
+    endTime: allDay ? "" : ((endTimeEl && endTimeEl.value) || "")
+  };
 }
 function updateTaskFormDate(){
   const dateEl = document.getElementById("t-date");
@@ -1800,35 +1990,20 @@ function collectDayBlocks(d, ownedIds){
   tasksOn(d.iso).forEach(function(t){
     if (t.done && !showDone) return;
     if (taskHasLogEntry(t, d.iso)) return;
-    const start = parseTimeMins(t.time);
     const label = taskDisplayName(t);
-    if (start == null){
-      allDay.push({ cls: "tl-chip", title: label, id: t.id, kind: "task" });
-      return;
-    }
-    const clipped = clipDayMins(start, start + 60);
-    if (clipped) timed.push({ cls: "tl-block task" + (t.done ? " done" : ""), title: label, start: clipped.start, end: clipped.end, id: t.id, kind: "task" });
+    pushBlockForDay({ timed: timed, allDay: allDay }, t, d.iso, "tl-block task" + (t.done ? " done" : ""), label, t.id, "task");
   });
   agendaOn(d.iso).forEach(function(a){
-    const start = parseTimeMins(a.time);
-    const label = kindLabel(a.kind) + ": " + a.title;
-    if (start == null){
-      allDay.push({ cls: "tl-chip", title: label });
-      return;
-    }
-    const clipped = clipDayMins(start, start + 60);
-    if (clipped) timed.push({ cls: "tl-block agenda-" + (a.kind || "meta"), title: a.title, start: clipped.start, end: clipped.end });
+    pushBlockForDay({ timed: timed, allDay: allDay }, a, d.iso, "tl-block agenda-prazo", a.title, a.id, "agenda");
   });
-  d.entries.forEach(function(e){
-    const start = entryStartMins(e);
+  gcalOn(d.iso).forEach(function(ev){
+    pushBlockForDay({ timed: timed, allDay: allDay }, ev, d.iso, "tl-block gcal", ev.title, ev.id, "gcal");
+  });
+  entriesOn(d.iso).forEach(function(e){
+    const ev = entryAsTimedEvent(e);
     const label = e.subject || (e.notes ? String(e.notes).slice(0, 40) : "Estudo");
-    if (start == null){
-      allDay.push({ cls: "tl-chip", title: label + " · " + fmtDuration(entrySeconds(e)), id: e.id, kind: "entry" });
-      return;
-    }
-    const durMin = Math.max(15, Math.round(entrySeconds(e) / 60) || 30);
-    const clipped = clipDayMins(start, start + durMin);
-    if (clipped) timed.push({ cls: "tl-block entry", title: label, start: clipped.start, end: clipped.end, id: e.id, kind: "entry" });
+    const suffix = entrySeconds(e) ? " · " + fmtDuration(entrySeconds(e)) : "";
+    pushBlockForDay({ timed: timed, allDay: allDay }, ev, d.iso, "tl-block entry", label + suffix, e.id, "entry");
   });
   return { timed: layoutTimed(timed), allDay: allDay };
 }
@@ -1870,10 +2045,10 @@ function dayAgendaItems(d, ownedIds){
   const blocks = collectDayBlocks(d, ownedIds);
   const rows = [];
   blocks.timed.forEach(function(b){
-    rows.push({ start: b.start, time: pad2(Math.floor(b.start / 60)) + ":" + pad2(b.start % 60), title: b.title });
+    rows.push({ start: b.start, time: fmtMinsAsTime(b.start) + " – " + fmtMinsAsTime(b.end), title: b.title });
   });
   blocks.allDay.forEach(function(c){
-    rows.push({ start: -1, time: "Dia", title: c.title });
+    rows.push({ start: -1, time: "Dia inteiro", title: c.title });
   });
   rows.sort(function(a, b){ return a.start - b.start; });
   if (!rows.length) return '<p class="empty-state">Nada neste dia.</p>';
@@ -1972,18 +2147,31 @@ function calendarTitle(isCurrentWeek){
   }
   return isCurrentWeek ? ("Esta semana · S" + isoWeekNum(viewWeekStart)) : visibleWeekLabel(viewWeekStart);
 }
-function renderLogAgendaRow(a){
+function renderLogAgendaRow(a, iso){
   const confirming = confirmDeleteAgendaId === a.id;
   const actions = confirming
     ? '<button class="btn btn-danger btn-xs" onclick="confirmDeleteAgenda(\'' + a.id + '\')">Confirmar</button><button class="btn btn-ghost btn-xs" onclick="cancelDeleteAgenda()">Cancelar</button>'
     : '<button class="btn btn-ghost btn-xs" onclick="askDeleteAgenda(\'' + a.id + '\')">Excluir</button>';
-  const meta = [a.time || "", kindLabel(a.kind)].filter(Boolean).join(" · ");
-  return '<li class="entry-row agenda-only"><div class="entry-dur">—</div><div>' +
-    '<div class="entry-tags"><span class="kind-pill kind-' + (a.kind || "prazo") + '">' + kindLabel(a.kind) + "</span></div>" +
+  const times = fmtLogTimeCells(a, iso || a.date);
+  const span = eventDaySpan(a);
+  const spanHint = span.to > span.from ? " · até " + fmtHumanDate(span.to) : "";
+  const meta = [kindLabel(a.kind), spanHint].filter(Boolean).join("");
+  return '<li class="entry-row agenda-only">' + times.html + '<div>' +
+    '<div class="entry-tags"><span class="kind-pill kind-prazo">' + kindLabel(a.kind) + "</span></div>" +
     '<div class="entry-notes">' + escapeHtml(a.title) + "</div>" +
     '<div class="task-note">' + escapeHtml(meta) + "</div>" +
     (a.notes ? '<div class="task-note">' + escapeHtml(a.notes) + "</div>" : "") +
     '</div><div class="entry-actions">' + actions + "</div></li>";
+}
+function renderLogGcalRow(ev, iso){
+  const times = fmtLogTimeCells(ev, iso || ev.date);
+  const span = eventDaySpan(ev);
+  const spanHint = span.to > span.from ? " · até " + fmtHumanDate(span.to) : "";
+  return '<li class="entry-row gcal-only">' + times.html + '<div>' +
+    '<div class="entry-tags"><span class="kind-pill" style="background:#3B5BDB33;color:#7DA2FF">Google</span></div>' +
+    '<div class="entry-notes">' + escapeHtml(ev.title) + "</div>" +
+    (spanHint ? '<div class="task-note">' + escapeHtml(spanHint.trim()) + "</div>" : "") +
+    "</div><div></div></li>";
 }
 function renderLogUpcoming(week){
   const weekIsos = {};
@@ -2001,8 +2189,8 @@ function renderLogUpcoming(week){
   if (!items.length) return "";
   items.sort(function(a, b){ return (a.at || "").localeCompare(b.at || ""); });
   const rows = items.map(function(row){
-    if (row.kind === "agenda") return renderLogAgendaRow(row.data);
-    return renderLogTaskRow(row.data);
+    if (row.kind === "agenda") return renderLogAgendaRow(row.data, row.data.date);
+    return renderLogTaskRow(row.data, row.data.date);
   }).join("");
   return '<div class="log-day"><div class="log-day-head">À frente</div><ul class="entry-list">' + rows + "</ul></div>";
 }
@@ -2011,22 +2199,26 @@ function renderLogEntries(){
   const chunks = [];
   week.days.forEach(function(d){
     const items = [];
-    d.entries.forEach(function(e){
-      items.push({ kind: "entry", data: e, at: e.createdAt || e.date || "" });
+    entriesOn(d.iso).forEach(function(e){
+      items.push({ kind: "entry", data: e, at: e.createdAt || e.date || "", iso: d.iso });
     });
     agendaOn(d.iso).forEach(function(a){
-      items.push({ kind: "agenda", data: a, at: a.createdAt || a.date || "" });
+      items.push({ kind: "agenda", data: a, at: a.createdAt || a.date || "", iso: d.iso });
+    });
+    gcalOn(d.iso).forEach(function(ev){
+      items.push({ kind: "gcal", data: ev, at: ev.date || "", iso: d.iso });
     });
     tasksOn(d.iso).forEach(function(t){
-      const linked = d.entries.some(function(e){ return e.taskId === t.id; });
-      if (!linked) items.push({ kind: "task", data: t, at: t.createdAt || t.date || "" });
+      const linked = entriesOn(d.iso).some(function(e){ return e.taskId === t.id; });
+      if (!linked) items.push({ kind: "task", data: t, at: t.createdAt || t.date || "", iso: d.iso });
     });
     if (!items.length) return;
     items.sort(function(a, b){ return (b.at || "").localeCompare(a.at || ""); });
     const rows = items.map(function(row){
-      if (row.kind === "entry") return renderLogEntryRow(row.data);
-      if (row.kind === "agenda") return renderLogAgendaRow(row.data);
-      return renderLogTaskRow(row.data);
+      if (row.kind === "entry") return renderLogEntryRow(row.data, row.iso);
+      if (row.kind === "agenda") return renderLogAgendaRow(row.data, row.iso);
+      if (row.kind === "gcal") return renderLogGcalRow(row.data, row.iso);
+      return renderLogTaskRow(row.data, row.iso);
     }).join("");
     chunks.push('<div class="log-day"><div class="log-day-head">' + escapeHtml(fmtHumanDate(d.iso)) + (d.isToday ? " · hoje" : "") + '</div><ul class="entry-list">' + rows + "</ul></div>");
   });
@@ -2035,7 +2227,7 @@ function renderLogEntries(){
   if (!upcoming && !body) return '<p class="empty-state">Nenhum registro nesta semana.</p>';
   return upcoming + body;
 }
-function renderLogEntryRow(e){
+function renderLogEntryRow(e, iso){
   const isLive = timer.entryId === e.id && timer.running;
   const isPaused = timer.entryId === e.id && !timer.running && (timer.accumulated > 0);
   const secs = (timer.entryId === e.id && (timer.running || timer.accumulated)) ? liveSeconds() : entrySeconds(e);
@@ -2046,22 +2238,30 @@ function renderLogEntryRow(e){
   const marks = [];
   if (e.tag) marks.push('<span class="mark tag">#' + escapeHtml(String(e.tag).replace(/^#+/, "")) + "</span>");
   if (e.project) marks.push('<span class="mark project">+' + escapeHtml(e.project) + "</span>");
-  const meta = [e.time || "", isLive ? "contando…" : (isPaused ? "pausado" : ""), "tempo"].filter(Boolean).join(" · ");
-  return '<li class="entry-row' + (isLive ? " live" : "") + '"><div class="entry-dur">' + (secs > 0 || isLive ? escapeHtml(fmtDuration(secs)) : "—") + '</div><div>' +
+  let timesHtml;
+  if (isLive || isPaused){
+    const start = e.time || pad2(new Date().getHours()) + ":" + pad2(new Date().getMinutes());
+    timesHtml = '<div class="log-times"><span class="log-time-start">' + escapeHtml(start) + '</span><span class="log-time-end">' + (isLive ? "…" : escapeHtml(fmtMinsAsTime(parseTimeMins(start) + Math.round(secs / 60)))) + "</span></div>";
+  } else {
+    timesHtml = fmtLogTimeCells(entryAsTimedEvent(e), iso || e.date).html;
+  }
+  const meta = [(secs > 0 || isLive ? fmtDuration(secs) : ""), isLive ? "contando…" : (isPaused ? "pausado" : ""), "tempo"].filter(Boolean).join(" · ");
+  return '<li class="entry-row' + (isLive ? " live" : "") + '">' + timesHtml + '<div>' +
     (marks.length ? '<div class="entry-tags">' + marks.join("") + "</div>" : "") +
     '<div class="entry-notes">' + escapeHtml(entryDisplayLabel(e)) + "</div>" +
     '<div class="task-note">' + escapeHtml(meta) + "</div>" +
     (e.notes ? '<div class="task-note">' + escapeHtml(e.notes) + "</div>" : "") +
     '</div><div class="entry-actions">' + actions + "</div></li>";
 }
-function renderLogTaskRow(t){
+function renderLogTaskRow(t, iso){
   const confirming = confirmDeleteTaskId === t.id;
   const actions = confirming
     ? '<button class="btn btn-danger btn-xs" onclick="confirmDeleteTask(\'' + t.id + '\')">Confirmar</button><button class="btn btn-ghost btn-xs" onclick="cancelDeleteTask()">Cancelar</button>'
     : '<button class="btn btn-ghost btn-xs" onclick="askDeleteTask(\'' + t.id + '\')">Excluir</button>';
   const spent = taskLoggedSeconds(t.id);
-  const meta = [t.time || "", t.done ? "concluída" : "tarefa"].filter(Boolean).join(" · ");
-  return '<li class="entry-row task-only"><div class="entry-dur">' + (spent ? escapeHtml(fmtDuration(spent)) : "—") + '</div><div>' +
+  const times = fmtLogTimeCells(t, iso || t.date);
+  const meta = [spent ? fmtDuration(spent) : "", t.done ? "concluída" : "tarefa"].filter(Boolean).join(" · ");
+  return '<li class="entry-row task-only">' + times.html + '<div>' +
     '<div class="entry-notes">' + escapeHtml(taskDisplayName(t)) + "</div>" +
     nomenMarks(t) +
     '<div class="task-note">' + escapeHtml(meta) + "</div>" +
@@ -2160,7 +2360,13 @@ function render(){
           "<h3>" + (reviewing ? "Revisar tarefa" : (editing ? "Editar tarefa" : "Nova entrada")) + "</h3>" +
           (showPlanKind ? renderPlanKindChips(planKind) : "") +
           '<label class="field"><span>Data</span><input type="date" id="t-date" value="' + (p.date || toISODate(new Date())) + '" required onchange="updateTaskFormDate()"></label>' +
-          '<div id="t-prazo-only"' + (planKind === "prazo" ? "" : ' style="display:none"') + '><label class="field"><span>Horário</span><input type="time" id="t-time-prazo" value="' + escapeHtml(p.time || "") + '"></label></div>' +
+          '<div id="t-prazo-only"' + (planKind === "prazo" ? "" : ' style="display:none"') + '>' +
+            '<label class="check-line"><input type="checkbox" id="t-all-day"' + (p.allDay ? " checked" : "") + ' onchange="togglePrazoAllDay(this.checked)"><span>Dia inteiro</span></label>' +
+            '<div class="field-row"><label class="field"><span>Data fim</span><input type="date" id="t-end-date" value="' + escapeHtml(p.endDate || p.date || toISODate(new Date())) + '"></label></div>' +
+            '<div id="t-prazo-times" class="field-row"' + (p.allDay ? ' style="display:none"' : "") + '>' +
+              '<label class="field"><span>Início</span><input type="time" id="t-time-prazo" value="' + escapeHtml(p.time || "") + '"></label>' +
+              '<label class="field"><span>Fim</span><input type="time" id="t-end-time-prazo" value="' + escapeHtml(p.endTime || "") + '"></label>' +
+            "</div></div>" +
           '<label class="field"><span>Título</span><input type="text" id="t-title" list="nomen-list" maxlength="120" value="' + escapeHtml(p.title || "") + '" placeholder="' + escapeHtml(planKindTitlePlaceholder(planKind)) + '" autocomplete="off"><datalist id="nomen-list">' + renderTitleSuggestionList(planKind) + "</datalist></label>" +
           '<label class="field"><span>Anotações</span><textarea id="t-notes" rows="3" placeholder="O que fazer, dúvidas, páginas, exercícios...">' + escapeHtml(p.notes || "") + "</textarea></label>" +
           '<div id="t-task-only" class="form-time-block"' + (planKind === "task" ? "" : ' style="display:none"') + '>' +
@@ -2245,6 +2451,7 @@ function render(){
   }
   if (formMode === "task") updateTaskFormDate();
   syncPomoDial();
+  maybeRefreshGcal();
 }
 
 function backupDaysAgo(){
@@ -2564,8 +2771,8 @@ function submitNomenDraft(ev){
   }
   if (kind === "deadline"){
     STATE.agenda.push(touch({
-      id: uid(), date: date, time: "", kind: "prazo", title: raw, notes: "",
-      calendarEventId: null, createdAt: new Date().toISOString()
+      id: uid(), date: date, endDate: date, time: "", endTime: "", allDay: true,
+      kind: "prazo", title: raw, notes: "", calendarEventId: null, createdAt: new Date().toISOString()
     }));
     focusCalendarDate(date);
     persist();
@@ -2716,17 +2923,16 @@ function submitTaskForm(ev){
   const planKind = normalizePlanKind(planKindEl ? planKindEl.getAttribute("data-kind") : ((formPrefill && formPrefill.planKind) || "task"));
   const timeEl = document.getElementById("t-time");
   const time = (timeEl && timeEl.value) || "";
-  const timePrazoEl = document.getElementById("t-time-prazo");
-  const timeForPrazo = (timePrazoEl && timePrazoEl.value) || time;
   const title = document.getElementById("t-title").value.trim();
   const notes = document.getElementById("t-notes").value.trim();
   if (!date){ showToast("Informe a data."); return; }
   if (!title){ showToast("Informe o título."); return; }
   formBusy = true;
   if (planKind === "prazo"){
+    const sched = readScheduleFields(date);
     STATE.agenda.push(touch({
-      id: uid(), date: date, time: timeForPrazo || "", kind: "prazo", title: title, notes: notes,
-      calendarEventId: null, createdAt: new Date().toISOString()
+      id: uid(), date: date, endDate: sched.endDate, time: sched.time, endTime: sched.endTime, allDay: sched.allDay,
+      kind: "prazo", title: title, notes: notes, calendarEventId: null, createdAt: new Date().toISOString()
     }));
     focusCalendarDate(date);
     finishTaskForm({
@@ -2793,6 +2999,9 @@ function submitTaskForm(ev){
     if (!t){ formBusy = false; showToast("Tarefa não encontrada."); return; }
     t.date = date;
     t.time = time;
+    t.endDate = date;
+    t.endTime = endTime || "";
+    t.allDay = !time && !endTime;
     t.title = parsed.title;
     t.tag = tag;
     t.subtag = subtag;
@@ -2848,7 +3057,8 @@ function submitTaskForm(ev){
     ? advanceReview({ mode: rmode, amount: amount, unit: unit, step: rmode === "ladder" ? -1 : 0 }, date)
     : null;
   const task = {
-    id: uid(), date: date, time: time, title: parsed.title, tag: tag, subtag: subtag, project: project, notes: notes, done: false,
+    id: uid(), date: date, endDate: date, time: time, endTime: endTime || "", allDay: !time && !endTime,
+    title: parsed.title, tag: tag, subtag: subtag, project: project, notes: notes, done: false,
     review: review, reviewedAt: null, calendarEventId: null,
     createdAt: new Date().toISOString()
   };
@@ -2928,9 +3138,6 @@ function confirmDeleteTag(tag){
   });
   if (STATE.settings){
     if (STATE.settings.dashColors) delete STATE.settings.dashColors[tag];
-    if (STATE.settings.dash && Array.isArray(STATE.settings.dash.tags)){
-      STATE.settings.dash.tags = STATE.settings.dash.tags.filter(function(t){ return normalizeTag(t) !== tag; });
-    }
   }
   confirmDeleteTagName = null;
   render();
@@ -3042,8 +3249,8 @@ function startTimerTick(){
     const el = document.querySelector(".timer-display");
     if (el) el.textContent = fmtHMS(secs);
     syncLiveEntrySeconds(secs);
-    const liveDur = document.querySelector(".entry-row.live .entry-dur");
-    if (liveDur) liveDur.textContent = fmtDuration(secs);
+    const liveEnd = document.querySelector(".entry-row.live .log-time-end");
+    if (liveEnd) liveEnd.textContent = "…";
   }, 250);
 }
 function haltFreeTimer(){
@@ -3423,6 +3630,9 @@ MyFocuslyCloud.configure({
     STATE.settings = STATE.settings || {};
     STATE.settings.lastBackupAt = Date.now();
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(STATE)); } catch (e) {}
+  },
+  onGoogleConnected: function(){
+    gcalLastRange = "";
   }
 });
 render();

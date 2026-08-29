@@ -4,7 +4,10 @@
 
   var DRIVE_FILE_NAME = "myfocusly-backup.json";
   var OAUTH_SCOPES =
-    "https://www.googleapis.com/auth/drive.appdata openid email profile";
+    "https://www.googleapis.com/auth/drive.appdata https://www.googleapis.com/auth/calendar.readonly openid email profile";
+  var GCAL_CACHE_TTL_MS = 5 * 60 * 1000;
+  var gcalCache = { from: "", to: "", events: [], fetchedAt: 0 };
+  var gcalFetchPromise = null;
   var CLOUD_PUSH_DEBOUNCE_MS = 5000;
   var CLOUD_ONLY = true;
   var TOKEN_STORAGE_KEY = "myfocusly-google-token";
@@ -110,6 +113,157 @@
     accessToken = null;
     tokenExpiresAt = 0;
     sessionUser = null;
+    gcalCache = { from: "", to: "", events: [], fetchedAt: 0 };
+    gcalFetchPromise = null;
+  }
+
+  function isGcalEnabled() {
+    if (!sessionUser || !accessToken) return false;
+    var STATE = deps && deps.getState ? deps.getState() : null;
+    var settings = STATE && STATE.settings;
+    return !settings || settings.showGcal !== false;
+  }
+
+  function mapGcalEvent(ev) {
+    var allDay = !!(ev.start && ev.start.date);
+    if (allDay) {
+      var from = ev.start.date;
+      var toEx = ev.end && ev.end.date ? ev.end.date : from;
+      var endDate = from;
+      try {
+        var d = new Date(toEx + "T00:00:00");
+        d.setDate(d.getDate() - 1);
+        endDate =
+          d.getFullYear() +
+          "-" +
+          String(d.getMonth() + 1).padStart(2, "0") +
+          "-" +
+          String(d.getDate()).padStart(2, "0");
+        if (endDate < from) endDate = from;
+      } catch (e) {
+        endDate = from;
+      }
+      return {
+        id: "gcal:" + ev.id,
+        date: from,
+        endDate: endDate,
+        time: "",
+        endTime: "",
+        allDay: true,
+        title: ev.summary || "(sem título)",
+        source: "gcal",
+        calendarEventId: ev.id,
+      };
+    }
+    var startDt = new Date(ev.start.dateTime);
+    var endDt = new Date(ev.end.dateTime);
+    function isoLocal(dt) {
+      return (
+        dt.getFullYear() +
+        "-" +
+        String(dt.getMonth() + 1).padStart(2, "0") +
+        "-" +
+        String(dt.getDate()).padStart(2, "0")
+      );
+    }
+    function timeLocal(dt) {
+      return (
+        String(dt.getHours()).padStart(2, "0") +
+        ":" +
+        String(dt.getMinutes()).padStart(2, "0")
+      );
+    }
+    return {
+      id: "gcal:" + ev.id,
+      date: isoLocal(startDt),
+      endDate: isoLocal(endDt),
+      time: timeLocal(startDt),
+      endTime: timeLocal(endDt),
+      allDay: false,
+      title: ev.summary || "(sem título)",
+      source: "gcal",
+      calendarEventId: ev.id,
+    };
+  }
+
+  async function fetchGcalEvents(fromIso, toIso) {
+    if (!accessToken || !isGcalEnabled()) {
+      gcalCache = { from: fromIso, to: toIso, events: [], fetchedAt: Date.now() };
+      return [];
+    }
+    var now = Date.now();
+    if (
+      gcalCache.from === fromIso &&
+      gcalCache.to === toIso &&
+      now - gcalCache.fetchedAt < GCAL_CACHE_TTL_MS
+    ) {
+      return gcalCache.events;
+    }
+    if (gcalFetchPromise) return gcalFetchPromise;
+    gcalFetchPromise = (async function () {
+      try {
+        var timeMin = fromIso + "T00:00:00Z";
+        var timeMax = toIso + "T23:59:59Z";
+        var url =
+          "https://www.googleapis.com/calendar/v3/calendars/primary/events?" +
+          "singleEvents=true&orderBy=startTime&maxResults=250&timeMin=" +
+          encodeURIComponent(timeMin) +
+          "&timeMax=" +
+          encodeURIComponent(timeMax);
+        var res = await fetch(url, {
+          headers: { Authorization: "Bearer " + accessToken },
+        });
+        if (res.status === 401 || res.status === 403) {
+          gcalCache = { from: fromIso, to: toIso, events: [], fetchedAt: now };
+          return [];
+        }
+        if (!res.ok) throw new Error("Erro ao ler Google Agenda.");
+        var data = await res.json();
+        var events = (data.items || [])
+          .filter(function (ev) {
+            return ev.status !== "cancelled";
+          })
+          .map(mapGcalEvent);
+        gcalCache = { from: fromIso, to: toIso, events: events, fetchedAt: Date.now() };
+        return events;
+      } finally {
+        gcalFetchPromise = null;
+      }
+    })();
+    return gcalFetchPromise;
+  }
+
+  function getGcalEvents() {
+    return gcalCache.events || [];
+  }
+
+  function invalidateGcalCache() {
+    gcalCache.fetchedAt = 0;
+  }
+
+  function setGcalEnabled(on) {
+    var STATE = deps.getState();
+    if (!STATE.settings) STATE.settings = {};
+    STATE.settings.showGcal = !!on;
+    invalidateGcalCache();
+    deps.persist();
+    if (on && accessToken) {
+      fetchGcalEvents(gcalCache.from || toIso(new Date()), gcalCache.to || toIso(new Date())).then(function () {
+        deps.render();
+      });
+    } else {
+      deps.render();
+    }
+  }
+
+  function toIso(d) {
+    return (
+      d.getFullYear() +
+      "-" +
+      String(d.getMonth() + 1).padStart(2, "0") +
+      "-" +
+      String(d.getDate()).padStart(2, "0")
+    );
   }
 
   async function fetchUserInfo(token) {
@@ -143,9 +297,11 @@
           deps.render();
           return;
         }
-        applyAccessToken(response)
+    applyAccessToken(response)
           .then(function () {
-            deps.showToast("Conta conectada. Backup no seu Google Drive.");
+            invalidateGcalCache();
+            if (deps.onGoogleConnected) deps.onGoogleConnected();
+            deps.showToast("Conta conectada. Backup no Google Drive + Agenda.");
             deps.render();
           })
           .catch(function (e) {
@@ -379,12 +535,18 @@
       var syncHint = cloudLastSyncAt
         ? "Último sync: " + (cloudLastSyncAt > Date.now() - 60000 ? "agora" : "há pouco") + "."
         : "Sync automático ao salvar.";
+      var STATE = deps.getState();
+      var gcalOn = !STATE.settings || STATE.settings.showGcal !== false;
       return (
         '<div class="cloud-block">' +
         '<p class="hint"><strong>Google Drive:</strong> ' + deps.escapeHtml(sessionUser.email || label) + "</p>" +
         '<p class="hint">' +
         deps.escapeHtml(syncHint) +
         "</p>" +
+        '<label class="check-line cloud-gcal-toggle"><input type="checkbox"' +
+        (gcalOn ? " checked" : "") +
+        ' onchange="MyFocuslyCloud.setGcalEnabled(this.checked)"><span>Mostrar Google Agenda no calendário</span></label>' +
+        '<p class="hint">Eventos do Google aparecem em azul. Não entram no backup.</p>' +
         '<div class="field-actions">' +
         '<button type="button" class="btn btn-ghost" onclick="MyFocuslyCloud.syncCloudNow()">Sincronizar agora</button>' +
         '<button type="button" class="btn btn-ghost" onclick="MyFocuslyCloud.signOutCloud()">Sair</button></div></div>'
@@ -423,5 +585,10 @@
     signInWithGoogle: signInWithGoogle,
     signOutCloud: signOutCloud,
     syncCloudNow: syncCloudNow,
+    isGcalEnabled: isGcalEnabled,
+    fetchGcalEvents: fetchGcalEvents,
+    getGcalEvents: getGcalEvents,
+    invalidateGcalCache: invalidateGcalCache,
+    setGcalEnabled: setGcalEnabled,
   };
 })(window);
