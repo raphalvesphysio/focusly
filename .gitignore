@@ -2,3 +2,4 @@ node_modules
 dist
 .firebase/
 supabase.config.json
+cloud/config.json

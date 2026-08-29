@@ -1,8 +1,8 @@
 {
   "name": "focusly",
   "private": true,
-  "version": "2.0.0",
-  "description": "MyFocusly — app web, backup local do usuario",
+  "version": "2.1.0-personal",
+  "description": "MyFocusly multiplataforma — Supabase sync (branch personal)",
   "scripts": {
     "icons": "python scripts/make-icon.py",
     "build": "node scripts/prepare-static.js",

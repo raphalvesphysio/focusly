@@ -546,6 +546,7 @@ summary{cursor:pointer;font-weight:600;font-size:0.88rem;}
 </head>
 <body>
 <div id="app"></div>
+<script src="cloud/sync.js"></script>
 <script>
 const STORAGE_KEY = "diario-estudos-state";
 const DEFAULT_HOUR_START = 7;
@@ -587,14 +588,6 @@ let pomo = { active: false, phase: "focus", endsAt: 0, pausedRemaining: 0, runni
 let pomoModalOpen = false;
 let backupFolderHandle = null;
 let migrationDirty = false;
-let cloudConfig = null;
-let supabaseClient = null;
-let sessionUser = null;
-let cloudReady = false;
-let cloudLastSyncAt = 0;
-let cloudPushTimer = null;
-const CLOUD_PUSH_DEBOUNCE_MS = 15000;
-const CLOUD_TABLE = "study_data";
 
 function pad2(n){ return n < 10 ? "0" + n : "" + n; }
 function uid(){ return "e" + Date.now().toString(36) + Math.random().toString(36).slice(2, 8); }
@@ -2198,7 +2191,7 @@ function render(){
   root.innerHTML =
     toast +
     '<header class="app-header"><div class="app-header-text">' + focuslyLogoHtml() + '</div>' +
-    '<div class="header-actions"><button class="account-chip" onclick="toggleDashModal()" title="Resumo do tempo registrado">Resumo</button><button class="account-chip" onclick="toggleAccount()" title="Backup e nuvem"><span class="dot' + (backupStatusOk() ? " ok" : "") + '"></span>Backup</button><button class="theme-toggle" onclick="toggleTheme()" aria-label="Alternar tema">' + (theme === "dark" ? "🌙" : "☀️") + "</button></div></header>" +
+    '<div class="header-actions"><button class="account-chip" onclick="toggleDashModal()" title="Resumo do tempo registrado">Resumo</button><button class="account-chip" onclick="toggleAccount()" title="Backup e nuvem"><span class="dot' + (MyFocuslyCloud.backupStatusOk(backupIsStale()) ? " ok" : "") + '"></span>Backup</button><button class="theme-toggle" onclick="toggleTheme()" aria-label="Alternar tema">' + (theme === "dark" ? "🌙" : "☀️") + "</button></div></header>" +
     '<div class="timers-row"><section class="card timer-card" aria-label="Cronômetro livre"><div class="timer-bar">' +
     '<div class="timer-display" aria-live="polite">' + fmtHMS(liveSeconds()) + '</div>' +
     '<div class="timer-controls">' + timerPlayBtn + timerStopBtn +
@@ -2335,185 +2328,6 @@ async function syncFromBackupFolder(handle, requestPermission){
     return false;
   }
 }
-function cloudPayload(){
-  return {
-    entries: STATE.entries,
-    tasks: STATE.tasks,
-    agenda: STATE.agenda,
-    tags: STATE.tags,
-    projects: STATE.projects,
-    subjectsByTag: STATE.subjectsByTag,
-    deleted: STATE.deleted,
-    settings: STATE.settings,
-    updatedAt: STATE.updatedAt || Date.now()
-  };
-}
-function loadSupabaseLib(){
-  if (window.supabase) return Promise.resolve();
-  return new Promise(function(resolve, reject){
-    const s = document.createElement("script");
-    s.src = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
-    s.onload = resolve;
-    s.onerror = function(){ reject(new Error("Supabase")); };
-    document.head.appendChild(s);
-  });
-}
-async function loadCloudConfig(){
-  const paths = ["supabase.config.json", "/supabase.config.json", "../supabase.config.json"];
-  for (let i = 0; i < paths.length; i++){
-    try {
-      const res = await fetch(paths[i], { cache: "no-store" });
-      if (!res.ok) continue;
-      const cfg = await res.json();
-      if (cfg && cfg.url && cfg.anonKey && !String(cfg.url).includes("SEU-PROJETO")) {
-        cloudConfig = { url: String(cfg.url).trim(), anonKey: String(cfg.anonKey).trim() };
-        return cloudConfig;
-      }
-    } catch (e) {}
-  }
-  return null;
-}
-async function getSupabaseClient(){
-  if (!cloudConfig) return null;
-  await loadSupabaseLib();
-  if (!supabaseClient) supabaseClient = window.supabase.createClient(cloudConfig.url, cloudConfig.anonKey);
-  return supabaseClient;
-}
-async function refreshCloudSession(){
-  const client = await getSupabaseClient();
-  if (!client) return null;
-  const { data, error } = await client.auth.getSession();
-  if (error) throw error;
-  sessionUser = data.session && data.session.user ? data.session.user : null;
-  return sessionUser;
-}
-async function pullCloud(){
-  if (!sessionUser) return;
-  const client = await getSupabaseClient();
-  const { data: row, error } = await client
-    .from(CLOUD_TABLE)
-    .select("payload, updated_at")
-    .eq("user_id", sessionUser.id)
-    .maybeSingle();
-  if (error) throw error;
-  if (!row || !row.payload){
-    await pushCloud(true);
-    return;
-  }
-  mergeDiary(row.payload);
-  cloudLastSyncAt = Date.now();
-  if (accountOpen) render();
-}
-async function pushCloud(force){
-  if (!sessionUser) return;
-  const client = await getSupabaseClient();
-  const payload = cloudPayload();
-  const { error } = await client.from(CLOUD_TABLE).upsert({
-    user_id: sessionUser.id,
-    payload: payload,
-    updated_at: new Date().toISOString()
-  });
-  if (error) throw error;
-  cloudLastSyncAt = Date.now();
-  if (!force && accountOpen) render();
-}
-function scheduleCloudPush(){
-  if (!sessionUser || !cloudReady) return;
-  if (cloudPushTimer) clearTimeout(cloudPushTimer);
-  cloudPushTimer = setTimeout(function(){
-    cloudPushTimer = null;
-    pushCloud(false).catch(function(){});
-  }, CLOUD_PUSH_DEBOUNCE_MS);
-}
-async function initCloud(){
-  cloudConfig = await loadCloudConfig();
-  if (!cloudConfig) return;
-  cloudReady = true;
-  try {
-    await refreshCloudSession();
-    if (sessionUser) await pullCloud();
-  } catch (e) {}
-  const client = await getSupabaseClient();
-  if (client){
-    client.auth.onAuthStateChange(function(event){
-      if (event === "SIGNED_IN"){
-        refreshCloudSession().then(function(){
-          return pullCloud();
-        }).then(function(){
-          showToast("Conta conectada. Sync na nuvem ativo.");
-          render();
-        }).catch(function(){ render(); });
-      }
-      if (event === "SIGNED_OUT"){
-        sessionUser = null;
-        render();
-      }
-    });
-  }
-}
-async function signInWithGoogle(){
-  const client = await getSupabaseClient();
-  if (!client){ showToast("Nuvem não configurada."); return; }
-  const redirectTo = location.origin + location.pathname;
-  const { error } = await client.auth.signInWithOAuth({ provider: "google", options: { redirectTo: redirectTo } });
-  if (error) showToast(error.message);
-}
-async function signInWithEmail(){
-  const client = await getSupabaseClient();
-  if (!client){ showToast("Nuvem não configurada."); return; }
-  const input = document.getElementById("cloud-email");
-  const email = input ? String(input.value || "").trim() : "";
-  if (!email){ showToast("Informe seu e-mail."); return; }
-  const redirectTo = location.origin + location.pathname;
-  const { error } = await client.auth.signInWithOtp({ email: email, options: { emailRedirectTo: redirectTo } });
-  if (error) showToast(error.message);
-  else showToast("Link enviado para " + email + ".");
-}
-async function signOutCloud(){
-  const client = await getSupabaseClient();
-  if (client) await client.auth.signOut();
-  sessionUser = null;
-  showToast("Desconectado.");
-  render();
-}
-async function syncCloudNow(){
-  if (!sessionUser){ showToast("Entre na sua conta primeiro."); return; }
-  try {
-    await pullCloud();
-    await pushCloud(true);
-    showToast("Sincronizado com a nuvem.");
-    render();
-  } catch (e) {
-    showToast("Erro ao sincronizar: " + (e.message || "tente de novo"));
-  }
-}
-function renderCloudBlock(){
-  if (!cloudReady){
-    return '<div class="cloud-block"><p class="hint">Sync na nuvem (PC + iPad): configure <code>supabase.config.json</code> no deploy. Veja <code>supabase/SETUP.md</code>.</p></div>';
-  }
-  if (sessionUser){
-    const label = sessionUser.email ? sessionUser.email.split("@")[0] : "Conta";
-    const syncHint = cloudLastSyncAt
-      ? ("Último sync: " + (cloudLastSyncAt > Date.now() - 60000 ? "agora" : "há pouco") + ".")
-      : "Sync automático ao salvar.";
-    return '<div class="cloud-block">' +
-      '<p class="hint"><strong>Nuvem:</strong> ' + escapeHtml(sessionUser.email || label) + '</p>' +
-      '<p class="hint">' + escapeHtml(syncHint) + " PC e iPad usam os mesmos dados.</p>" +
-      '<div class="field-actions">' +
-      '<button type="button" class="btn btn-ghost" onclick="syncCloudNow()">Sincronizar agora</button>' +
-      '<button type="button" class="btn btn-ghost" onclick="signOutCloud()">Sair</button></div></div>';
-  }
-  return '<div class="cloud-block">' +
-    '<p class="hint"><strong>Entrar</strong> para backup automático na nuvem (PC + iPad).</p>' +
-    '<button type="button" class="btn-google" onclick="signInWithGoogle()">Entrar com Google</button>' +
-    '<div class="cloud-email-row">' +
-    '<input type="email" id="cloud-email" placeholder="ou seu e-mail" autocomplete="email">' +
-    '<button type="button" class="btn btn-ghost" onclick="signInWithEmail()">Enviar link</button></div></div>';
-}
-function backupStatusOk(){
-  if (sessionUser && cloudLastSyncAt) return true;
-  return !backupIsStale();
-}
 function renderAccountPanel(){
   const d = backupDaysAgo();
   const status = d === null
@@ -2532,7 +2346,7 @@ function renderAccountPanel(){
   const primaryLabel = folderName ? "Salvar backup agora" : "Baixar backup";
   return '<div class="overlay open" onclick="if(event.target===this) toggleAccount()"><div class="panel">' +
     "<h3>Backup</h3>" +
-    renderCloudBlock() +
+    MyFocuslyCloud.renderCloudBlock() +
     '<p class="hint">Cópia local neste aparelho + nuvem (se entrou). Pasta no PC é opcional.</p>' +
     '<p class="hint' + (backupIsStale() ? " hint-warn" : "") + '">' + escapeHtml(status) + "</p>" +
     folderBlock +
@@ -3350,7 +3164,7 @@ function persist(){
   try { localStorage.setItem(STORAGE_KEY, JSON.stringify(STATE)); } catch (e) {}
   persistRuntime();
   scheduleAutoBackup();
-  scheduleCloudPush();
+  MyFocuslyCloud.scheduleCloudPush();
 }
 const AUTO_BACKUP_DEBOUNCE_MS = 20000;
 const AUTO_BACKUP_DEADLINE_MS = 120000;
@@ -3549,18 +3363,27 @@ window.addEventListener("beforeunload", persistRuntime);
 
 viewWeekStart = mondayOf(new Date());
 loadState();
+MyFocuslyCloud.configure({
+  getState: function(){ return STATE; },
+  mergeDiary: mergeDiary,
+  persist: persist,
+  render: render,
+  showToast: showToast,
+  escapeHtml: escapeHtml,
+  getAccountOpen: function(){ return accountOpen; }
+});
 render();
-initCloud().then(function(){
+MyFocuslyCloud.initCloud().then(function(){
   return initBackupFolder();
 }).then(function(synced){
   if (synced) persist();
-  if (!sessionUser && FS_ACCESS_SUPPORTED && !(STATE.settings && STATE.settings.backupFolderName)) accountOpen = true;
+  if (!MyFocuslyCloud.getSessionUser() && FS_ACCESS_SUPPORTED && !(STATE.settings && STATE.settings.backupFolderName)) accountOpen = true;
   render();
 });
 document.addEventListener("visibilitychange", function(){
   if (document.hidden){
     flushAutoBackup();
-    if (sessionUser) pushCloud(true).catch(function(){});
+    if (MyFocuslyCloud.getSessionUser()) MyFocuslyCloud.pushCloud(true).catch(function(){});
   }
 });
 window.addEventListener("pagehide", flushAutoBackup);

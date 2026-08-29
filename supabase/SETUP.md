@@ -1,23 +1,25 @@
-# Supabase — sync MyFocusly (PC + iPad)
+# Supabase — MyFocusly multiplataforma (branch `personal`)
 
 ## 1. SQL
-No painel Supabase: **SQL Editor** → cole `supabase/schema.sql` → **Run**.
+Supabase → **SQL Editor** → cole `supabase/schema.sql` → **Run**.
 
 ## 2. Auth
-**Authentication → Providers**
-- Ative **Google** (ou use só **Email** com magic link)
-- **URL Configuration → Redirect URLs**, adicione:
-  - `https://myfocusly.netlify.app/legacy/`
-  - `http://localhost:3847/legacy/` (dev)
+**Authentication → Providers** → Google e/ou Email.
 
-## 3. Config no projeto
-Copie `supabase.config.example.json` → `supabase.config.json` e preencha **URL** e **anon key** (Settings → API).
+**Redirect URLs** (use a URL do site desta branch, não a `main`):
+- `https://SEU-SITE-PERSONAL.netlify.app/legacy/`
+- `http://localhost:3847/legacy/`
 
-Faça deploy de novo (push no GitHub).
+## 3. Config
+Copie `cloud/config.example.json` → `cloud/config.json` (local).
 
-**Netlify (recomendado):** Site settings → Environment variables:
+**Netlify (branch personal):** variáveis de ambiente:
 - `SUPABASE_URL`
 - `SUPABASE_ANON_KEY`
 
+Build gera `dist/legacy/cloud/config.json` automaticamente.
+
 ## 4. Uso
-No app: **Backup → Entrar com Google** (ou e-mail). Depois disso sync automático.
+App → **Backup** → **Entrar com Google** (ou e-mail).
+
+Veja também `docs/VERSIONS.txt`.

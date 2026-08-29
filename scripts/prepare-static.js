@@ -8,6 +8,7 @@ const DIST = path.join(ROOT, "dist");
 const PUBLIC = path.join(ROOT, "client", "public");
 const SRC = path.join(ROOT, "client", "src");
 const LEGACY = path.join(ROOT, "legacy");
+const CLOUD = path.join(ROOT, "cloud");
 
 function rimraf(dir) {
   if (fs.existsSync(dir)) fs.rmSync(dir, { recursive: true, force: true });
@@ -24,20 +25,34 @@ fs.mkdirSync(DIST, { recursive: true });
 copyDir(PUBLIC, DIST);
 copyDir(SRC, path.join(DIST, "src"));
 copyDir(LEGACY, path.join(DIST, "legacy"));
-
-const supabaseCfg = path.join(ROOT, "supabase.config.json");
-let supabaseJson = null;
-if (fs.existsSync(supabaseCfg)) {
-  supabaseJson = fs.readFileSync(supabaseCfg, "utf8");
-} else if (process.env.SUPABASE_URL && process.env.SUPABASE_ANON_KEY) {
-  supabaseJson = JSON.stringify({
-    url: process.env.SUPABASE_URL,
-    anonKey: process.env.SUPABASE_ANON_KEY,
-  }, null, 2);
+if (fs.existsSync(CLOUD)) {
+  copyDir(CLOUD, path.join(DIST, "cloud"));
+  copyDir(CLOUD, path.join(DIST, "legacy", "cloud"));
 }
-if (supabaseJson) {
-  fs.writeFileSync(path.join(DIST, "supabase.config.json"), supabaseJson);
-  fs.writeFileSync(path.join(DIST, "legacy", "supabase.config.json"), supabaseJson);
+
+const cloudCfgPaths = [
+  path.join(CLOUD, "config.json"),
+  path.join(ROOT, "supabase.config.json"),
+];
+let cloudJson = null;
+for (const p of cloudCfgPaths) {
+  if (fs.existsSync(p)) {
+    cloudJson = fs.readFileSync(p, "utf8");
+    break;
+  }
+}
+if (!cloudJson && process.env.SUPABASE_URL && process.env.SUPABASE_ANON_KEY) {
+  cloudJson = JSON.stringify(
+    { url: process.env.SUPABASE_URL, anonKey: process.env.SUPABASE_ANON_KEY },
+    null,
+    2
+  );
+}
+if (cloudJson) {
+  for (const base of [path.join(DIST, "cloud"), path.join(DIST, "legacy", "cloud")]) {
+    fs.mkdirSync(base, { recursive: true });
+    fs.writeFileSync(path.join(base, "config.json"), cloudJson);
+  }
 }
 
 fs.writeFileSync(
@@ -56,6 +71,9 @@ fs.writeFileSync(
     "/src/*",
     "  Cache-Control: public, max-age=3600",
     "",
+    "/cloud/*",
+    "  Cache-Control: public, max-age=3600",
+    "",
     "/*.html",
     "  Cache-Control: no-cache",
     "",
@@ -63,4 +81,4 @@ fs.writeFileSync(
   "utf8"
 );
 
-console.log("Static build ready:", DIST);
+console.log("Static build ready (personal/multiplataforma):", DIST);

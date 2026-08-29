@@ -1,9 +1,11 @@
-MyFocusly
-=========
+MyFocusly — multiplataforma (branch personal)
+==============================================
 
-Link: https://myfocusly.netlify.app/legacy/
+Link: https://SEU-SITE.netlify.app/legacy/
+(iPad, iPhone, PC — mesma conta após login)
 
-Windows: clique duas vezes em Iniciar-MyFocusly.bat
-Na 1a vez: Backup > Escolher pasta de backup (Chrome ou Edge).
+PC: Iniciar-MyFocusly.bat (opcional)
+iPad: abra o link no Safari → Compartilhar → Tela de Início
 
-Se o antivirus bloquear, use o link acima no navegador.
+Backup: entre com Google/e-mail no app (Backup).
+Pasta local no PC continua opcional.
