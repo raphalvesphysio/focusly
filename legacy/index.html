@@ -564,6 +564,7 @@ const FOLDER_DB_NAME = "diario-tarefas-fs";
 const FOLDER_STORE = "handles";
 const FOLDER_KEY = "backup-folder";
 const FOLDER_BACKUP_FILENAME = "diario-tarefas-backup.json";
+const STATE_CACHE_KEY = "myfocusly-state-cache";
 
 let STATE = { entries: [], tasks: [], agenda: [], tags: [], projects: [], subjectsByTag: {}, deleted: {}, settings: {}, updatedAt: 0 };
 let viewWeekStart = null;
@@ -2793,7 +2794,7 @@ function submitNomenDraft(ev){
     if (!tag){ showToast("Nome de tag inválido."); return; }
     if (path.subtag) rememberSubject(tag, path.subtag);
     persist();
-    showToast(path.subtag ? (formatTagPath(tag, path.subtag) + " salvo em " + tag + ".") : ("Tag " + tag + " adicionada."));
+    showToast(path.subtag ? (formatTagPath(tag, path.subtag) + " salvo em " + tag + ". Tags não aparecem no calendário — use @ Tarefa ou ◷ Prazo.") : ("Tag " + tag + " adicionada."));
   }
   if (input) input.value = "";
   focusNomenDraft = true;
@@ -3407,6 +3408,7 @@ function isCloudOnly(){
 function persist(){
   STATE.updatedAt = Date.now();
   if (isCloudOnly()){
+    try { localStorage.setItem(STATE_CACHE_KEY, JSON.stringify(STATE)); } catch (e) {}
     persistRuntime();
     if (MyFocuslyCloud.getSessionUser()) MyFocuslyCloud.scheduleCloudPush();
     return;
@@ -3450,7 +3452,15 @@ async function runAutoBackup(){
   } catch (e) {}
 }
 function loadState(){
-  if (!isCloudOnly()){
+  if (isCloudOnly()){
+    try {
+      const raw = localStorage.getItem(STATE_CACHE_KEY);
+      if (raw){
+        const parsed = JSON.parse(raw);
+        if (parsed && Array.isArray(parsed.entries)) STATE = parsed;
+      }
+    } catch (e) {}
+  } else {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (raw){
@@ -3527,6 +3537,23 @@ function mergeStringList(local, remote){
   });
   return Object.keys(map).map(function(k){ return map[k]; }).sort(function(a, b){ return a.localeCompare(b, "pt"); });
 }
+function restoreDiary(parsed){
+  if (!parsed) throw new Error("invalid");
+  if (!Array.isArray(parsed.entries) && !Array.isArray(parsed.tasks) && !Array.isArray(parsed.agenda)) throw new Error("invalid");
+  const prevSettings = STATE.settings || {};
+  STATE = {
+    entries: Array.isArray(parsed.entries) ? parsed.entries.slice() : [],
+    tasks: Array.isArray(parsed.tasks) ? parsed.tasks.slice() : [],
+    agenda: Array.isArray(parsed.agenda) ? parsed.agenda.slice() : [],
+    tags: Array.isArray(parsed.tags) ? parsed.tags.slice() : [],
+    projects: Array.isArray(parsed.projects) ? parsed.projects.slice() : [],
+    subjectsByTag: parsed.subjectsByTag && typeof parsed.subjectsByTag === "object" ? parsed.subjectsByTag : {},
+    deleted: parsed.deleted && typeof parsed.deleted === "object" && !Array.isArray(parsed.deleted) ? parsed.deleted : {},
+    settings: Object.assign({}, prevSettings, parsed.settings || {}),
+    updatedAt: parsed.updatedAt || Date.now()
+  };
+  ensureLists();
+}
 function mergeDiary(remote){
   if (!remote) return;
   if (!Array.isArray(remote.entries)) return;
@@ -3546,6 +3573,8 @@ function mergeDiary(remote){
   ensureLists();
   if (!isCloudOnly()) {
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(STATE)); } catch (e) {}
+  } else {
+    try { localStorage.setItem(STATE_CACHE_KEY, JSON.stringify(STATE)); } catch (e) {}
   }
 }
 async function exportJson(){
@@ -3588,17 +3617,23 @@ function importJson(file){
   reader.onload = function(){
     try {
       const parsed = JSON.parse(reader.result);
-      if (!parsed || !Array.isArray(parsed.entries)) throw new Error("invalid");
-      const before = (STATE.tasks || []).length + (STATE.entries || []).length + (STATE.agenda || []).length;
-      mergeDiary(parsed);
-      const after = (STATE.tasks || []).length + (STATE.entries || []).length + (STATE.agenda || []).length;
+      restoreDiary(parsed);
       persist();
       render();
-      const added = after - before;
-      showToast(added > 0
-        ? ("Backup combinado. " + added + " item" + (added === 1 ? "" : "ns") + " a mais.")
-        : "Backup combinado. Nada de novo neste arquivo.");
-    } catch (e) { showToast("Arquivo inválido"); }
+      const n = (STATE.entries || []).length;
+      const t = (STATE.tasks || []).length;
+      const a = (STATE.agenda || []).length;
+      let msg = "Restaurado: " + n + " tempo" + (n === 1 ? "" : "s") + ", " + t + " tarefa" + (t === 1 ? "" : "s") + ", " + a + " prazo" + (a === 1 ? "" : "s") + ".";
+      if (MyFocuslyCloud.getSessionUser()) {
+        MyFocuslyCloud.pushCloud(true).then(function(){
+          showToast(msg + " Enviado pro Drive.");
+        }).catch(function(){
+          showToast(msg + " Falhou ao enviar pro Drive — use Sincronizar.");
+        });
+      } else {
+        showToast(msg + " Entre com Google para copiar pro Drive.");
+      }
+    } catch (e) { showToast("Arquivo inválido ou corrompido."); }
   };
   reader.readAsText(file);
 }
