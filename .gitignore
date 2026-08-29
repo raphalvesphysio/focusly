@@ -1,3 +1,4 @@
 node_modules
 dist
 .firebase/
+supabase.config.json
