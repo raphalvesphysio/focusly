@@ -3537,9 +3537,55 @@ function mergeStringList(local, remote){
   });
   return Object.keys(map).map(function(k){ return map[k]; }).sort(function(a, b){ return a.localeCompare(b, "pt"); });
 }
+function normalizeBackupPayload(parsed){
+  if (!parsed || typeof parsed !== "object") return null;
+  if (parsed.state && typeof parsed.state === "object") parsed = parsed.state;
+  if (Array.isArray(parsed.entries) || Array.isArray(parsed.tasks) || Array.isArray(parsed.agenda)) {
+    if (!Array.isArray(parsed.entries)) parsed.entries = [];
+    if (!Array.isArray(parsed.tasks)) parsed.tasks = [];
+    if (!Array.isArray(parsed.agenda)) parsed.agenda = [];
+    return parsed;
+  }
+  if (parsed.days && typeof parsed.days === "object"){
+    const entries = [];
+    Object.keys(parsed.days).forEach(function(date){
+      const day = parsed.days[date];
+      (day.sessions || []).forEach(function(s, idx){
+        entries.push({
+          id: s.id || uid(),
+          date: date,
+          time: s.time || "",
+          seconds: s.seconds != null ? s.seconds : ((s.minutes || 0) * 60),
+          minutes: s.minutes || Math.round((s.seconds || 0) / 60),
+          subject: s.subject || "",
+          notes: idx === 0 ? (day.notes || "") : "",
+          tag: s.tag || "",
+          subtag: s.subtag || "",
+          project: s.project || "",
+          source: s.kind === "manual" ? "manual" : "free",
+          taskId: s.taskId || null,
+          live: false,
+          createdAt: s.createdAt || s.endedAt || new Date().toISOString()
+        });
+      });
+    });
+    return {
+      entries: entries,
+      tasks: Array.isArray(parsed.tasks) ? parsed.tasks : [],
+      agenda: Array.isArray(parsed.agenda) ? parsed.agenda : [],
+      tags: Array.isArray(parsed.tags) ? parsed.tags : [],
+      projects: Array.isArray(parsed.projects) ? parsed.projects : [],
+      subjectsByTag: parsed.subjectsByTag || {},
+      deleted: parsed.deleted || {},
+      settings: parsed.settings || {},
+      updatedAt: parsed.updatedAt || Date.now()
+    };
+  }
+  return null;
+}
 function restoreDiary(parsed){
+  parsed = normalizeBackupPayload(parsed);
   if (!parsed) throw new Error("invalid");
-  if (!Array.isArray(parsed.entries) && !Array.isArray(parsed.tasks) && !Array.isArray(parsed.agenda)) throw new Error("invalid");
   const prevSettings = STATE.settings || {};
   STATE = {
     entries: Array.isArray(parsed.entries) ? parsed.entries.slice() : [],
@@ -3616,14 +3662,17 @@ function importJson(file){
   const reader = new FileReader();
   reader.onload = function(){
     try {
-      const parsed = JSON.parse(reader.result);
+      const text = String(reader.result || "").replace(/^\uFEFF/, "").trim();
+      const parsed = JSON.parse(text);
       restoreDiary(parsed);
+      STATE.updatedAt = Date.now();
       persist();
       render();
       const n = (STATE.entries || []).length;
       const t = (STATE.tasks || []).length;
       const a = (STATE.agenda || []).length;
       let msg = "Restaurado: " + n + " tempo" + (n === 1 ? "" : "s") + ", " + t + " tarefa" + (t === 1 ? "" : "s") + ", " + a + " prazo" + (a === 1 ? "" : "s") + ".";
+      if (n + t + a === 0) msg = "Arquivo lido, mas veio vazio (0 itens). Confira se é o JSON certo.";
       if (MyFocuslyCloud.getSessionUser()) {
         MyFocuslyCloud.pushCloud(true).then(function(){
           showToast(msg + " Enviado pro Drive.");
@@ -3633,7 +3682,9 @@ function importJson(file){
       } else {
         showToast(msg + " Entre com Google para copiar pro Drive.");
       }
-    } catch (e) { showToast("Arquivo inválido ou corrompido."); }
+      const input = document.getElementById("import-file");
+      if (input) input.value = "";
+    } catch (e) { showToast("Arquivo inválido: " + (e.message || "JSON corrompido")); }
   };
   reader.readAsText(file);
 }
@@ -3686,7 +3737,10 @@ MyFocuslyCloud.initCloud().then(function(){
 document.addEventListener("visibilitychange", function(){
   if (document.hidden){
     if (!isCloudOnly()) flushAutoBackup();
-    if (MyFocuslyCloud.getSessionUser()) MyFocuslyCloud.pushCloud(true).catch(function(){});
+    if (MyFocuslyCloud.getSessionUser()) {
+      var n = (STATE.entries || []).length + (STATE.tasks || []).length + (STATE.agenda || []).length;
+      if (n > 0) MyFocuslyCloud.pushCloud(false).catch(function(){});
+    }
   }
 });
 window.addEventListener("pagehide", function(){

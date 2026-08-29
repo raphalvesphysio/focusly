@@ -12,6 +12,25 @@
   var CLOUD_ONLY = true;
   var TOKEN_STORAGE_KEY = "myfocusly-google-token";
   var FILE_ID_STORAGE_KEY = "myfocusly-drive-file-id";
+  var CLIENT_ID_STORAGE_KEY = "myfocusly-google-client-id";
+
+  function diaryItemCount(st) {
+    st = st || {};
+    return (st.entries || []).length + (st.tasks || []).length + (st.agenda || []).length;
+  }
+
+  async function downloadRemoteFile(fileId) {
+    var metaRes = await fetch(
+      "https://www.googleapis.com/drive/v3/files/" + encodeURIComponent(fileId) + "?alt=media",
+      { headers: { Authorization: "Bearer " + accessToken } }
+    );
+    if (!metaRes.ok) return null;
+    try {
+      return await metaRes.json();
+    } catch (e) {
+      return null;
+    }
+  }
 
   var deps = null;
   var googleClientId = null;
@@ -103,8 +122,22 @@
       expires_at: Date.now() + expiresIn * 1000,
     };
     localStorage.setItem(TOKEN_STORAGE_KEY, JSON.stringify(payload));
+    if (googleClientId) localStorage.setItem(CLIENT_ID_STORAGE_KEY, googleClientId);
     accessToken = payload.access_token;
     tokenExpiresAt = payload.expires_at;
+  }
+
+  function clearTokenIfClientChanged() {
+    if (!googleClientId) return;
+    try {
+      var prev = localStorage.getItem(CLIENT_ID_STORAGE_KEY);
+      if (prev && prev !== googleClientId) {
+        clearStoredSession();
+        if (deps && deps.showToast) {
+          deps.showToast("Conta Google resetada (novo Client ID). Entre de novo.");
+        }
+      }
+    } catch (e) {}
   }
 
   function clearStoredSession() {
@@ -410,31 +443,48 @@
     if (!accessToken) return;
     var file = await findDriveFile();
     if (file && file.id) setStoredFileId(file.id);
+    var local = deps.getState();
+    var localN = diaryItemCount(local);
     if (!file || !file.id) {
-      await pushCloud(true);
+      if (localN > 0) await pushCloud(true);
       return;
     }
-    var metaRes = await fetch(
-      "https://www.googleapis.com/drive/v3/files/" +
-        encodeURIComponent(file.id) +
-        "?alt=media",
-      { headers: { Authorization: "Bearer " + accessToken } }
-    );
-    if (!metaRes.ok) throw new Error("Erro ao baixar backup do Drive.");
-    var remote = await metaRes.json();
+    var remote = await downloadRemoteFile(file.id);
     if (!remote || !Array.isArray(remote.entries)) {
+      if (localN > 0) await pushCloud(true);
+      return;
+    }
+    var remoteN = diaryItemCount(remote);
+    if (localN > 0 && remoteN === 0) {
       await pushCloud(true);
+      cloudLastSyncAt = Date.now();
+      if (deps.render) deps.render();
+      return;
+    }
+    if (localN > remoteN && (local.updatedAt || 0) >= (remote.updatedAt || 0)) {
+      await pushCloud(true);
+      cloudLastSyncAt = Date.now();
+      if (deps.render) deps.render();
       return;
     }
     deps.mergeDiary(remote);
     cloudLastSyncAt = Date.now();
-    if (deps.getAccountOpen()) deps.render();
+    if (deps.getAccountOpen && deps.getAccountOpen()) deps.render();
+    else if (deps.render) deps.render();
   }
 
   async function pushCloud(force) {
     if (!accessToken) return;
     var payload = cloudPayload();
+    var localN = diaryItemCount(payload);
     var fileId = getStoredFileId();
+    if (localN === 0) {
+      var existing = fileId ? { id: fileId } : await findDriveFile();
+      if (existing && existing.id) {
+        var remote = await downloadRemoteFile(existing.id);
+        if (remote && diaryItemCount(remote) > 0) return;
+      }
+    }
     if (fileId) {
       try {
         await updateDriveFile(fileId, payload);
@@ -470,6 +520,7 @@
   async function initCloud() {
     googleClientId = await loadCloudConfig();
     if (!googleClientId) return;
+    clearTokenIfClientChanged();
     cloudReady = true;
     try {
       await loadGsiLib();
