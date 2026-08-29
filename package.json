@@ -2,7 +2,7 @@
   "name": "focusly",
   "private": true,
   "version": "2.1.0-personal",
-  "description": "MyFocusly multiplataforma — Supabase sync (branch personal)",
+  "description": "MyFocusly multiplataforma — Google Drive sync (branch personal)",
   "scripts": {
     "icons": "python scripts/make-icon.py",
     "build": "node scripts/prepare-static.js",

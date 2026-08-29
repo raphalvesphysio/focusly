@@ -1,6 +1,6 @@
 @echo off
 setlocal
-set "APP_URL=https://myfocusly.netlify.app/legacy/"
+set "APP_URL=https://myfocusly.netlify.app/"
 set "PROFILE_DIR=%LOCALAPPDATA%\MyFocusly\BrowserProfile"
 if not exist "%PROFILE_DIR%" mkdir "%PROFILE_DIR%"
 

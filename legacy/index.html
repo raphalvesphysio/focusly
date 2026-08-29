@@ -359,7 +359,6 @@ h1{font-family:"Fraunces", Georgia, serif;font-weight:600;font-size:2rem;margin:
 .kind-prazo{background:var(--highlight-soft);color:var(--highlight);}
 .kind-rever{background:var(--highlight-soft);color:var(--highlight);}
 .cal-dot{font-size:0.72rem;color:var(--ink-faint);}
-.log-day-tools{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px;}
 .dash-card{display:flex;flex-direction:column;gap:10px;padding:14px;overflow:hidden;}
 .dash-block{flex:1;min-height:0;overflow:auto;display:flex;flex-direction:column;gap:10px;}
 .dash-toolbar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;}
@@ -450,6 +449,9 @@ input,textarea{font-size:0.95rem;color:var(--ink);background:var(--bg);border:1p
 .btn-google:hover{background:#f5f5f5;}
 :root[data-theme="dark"] .btn-google{background:#fff;color:#1f1f1f;}
 .cloud-block{display:flex;flex-direction:column;gap:10px;padding-bottom:12px;margin-bottom:12px;border-bottom:1px solid var(--line);}
+.backup-locations{margin-bottom:4px;}
+.backup-list{margin:6px 0 0;padding-left:1.15rem;display:flex;flex-direction:column;gap:6px;}
+.backup-list li{margin:0;}
 .cloud-email-row{display:flex;gap:8px;flex-wrap:wrap;}
 .cloud-email-row input{flex:1;min-width:160px;}
 .sync-modal{max-width:380px;text-align:center;gap:16px;padding:28px 24px 18px;}
@@ -580,7 +582,6 @@ let dashModalOpen = false;
 let dashExpanded = {};
 let calView = "list";
 let selectedDayIso = "";
-let logFilter = "task";
 let nomenDraftKind = "task";
 let nomenDraftDate = "";
 let focusNomenDraft = false;
@@ -1521,8 +1522,33 @@ function planKindTitlePlaceholder(kind){
   kind = normalizePlanKind(kind);
   if (kind === "prazo") return "entregar relatório, entrega…";
   if (kind === "project") return "nome do projeto";
-  if (kind === "tag") return "nome da tag";
+  if (kind === "tag") return "PoD/Mat ou nome da tag";
   return "@tarefa  +projeto  #tag";
+}
+function renderPlanKindChips(planKind){
+  const kinds = [
+    { id: "task", ico: "@", label: "Tarefa" },
+    { id: "prazo", ico: "◷", label: "Prazo" },
+    { id: "project", ico: "+", label: "Projeto" },
+    { id: "tag", ico: "#", label: "Tags" }
+  ];
+  return '<div class="nomen-row form-plan-kind">' + kinds.map(function(k){
+    return '<button type="button" class="nomen-chip' + (planKind === k.id ? " on" : "") + '" data-kind="' + k.id + '" onclick="setTaskFormPlanKind(\'' + k.id + '\')"><span class="nomen-ico">' + k.ico + '</span> ' + k.label + "</button>";
+  }).join("") + "</div>";
+}
+function setTaskFormPlanKind(kind){
+  togglePlanKindFields(normalizePlanKind(kind));
+  document.querySelectorAll(".form-plan-kind .nomen-chip").forEach(function(btn){
+    btn.classList.toggle("on", btn.getAttribute("data-kind") === normalizePlanKind(kind));
+  });
+}
+function secondsFromTimeRange(dateIso, startTime, endTime){
+  if (!dateIso || !startTime || !endTime) return 0;
+  const start = new Date(dateIso + "T" + startTime + ":00");
+  let end = new Date(dateIso + "T" + endTime + ":00");
+  if (isNaN(start.getTime()) || isNaN(end.getTime())) return 0;
+  if (end <= start) end = new Date(end.getTime() + 86400000);
+  return Math.max(0, Math.round((end - start) / 1000));
 }
 function draftDefaultDate(){
   return nomenDraftDate || selectedDayIso || toISODate(new Date());
@@ -1539,6 +1565,8 @@ function togglePlanKindFields(kind){
   kind = normalizePlanKind(kind);
   const taskOnly = document.getElementById("t-task-only");
   if (taskOnly) taskOnly.style.display = kind === "task" ? "" : "none";
+  const prazoOnly = document.getElementById("t-prazo-only");
+  if (prazoOnly) prazoOnly.style.display = kind === "prazo" ? "" : "none";
   ["t-task-only-review"].forEach(function(id){
     const el = document.getElementById(id);
     if (el) el.style.display = kind === "task" ? "" : "none";
@@ -2031,7 +2059,7 @@ function renderLogTaskRow(t){
     '</div><div class="entry-actions">' + actions + "</div></li>";
 }
 function renderNomenDraftHtml(){
-  const kind = nomenDraftKind || logFilter || "task";
+  const kind = nomenDraftKind || "task";
   const placeholders = {
     task: "ler capítulo, revisar lista…",
     project: "heuristica, TCC…",
@@ -2040,10 +2068,11 @@ function renderNomenDraftHtml(){
   };
   const prefix = kind === "project" ? "+" : (kind === "tag" ? "#" : (kind === "deadline" ? "◷" : "@"));
   const draftDate = draftDefaultDate();
+  const submitLabel = kind === "task" ? "Continuar" : "Adicionar";
   return '<form class="nomen-draft-form" onsubmit="submitNomenDraft(event)">' +
     '<div class="nomen-draft-line"><span class="nomen-draft-prefix">' + prefix + "</span>" +
     '<input id="nomen-draft" class="nomen-draft-input" type="text" maxlength="120" placeholder="' + escapeHtml(placeholders[kind] || placeholders.task) + '" autocomplete="off">' +
-    '<button type="submit" class="btn btn-primary btn-xs">Adicionar</button></div>' +
+    '<button type="submit" class="btn btn-primary btn-xs">' + submitLabel + '</button></div>' +
     '<label class="nomen-draft-date"><span>Para</span><input type="date" id="nomen-date" value="' + draftDate + '"></label></form>';
 }
 function renderTimeline(week, isCurrentWeek){
@@ -2078,7 +2107,7 @@ function render(){
   const week = computeWeek(STATE, viewWeekStart);
   const isCurrentWeek = toISODate(viewWeekStart) === toISODate(mondayOf(new Date()));
   const toast = toastMsg ? '<div class="toast">' + escapeHtml(toastMsg) + "</div>" : "";
-  const activeNomen = nomenDraftKind || logFilter || "task";
+  const activeNomen = nomenDraftKind || "task";
   const nomenBtns =
     '<div class="nomen-row">' +
       '<button type="button" class="nomen-chip' + (activeNomen === "task" ? " on" : "") + '" onclick="openNomenChip(\'task\')"><span class="nomen-ico">@</span> Tarefa</button>' +
@@ -2119,21 +2148,18 @@ function render(){
       '<div class="overlay open" onclick="if(event.target===this) closeForm()">' +
         '<form class="panel" onsubmit="submitTaskForm(event)">' +
           "<h3>" + (reviewing ? "Revisar tarefa" : (editing ? "Editar tarefa" : "Nova entrada")) + "</h3>" +
-          (showPlanKind
-            ? '<label class="field"><span>Tipo</span><select id="t-plan-kind" onchange="togglePlanKindFields(this.value)">' +
-              '<option value="task"' + (planKind === "task" ? " selected" : "") + ">Tarefa</option>" +
-              '<option value="prazo"' + (planKind === "prazo" ? " selected" : "") + ">Prazo</option>" +
-              '<option value="project"' + (planKind === "project" ? " selected" : "") + ">Projeto</option>" +
-              '<option value="tag"' + (planKind === "tag" ? " selected" : "") + ">Tag</option></select></label>"
-            : "") +
-          '<div class="field-row"><label class="field"><span>Data</span><input type="date" id="t-date" value="' + (p.date || toISODate(new Date())) + '" required onchange="updateTaskFormDate()"></label>' +
-          '<label class="field"><span>Horário</span><input type="time" id="t-time" value="' + escapeHtml(p.time || "") + '"></label></div>' +
+          (showPlanKind ? renderPlanKindChips(planKind) : "") +
+          '<label class="field"><span>Data</span><input type="date" id="t-date" value="' + (p.date || toISODate(new Date())) + '" required onchange="updateTaskFormDate()"></label>' +
+          '<div id="t-prazo-only"' + (planKind === "prazo" ? "" : ' style="display:none"') + '><label class="field"><span>Horário</span><input type="time" id="t-time-prazo" value="' + escapeHtml(p.time || "") + '"></label></div>' +
           '<label class="field"><span>Título</span><input type="text" id="t-title" list="nomen-list" maxlength="120" value="' + escapeHtml(p.title || "") + '" placeholder="' + escapeHtml(planKindTitlePlaceholder(planKind)) + '" autocomplete="off"><datalist id="nomen-list">' + renderTitleSuggestionList(planKind) + "</datalist></label>" +
           '<label class="field"><span>Anotações</span><textarea id="t-notes" rows="3" placeholder="O que fazer, dúvidas, páginas, exercícios...">' + escapeHtml(p.notes || "") + "</textarea></label>" +
           '<div id="t-task-only" class="form-time-block"' + (planKind === "task" ? "" : ' style="display:none"') + '>' +
-          '<span class="field-caption">Tempo</span>' +
-          '<div class="field-row"><label class="field"><span>Já gasto · horas</span><input type="number" id="t-hours" min="0" max="23" value="' + (p.hours != null ? p.hours : (p.seconds ? Math.floor(p.seconds / 3600) : "")) + '" placeholder="0"></label>' +
-          '<label class="field"><span>Já gasto · min</span><input type="number" id="t-mins" min="0" max="59" value="' + (p.mins != null ? p.mins : (p.seconds ? Math.floor((p.seconds % 3600) / 60) : "")) + '" placeholder="0"></label></div>' +
+          '<span class="field-caption">Tempo de estudo</span>' +
+          '<div class="field-row"><label class="field"><span>Início</span><input type="time" id="t-time" value="' + escapeHtml(p.time || "") + '"></label>' +
+          '<label class="field"><span>Fim</span><input type="time" id="t-time-end" value="' + escapeHtml(p.endTime || "") + '"></label></div>' +
+          '<p class="hint" style="margin:0;font-size:0.82rem">Ou informe a duração:</p>' +
+          '<div class="field-row"><label class="field"><span>Horas</span><input type="number" id="t-hours" min="0" max="23" value="' + (p.hours != null ? p.hours : (p.seconds ? Math.floor(p.seconds / 3600) : "")) + '" placeholder="0"></label>' +
+          '<label class="field"><span>Minutos</span><input type="number" id="t-mins" min="0" max="59" value="' + (p.mins != null ? p.mins : (p.seconds ? Math.floor((p.seconds % 3600) / 60) : "")) + '" placeholder="0"></label></div>' +
           '<div id="t-start-timer-wrap" class="t-start-timer-wrap"' + (isFutureIso(p.date || toISODate(new Date())) ? ' style="display:none"' : "") + '><label class="check-line"><input type="checkbox" id="t-start-timer"' + (p.startTimer ? " checked" : "") + '><span>Iniciar cronômetro ao salvar</span></label></div></div>' +
           '<div id="t-task-only-review"' + (planKind === "task" ? "" : ' style="display:none"') + ' class="form-review-block">' +
             '<label class="check-line"><input type="checkbox" id="t-review" onchange="toggleReviewFields(this.checked)"' + (reviewOpen ? " checked" : "") + '> Precisa rever depois</label>' +
@@ -2164,8 +2190,7 @@ function render(){
   const logPanel =
     '<section class="card log-card"><div class="log-card-head"><h2>Registros</h2><button class="btn btn-icon" type="button" onclick="toggleLog()" aria-label="' + (logOpen ? "Recolher registros" : "Abrir registros") + '">' + (logOpen ? "‹" : "›") + "</button></div>" +
     '<button class="log-rail" type="button" onclick="toggleLog()"><span>Registros</span></button>' +
-    '<div class="log-pin">' + nomenBtns + renderNomenDraftHtml() +
-    '<div class="log-day-tools"><button class="btn btn-link" type="button" onclick="openTaskFormFromDraft()">Detalhes…</button></div></div>' +
+    '<div class="log-pin">' + nomenBtns + renderNomenDraftHtml() + '</div>' +
     '<div class="log-body">' + renderLogEntries() + "</div></section>";
   const dashModalHtml = renderDashboardModal();
   const timelineHtml = renderTimeline(week, isCurrentWeek);
@@ -2218,8 +2243,50 @@ function backupDaysAgo(){
   return Math.floor((Date.now() - at) / 86400000);
 }
 function backupIsStale(){
+  if (MyFocuslyCloud.getSessionUser()) {
+    const cloudAt = MyFocuslyCloud.getCloudLastSyncAt && MyFocuslyCloud.getCloudLastSyncAt();
+    if (cloudAt && cloudAt > Date.now() - 7 * 86400000) return false;
+  }
   const d = backupDaysAgo();
   return d === null || d >= 7;
+}
+function renderBackupLocations(){
+  const cloudUser = MyFocuslyCloud.getSessionUser();
+  const folderName = STATE.settings && STATE.settings.backupFolderName;
+  let html = '<div class="backup-locations">' +
+    '<p class="hint"><strong>Onde está salvo</strong></p>' +
+    '<ul class="hint backup-list">' +
+    '<li><strong>Neste aparelho</strong> — memória do navegador (automático).</li>';
+  if (cloudUser) {
+    html += '<li><strong>Google Drive</strong> — conta <em>' + escapeHtml(cloudUser.email || "conectada") +
+      '</em>, arquivo <code>myfocusly-backup.json</code> (área privada do app; não aparece na pasta normal do Drive).</li>';
+  } else {
+    html += '<li><strong>Google Drive</strong> — entre com Google acima para sync PC + iPad.</li>';
+  }
+  if (folderName) {
+    html += '<li><strong>Pasta no PC</strong> — <em>' + escapeHtml(folderName) + '</em>, arquivo <code>' + FOLDER_BACKUP_FILENAME + '</code> (cópia extra).</li>';
+  } else if (FS_ACCESS_SUPPORTED) {
+    html += '<li><strong>Pasta no PC</strong> — opcional; escolha abaixo para cópia em arquivo no disco.</li>';
+  }
+  html += '</ul></div>';
+  return html;
+}
+function renderLocalBackupNote(){
+  const cloudUser = MyFocuslyCloud.getSessionUser();
+  const folderName = STATE.settings && STATE.settings.backupFolderName;
+  const d = backupDaysAgo();
+  if (cloudUser && !folderName) return "";
+  if (folderName && d !== null) {
+    const when = d === 0 ? "hoje" : ("há " + d + " dia" + (d === 1 ? "" : "s"));
+    return '<p class="hint' + (backupIsStale() ? " hint-warn" : "") + '">Último save na pasta local: ' + when + ".</p>";
+  }
+  if (!cloudUser) {
+    const status = d === null
+      ? "Sem backup em arquivo ainda. Entre com Google ou baixe/restaure um JSON."
+      : (d === 0 ? "Último arquivo local: hoje." : ("Último arquivo local há " + d + " dia" + (d === 1 ? "" : "s") + "."));
+    return '<p class="hint' + (backupIsStale() ? " hint-warn" : "") + '">' + escapeHtml(status) + "</p>";
+  }
+  return "";
 }
 function openFolderDB(){
   return new Promise((resolve, reject) => {
@@ -2329,34 +2396,43 @@ async function syncFromBackupFolder(handle, requestPermission){
   }
 }
 function renderAccountPanel(){
-  const d = backupDaysAgo();
-  const status = d === null
-    ? "Você ainda não fez nenhum backup."
-    : (d === 0 ? "Último backup: hoje." : ("Último backup há " + d + " dia" + (d === 1 ? "" : "s") + "."));
+  if (isCloudOnly()){
+    return '<div class="overlay open" onclick="if(event.target===this) toggleAccount()"><div class="panel">' +
+      "<h3>Backup</h3>" +
+      MyFocuslyCloud.renderCloudBlock() +
+      '<p class="hint">Seus dados ficam <strong>só no Google Drive</strong> da conta conectada (<code>myfocusly-backup.json</code>, área privada do app).</p>' +
+      '<details><summary>Importar backup antigo (uma vez)</summary>' +
+      '<p class="hint">Se você tinha um arquivo JSON do MyFocusly no PC, use <strong>Restaurar</strong> para combinar com o Drive.</p>' +
+      '<label class="btn btn-ghost">Restaurar de um arquivo<input id="import-file" type="file" accept="application/json" hidden onchange="importJson(this.files[0])"></label></details>' +
+      '<div class="field-actions"><button class="btn btn-ghost" type="button" onclick="toggleAccount()">Fechar</button></div></div></div>';
+  }
   const folderName = STATE.settings && STATE.settings.backupFolderName;
   const folderHint = FS_ACCESS_SUPPORTED
-    ? "Escolha uma pasta (ex.: Backups, OneDrive) — o app salva sozinho nela."
-    : "Neste navegador só dá para <strong>Baixar backup</strong>. Para escolher pasta, use <strong>Chrome ou Edge</strong> no PC.";
+    ? "Cópia extra no disco — escolha uma pasta (Backups, OneDrive, etc.)."
+    : "Neste navegador: use <strong>Baixar backup</strong>. Pasta automática: Chrome ou Edge no PC.";
   const folderBlock = folderName
-    ? '<p class="hint">Pasta de backup: <strong>' + escapeHtml(folderName) + '</strong>. Salva sozinho em "' + FOLDER_BACKUP_FILENAME + '". Ao abrir, combina com o que estiver nessa pasta.</p>' +
+    ? '<p class="hint">Pasta: <strong>' + escapeHtml(folderName) + '</strong></p>' +
       '<div class="field-actions"><button class="btn btn-ghost" type="button" onclick="chooseBackupFolder()">Trocar pasta</button>' +
       '<button class="btn btn-ghost" type="button" onclick="forgetBackupFolder()">Esquecer pasta</button></div>'
     : '<p class="hint">' + folderHint + '</p>' +
-      '<div class="field-actions"><button class="btn btn-ghost" type="button" onclick="chooseBackupFolder()">Escolher pasta de backup</button></div>';
-  const primaryLabel = folderName ? "Salvar backup agora" : "Baixar backup";
+      (FS_ACCESS_SUPPORTED
+        ? '<div class="field-actions"><button class="btn btn-ghost" type="button" onclick="chooseBackupFolder()">Escolher pasta no PC</button></div>'
+        : "");
+  const primaryLabel = folderName ? "Salvar na pasta agora" : "Baixar cópia JSON";
   return '<div class="overlay open" onclick="if(event.target===this) toggleAccount()"><div class="panel">' +
     "<h3>Backup</h3>" +
     MyFocuslyCloud.renderCloudBlock() +
-    '<p class="hint">Cópia local neste aparelho + nuvem (se entrou). Pasta no PC é opcional.</p>' +
-    '<p class="hint' + (backupIsStale() ? " hint-warn" : "") + '">' + escapeHtml(status) + "</p>" +
+    renderBackupLocations() +
+    renderLocalBackupNote() +
     folderBlock +
     '<div class="field-actions"><button class="btn btn-primary" type="button" onclick="exportJson()">' + primaryLabel + '</button>' +
     '<label class="btn btn-ghost">Restaurar de um arquivo<input id="import-file" type="file" accept="application/json" hidden onchange="importJson(this.files[0])"></label></div>' +
-    '<details><summary>Como manter o backup em dia</summary>' +
+    '<details><summary>Como funciona</summary>' +
+    '<p class="hint"><strong>PC + iPad:</strong> entre com o mesmo Google. O app sincroniza sozinho ao salvar.</p>' +
     (FS_ACCESS_SUPPORTED
-      ? '<p class="hint">Escolhendo uma pasta de backup acima (dentro do Drive, OneDrive ou Dropbox), o programa salva sozinho nela a cada mudança — sem precisar clicar em nada — e o app deles sincroniza para a nuvem.</p>'
-      : '<p class="hint">Salve o arquivo dentro da sua pasta do Google Drive, OneDrive ou Dropbox. O programa deles sincroniza para a nuvem sozinho.</p>') +
-    '<p class="hint">Para levar seus dados para outro computador, baixe (ou pegue da pasta) o backup em um e use <strong>Restaurar</strong> no outro. O que existe nos dois é combinado, e o que você apagou continua apagado.</p></details>' +
+      ? '<p class="hint"><strong>PC (extra):</strong> pasta local é opcional — mais uma cópia em <code>' + FOLDER_BACKUP_FILENAME + '</code>.</p>'
+      : "") +
+    '<p class="hint"><strong>Restaurar</strong> combina o arquivo com o que já existe aqui; exclusões continuam valendo.</p></details>' +
     '<div class="field-actions"><button class="btn btn-ghost" type="button" onclick="toggleAccount()">Fechar</button></div></div></div>';
 }
 
@@ -2428,11 +2504,35 @@ function timerLabelTitle(){
 }
 function openNomenChip(kind){
   kind = kind === "project" || kind === "tag" || kind === "deadline" ? kind : "task";
-  logFilter = kind === "deadline" ? "deadline" : kind;
   logOpen = true;
   nomenDraftKind = kind;
   focusNomenDraft = true;
   render();
+}
+function openTaskFormFromDraft(raw, date){
+  raw = raw || "";
+  date = date || draftDefaultDate();
+  const kind = nomenDraftKind || "task";
+  if (kind === "deadline"){
+    openTaskForm(date, "", { planKind: "prazo", title: raw });
+    return;
+  }
+  if (kind === "project"){
+    openTaskForm(date, "", { planKind: "project", title: raw ? raw.replace(/^\++/, "") : "" });
+    return;
+  }
+  if (kind === "tag"){
+    openTaskForm(date, "", { planKind: "tag", title: raw ? raw.replace(/^#+/, "") : "" });
+    return;
+  }
+  let title = raw;
+  if (raw){
+    const parsed = parseNomen(raw.charAt(0) === "@" || raw.charAt(0) === "+" || raw.charAt(0) === "#" ? raw : ("@" + raw.replace(/^@+/, "")));
+    title = parsed.title ? ("@" + parsed.title.replace(/^@+/, "")) : raw;
+    if (parsed.project) title += " " + parsed.project;
+    if (parsed.tag) title += " " + parsed.tag;
+  }
+  openTaskForm(date, "", { planKind: "task", title: title, startTimer: false });
 }
 function readDraftDate(){
   const dateEl = document.getElementById("nomen-date");
@@ -2445,9 +2545,13 @@ function submitNomenDraft(ev){
   const input = document.getElementById("nomen-draft");
   const raw = input ? input.value.trim() : "";
   if (!raw){ showToast("Digite um nome."); return; }
-  const kind = nomenDraftKind || logFilter;
+  const kind = nomenDraftKind || "task";
   const date = readDraftDate();
-  let parsed = null;
+  if (kind === "task"){
+    openTaskFormFromDraft(raw, date);
+    if (input) input.value = "";
+    return;
+  }
   if (kind === "deadline"){
     STATE.agenda.push(touch({
       id: uid(), date: date, time: "", kind: "prazo", title: raw, notes: "",
@@ -2473,71 +2577,10 @@ function submitNomenDraft(ev){
     if (path.subtag) rememberSubject(tag, path.subtag);
     persist();
     showToast(path.subtag ? (formatTagPath(tag, path.subtag) + " salvo em " + tag + ".") : ("Tag " + tag + " adicionada."));
-  } else {
-    parsed = parseNomen(raw.charAt(0) === "@" || raw.charAt(0) === "+" || raw.charAt(0) === "#" ? raw : ("@" + raw.replace(/^@+/, "")));
-    if (!parsed.title){ showToast("Informe o nome da tarefa."); return; }
-    rememberTag(parsed.tag);
-    if (parsed.subtag) rememberSubject(parsed.tag, parsed.subtag);
-    rememberProject(parsed.project);
-    const taskId = uid();
-    STATE.tasks.push(touch({
-      id: taskId, date: date, time: "", title: parsed.title, tag: parsed.tag, subtag: parsed.subtag || "",
-      project: parsed.project,
-      notes: "", done: false, review: null, reviewedAt: null, calendarEventId: null,
-      createdAt: new Date().toISOString()
-    }));
-    focusCalendarDate(date);
-    persist();
-    if (isFutureIso(date)){
-      showToast("Tarefa agendada para " + fmtHumanDate(date) + ".");
-      if (input) input.value = "";
-      focusNomenDraft = true;
-      render();
-      return;
-    }
-    showToast("Tarefa " + parsed.title + " adicionada.");
-    if (input) input.value = "";
-    armTimerFromDraft(kind, raw, parsed, taskId);
-    focusNomenDraft = true;
-    render();
-    return;
   }
   if (input) input.value = "";
-  armTimerFromDraft(kind, raw, parsed, null);
   focusNomenDraft = true;
   render();
-}
-function armTimerFromDraft(kind, raw, parsed, taskId){
-  if (pomo.active){ showToast("Encerre o Intervalo antes de iniciar o cronômetro."); return; }
-  if (timer.running){
-    applyTimerElapsed();
-    if (tickTimer){ clearInterval(tickTimer); tickTimer = null; }
-  }
-  timer.accumulated = 0;
-  timer.running = false;
-  timer.startedAt = 0;
-  if (kind === "project"){
-    timer.project = raw.replace(/^\++/, "").trim();
-    timer.task = "";
-    timer.tags = "";
-    timer.subtag = "";
-  } else if (kind === "tag"){
-    const path = parseTagPath(raw);
-    timer.tags = path.tag ? path.tag.replace(/^#+/, "") : raw.replace(/^#+/, "").trim();
-    timer.subtag = path.subtag || "";
-    timer.task = "";
-    timer.project = "";
-  } else if (parsed){
-    timer.task = (parsed.title || "").replace(/^@+/, "");
-    timer.project = parsed.project ? parsed.project.replace(/^\++/, "") : "";
-    timer.tags = parsed.tag ? parsed.tag.replace(/^#+/, "") : "";
-    timer.subtag = parsed.subtag || "";
-  }
-  timer.running = true;
-  timer.startedAt = Date.now();
-  ensureLiveEntry(taskId || null);
-  startTimerTick();
-  persistRuntime();
 }
 function nudgePomo(deltaMin){
   const next = Math.max(60, (pomo.active ? pomoRemaining() : pomoTotalSeconds()) + deltaMin * 60);
@@ -2641,32 +2684,6 @@ function openTaskForm(date, time, extra){
   };
   render();
 }
-function openTaskFormFromDraft(){
-  const input = document.getElementById("nomen-draft");
-  const raw = input ? input.value.trim() : "";
-  const date = readDraftDate();
-  const kind = nomenDraftKind || logFilter || "task";
-  if (kind === "deadline"){
-    openTaskForm(date, "", { planKind: "prazo", title: raw });
-    return;
-  }
-  if (kind === "project"){
-    openTaskForm(date, "", { planKind: "project", title: raw ? raw.replace(/^\++/, "") : "" });
-    return;
-  }
-  if (kind === "tag"){
-    openTaskForm(date, "", { planKind: "tag", title: raw ? raw.replace(/^#+/, "") : "" });
-    return;
-  }
-  let title = raw;
-  if (raw){
-    const parsed = parseNomen(raw.charAt(0) === "@" || raw.charAt(0) === "+" || raw.charAt(0) === "#" ? raw : ("@" + raw.replace(/^@+/, "")));
-    title = parsed.title ? ("@" + parsed.title.replace(/^@+/, "")) : raw;
-    if (parsed.project) title += " " + parsed.project;
-    if (parsed.tag) title += " " + parsed.tag;
-  }
-  openTaskForm(date, "", { planKind: "task", title: title, startTimer: false });
-}
 function openTaskReview(id){
   const t = (STATE.tasks || []).filter(function(x){ return x.id === id; })[0];
   if (!t) return;
@@ -2685,17 +2702,20 @@ function submitTaskForm(ev){
   if (formBusy) return;
   const addAnother = !!(ev.submitter && ev.submitter.getAttribute("data-more") === "1");
   const date = document.getElementById("t-date").value;
-  const time = (document.getElementById("t-time") && document.getElementById("t-time").value) || "";
+  const planKindEl = document.querySelector(".form-plan-kind .nomen-chip.on");
+  const planKind = normalizePlanKind(planKindEl ? planKindEl.getAttribute("data-kind") : ((formPrefill && formPrefill.planKind) || "task"));
+  const timeEl = document.getElementById("t-time");
+  const time = (timeEl && timeEl.value) || "";
+  const timePrazoEl = document.getElementById("t-time-prazo");
+  const timeForPrazo = (timePrazoEl && timePrazoEl.value) || time;
   const title = document.getElementById("t-title").value.trim();
   const notes = document.getElementById("t-notes").value.trim();
-  const planKindEl = document.getElementById("t-plan-kind");
-  const planKind = normalizePlanKind(planKindEl ? planKindEl.value : "task");
   if (!date){ showToast("Informe a data."); return; }
   if (!title){ showToast("Informe o título."); return; }
   formBusy = true;
   if (planKind === "prazo"){
     STATE.agenda.push(touch({
-      id: uid(), date: date, time: time || "", kind: "prazo", title: title, notes: notes,
+      id: uid(), date: date, time: timeForPrazo || "", kind: "prazo", title: title, notes: notes,
       calendarEventId: null, createdAt: new Date().toISOString()
     }));
     focusCalendarDate(date);
@@ -2733,9 +2753,12 @@ function submitTaskForm(ev){
   }
   const hoursEl = document.getElementById("t-hours");
   const minsEl = document.getElementById("t-mins");
+  const endTimeEl = document.getElementById("t-time-end");
+  const endTime = (endTimeEl && endTimeEl.value) || "";
   const hours = hoursEl ? (parseInt(hoursEl.value, 10) || 0) : 0;
   const mins = minsEl ? (parseInt(minsEl.value, 10) || 0) : 0;
   let seconds = hours * 3600 + mins * 60;
+  if (!seconds) seconds = secondsFromTimeRange(date, time, endTime);
   if (!seconds && formPrefill && formPrefill.seconds) seconds = formPrefill.seconds;
   const reviewEl = document.getElementById("t-review");
   const wantsReview = !!(reviewEl && reviewEl.checked);
@@ -3159,8 +3182,16 @@ function persistRuntime(){
     } else sessionStorage.removeItem("diario-pomo-snapshot");
   } catch (e) {}
 }
+function isCloudOnly(){
+  return !!(MyFocuslyCloud.isCloudOnly && MyFocuslyCloud.isCloudOnly());
+}
 function persist(){
   STATE.updatedAt = Date.now();
+  if (isCloudOnly()){
+    persistRuntime();
+    if (MyFocuslyCloud.getSessionUser()) MyFocuslyCloud.scheduleCloudPush();
+    return;
+  }
   try { localStorage.setItem(STORAGE_KEY, JSON.stringify(STATE)); } catch (e) {}
   persistRuntime();
   scheduleAutoBackup();
@@ -3200,38 +3231,40 @@ async function runAutoBackup(){
   } catch (e) {}
 }
 function loadState(){
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw){
-      const parsed = JSON.parse(raw);
-      if (parsed && Array.isArray(parsed.entries)) STATE = parsed;
-    }
-  } catch (e) {}
-  ensureLists();
-  if (!STATE.entries.length){
+  if (!isCloudOnly()){
     try {
-      const oldRaw = localStorage.getItem("conta-estudo-v1");
-      if (oldRaw){
-        const old = JSON.parse(oldRaw);
-        const entries = [];
-        Object.keys(old.days || {}).forEach(function(date){
-          const day = old.days[date];
-          (day.sessions || []).forEach(function(s, idx){
-            entries.push({
-              id: s.id || uid(),
-              date: date,
-              seconds: s.seconds || 0,
-              subject: s.subject || "",
-              notes: idx === 0 ? (day.notes || "") : "",
-              source: s.kind === "manual" ? "manual" : "free",
-              createdAt: new Date(s.endedAt || Date.now()).toISOString()
-            });
-          });
-        });
-        if (entries.length){ STATE.entries = entries; persist(); }
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw){
+        const parsed = JSON.parse(raw);
+        if (parsed && Array.isArray(parsed.entries)) STATE = parsed;
       }
     } catch (e) {}
+    if (!STATE.entries.length){
+      try {
+        const oldRaw = localStorage.getItem("conta-estudo-v1");
+        if (oldRaw){
+          const old = JSON.parse(oldRaw);
+          const entries = [];
+          Object.keys(old.days || {}).forEach(function(date){
+            const day = old.days[date];
+            (day.sessions || []).forEach(function(s, idx){
+              entries.push({
+                id: s.id || uid(),
+                date: date,
+                seconds: s.seconds || 0,
+                subject: s.subject || "",
+                notes: idx === 0 ? (day.notes || "") : "",
+                source: s.kind === "manual" ? "manual" : "free",
+                createdAt: new Date(s.endedAt || Date.now()).toISOString()
+              });
+            });
+          });
+          if (entries.length){ STATE.entries = entries; persist(); }
+        }
+      } catch (e) {}
+    }
   }
+  ensureLists();
   if (migrationDirty){
     migrationDirty = false;
     STATE.updatedAt = Date.now();
@@ -3292,7 +3325,9 @@ function mergeDiary(remote){
     updatedAt: Math.max(remoteAt, STATE.updatedAt || 0)
   };
   ensureLists();
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(STATE)); } catch (e) {}
+  if (!isCloudOnly()) {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(STATE)); } catch (e) {}
+  }
 }
 async function exportJson(){
   let handle = backupFolderHandle;
@@ -3326,7 +3361,7 @@ async function exportJson(){
   STATE.settings.lastBackupAt = Date.now();
   persist();
   render();
-  showToast("Backup baixado. Guarde-o na sua pasta do Drive.");
+  showToast("Cópia JSON baixada.");
 }
 function importJson(file){
   if (!file) return;
@@ -3370,23 +3405,36 @@ MyFocuslyCloud.configure({
   render: render,
   showToast: showToast,
   escapeHtml: escapeHtml,
-  getAccountOpen: function(){ return accountOpen; }
+  getAccountOpen: function(){ return accountOpen; },
+  onCloudSynced: function(){
+    if (isCloudOnly()) return;
+    STATE.settings = STATE.settings || {};
+    STATE.settings.lastBackupAt = Date.now();
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(STATE)); } catch (e) {}
+  }
 });
 render();
 MyFocuslyCloud.initCloud().then(function(){
+  if (isCloudOnly()) {
+    if (!MyFocuslyCloud.getSessionUser()) accountOpen = true;
+    render();
+    return;
+  }
   return initBackupFolder();
 }).then(function(synced){
-  if (synced) persist();
-  if (!MyFocuslyCloud.getSessionUser() && FS_ACCESS_SUPPORTED && !(STATE.settings && STATE.settings.backupFolderName)) accountOpen = true;
+  if (!isCloudOnly() && synced) persist();
+  if (!isCloudOnly() && !MyFocuslyCloud.getSessionUser() && FS_ACCESS_SUPPORTED && !(STATE.settings && STATE.settings.backupFolderName)) accountOpen = true;
   render();
 });
 document.addEventListener("visibilitychange", function(){
   if (document.hidden){
-    flushAutoBackup();
+    if (!isCloudOnly()) flushAutoBackup();
     if (MyFocuslyCloud.getSessionUser()) MyFocuslyCloud.pushCloud(true).catch(function(){});
   }
 });
-window.addEventListener("pagehide", flushAutoBackup);
+window.addEventListener("pagehide", function(){
+  if (!isCloudOnly()) flushAutoBackup();
+});
 </script>
 </body>
 </html>

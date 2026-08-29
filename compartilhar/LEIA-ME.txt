@@ -1,11 +1,11 @@
 MyFocusly — multiplataforma (branch personal)
 ==============================================
 
-Link: https://SEU-SITE.netlify.app/legacy/
+Link: https://SEU-SITE.netlify.app/
 (iPad, iPhone, PC — mesma conta após login)
 
 PC: Iniciar-MyFocusly.bat (opcional)
 iPad: abra o link no Safari → Compartilhar → Tela de Início
 
-Backup: entre com Google/e-mail no app (Backup).
+Backup: Entrar com Google no app (Backup) — dados no seu Drive.
 Pasta local no PC continua opcional.

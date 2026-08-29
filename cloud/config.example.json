@@ -1,4 +1,3 @@
 {
-  "url": "https://SEU-PROJETO.supabase.co",
-  "anonKey": "SUA-CHAVE-ANON-AQUI"
+  "googleClientId": "SEU-CLIENT-ID.apps.googleusercontent.com"
 }

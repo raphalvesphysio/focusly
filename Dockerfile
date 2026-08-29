@@ -6,6 +6,7 @@ COPY package.json package-lock.json* ./
 COPY server ./server
 COPY client ./client
 COPY legacy ./legacy
+COPY cloud ./cloud
 
 ENV NODE_ENV=production
 ENV HOST=0.0.0.0

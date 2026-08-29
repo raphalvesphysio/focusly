@@ -6,9 +6,8 @@ const path = require("path");
 const { loadConfig } = require("./config");
 
 const cfg = loadConfig();
-const PUBLIC = path.join(cfg.root, "client", "public");
-const SRC = path.join(cfg.root, "client", "src");
 const LEGACY = path.join(cfg.root, "legacy");
+const CLOUD = path.join(cfg.root, "cloud");
 const { host, port, isProd } = cfg.server;
 
 const MIME = {
@@ -26,22 +25,18 @@ const CACHE_STATIC = isProd ? "public, max-age=3600" : "no-cache";
 
 function resolveFile(urlPath) {
   const decoded = decodeURIComponent(urlPath.split("?")[0]);
-  if (decoded.startsWith("/src/")) {
-    const resolved = path.normalize(path.join(SRC, decoded.slice(5)));
-    if (!resolved.startsWith(SRC)) return null;
-    return resolved;
+  if (decoded === "/legacy" || decoded === "/legacy/" || decoded.startsWith("/legacy/")) {
+    return { redirect: "/" };
   }
-  if (decoded === "/legacy" || decoded.startsWith("/legacy/")) {
-    const rel =
-      decoded === "/legacy" || decoded === "/legacy/" ? "/index.html" : decoded.slice(7);
-    const resolved = path.normalize(path.join(LEGACY, rel));
-    if (!resolved.startsWith(LEGACY)) return null;
-    return resolved;
+  if (decoded.startsWith("/cloud/")) {
+    const resolved = path.normalize(path.join(CLOUD, decoded.slice(7)));
+    if (!resolved.startsWith(CLOUD)) return null;
+    return { file: resolved };
   }
   const rel = decoded === "/" ? "/index.html" : decoded;
-  const resolved = path.normalize(path.join(PUBLIC, rel));
-  if (!resolved.startsWith(PUBLIC)) return null;
-  return resolved;
+  const resolved = path.normalize(path.join(LEGACY, rel));
+  if (!resolved.startsWith(LEGACY)) return null;
+  return { file: resolved };
 }
 
 function send(res, status, body, type, extraHeaders) {
@@ -65,15 +60,18 @@ const server = http.createServer(function (req, res) {
     return send(res, 200, JSON.stringify({ ok: true, app: "myfocusly", mode: "static" }), "application/json; charset=utf-8");
   }
 
-  const filePath = resolveFile(url);
-  if (!filePath) return send(res, 403, "Forbidden");
+  const resolved = resolveFile(url);
+  if (!resolved) return send(res, 403, "Forbidden");
+  if (resolved.redirect) {
+    return send(res, 301, "", "text/plain; charset=utf-8", { Location: resolved.redirect });
+  }
 
-  fs.readFile(filePath, function (err, data) {
+  fs.readFile(resolved.file, function (err, data) {
     if (err) {
       if (err.code === "ENOENT") return send(res, 404, "Not found");
       return send(res, 500, "Server error");
     }
-    send(res, 200, data, MIME[path.extname(filePath).toLowerCase()] || "application/octet-stream");
+    send(res, 200, data, MIME[path.extname(resolved.file).toLowerCase()] || "application/octet-stream");
   });
 });
 

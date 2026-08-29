@@ -3,18 +3,18 @@ MyFocusly — duas versões
 
 main (produção pública)
   Branch: main
-  Deploy: myfocusly.netlify.app/legacy/
+  Deploy: myfocusly.netlify.app/
   Backup: pasta local no PC (Chrome/Edge)
   Uso: acesso exclusivo via PC
 
 personal (multiplataforma — uso pessoal)
   Branch: personal
   Deploy: site Netlify separado (recomendado)
-  Backup: Supabase (login) + pasta local opcional no PC
-  Uso: PC + iPad, mesma conta
+  Backup: Google Drive (login) — só na nuvem, sem pasta local
+  Uso: PC + iPad, mesma conta Google
 
 Pastas desta versão (personal):
   legacy/     app completo
-  cloud/      sync Supabase (sync.js + config)
-  supabase/   SQL e guia de setup
+  cloud/      sync Google Drive (sync.js + config)
+  cloud/SETUP.md  guia rápido
   compartilhar/  atalhos e instruções

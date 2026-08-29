@@ -7,13 +7,18 @@
 
 [[redirects]]
   from = "/legacy"
-  to = "/legacy/index.html"
-  status = 200
+  to = "/"
+  status = 301
+
+[[redirects]]
+  from = "/legacy/"
+  to = "/"
+  status = 301
 
 [[redirects]]
   from = "/legacy/*"
-  to = "/legacy/index.html"
-  status = 200
+  to = "/"
+  status = 301
 
 [[headers]]
   for = "/*"
@@ -22,7 +27,7 @@
     Referrer-Policy = "strict-origin-when-cross-origin"
 
 [[headers]]
-  for = "/src/*"
+  for = "/cloud/*"
   [headers.values]
     Cache-Control = "public, max-age=3600"
 

@@ -2,9 +2,9 @@
   "hosting": {
     "public": "dist",
     "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
-    "rewrites": [
-      { "source": "/legacy", "destination": "/legacy/index.html" },
-      { "source": "/legacy/**", "destination": "/legacy/index.html" }
+    "redirects": [
+      { "source": "/legacy", "destination": "/", "type": 301 },
+      { "source": "/legacy/**", "destination": "/", "type": 301 }
     ],
     "headers": [
       {
@@ -12,7 +12,7 @@
         "headers": [{ "key": "Cache-Control", "value": "no-cache" }]
       },
       {
-        "source": "/src/**",
+        "source": "/cloud/**",
         "headers": [{ "key": "Cache-Control", "value": "public, max-age=3600" }]
       },
       {
