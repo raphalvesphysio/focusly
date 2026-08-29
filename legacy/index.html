@@ -2618,9 +2618,9 @@ function renderAccountPanel(){
       "<h3>Backup</h3>" +
       MyFocuslyCloud.renderCloudBlock() +
       '<p class="hint">Seus dados ficam <strong>só no Google Drive</strong> da conta conectada (<code>myfocusly-backup.json</code>, área privada do app).</p>' +
-      '<details><summary>Importar backup antigo (uma vez)</summary>' +
-      '<p class="hint">Se você tinha um arquivo JSON do MyFocusly no PC, use <strong>Restaurar</strong> para combinar com o Drive.</p>' +
-      '<label class="btn btn-ghost">Restaurar de um arquivo<input id="import-file" type="file" accept="application/json" hidden onchange="importJson(this.files[0])"></label></details>' +
+      '<div class="field-actions"><button class="btn btn-primary" type="button" onclick="exportJson()">Baixar backup JSON</button>' +
+      '<label class="btn btn-ghost">Restaurar de um arquivo<input id="import-file" type="file" accept="application/json" hidden onchange="importJson(this.files[0])"></label></div>' +
+      '<p class="hint">Baixe uma cópia antes de trocar o projeto Google ou o Client ID.</p>' +
       '<div class="field-actions"><button class="btn btn-ghost" type="button" onclick="toggleAccount()">Fechar</button></div></div></div>';
   }
   const folderName = STATE.settings && STATE.settings.backupFolderName;
